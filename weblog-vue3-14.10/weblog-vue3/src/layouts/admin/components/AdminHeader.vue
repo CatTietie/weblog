@@ -49,8 +49,7 @@
                 <el-dropdown class="flex items-center justify-center" @command="handleCommand">
                     <span class="el-dropdown-link flex items-center justify-center text-gray-700 text-xs">
                         <!-- 头像 Avatar -->
-                        <el-avatar class="mr-2" :size="25"
-                            src="https://img.quanxiaoha.com/quanxiaoha/f97361c0429d4bb1bc276ab835843065.jpg" />
+                        <el-avatar class="mr-2" :size="25" :src="avatarUrl" />
                         {{ userStore.userInfo.username }}
                         <el-icon class="el-icon--right">
                             <arrow-down />
@@ -85,7 +84,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, watch, onMounted } from 'vue'
 import { useMenuStore } from '@/stores/menu'
 import { useUserStore } from '@/stores/user'
 import { useFullscreen } from '@vueuse/core'
@@ -93,6 +92,7 @@ import { updateAdminPassword } from '@/api/admin/user'
 import { showMessage, showModel } from '@/composables/util'
 import { useRouter } from 'vue-router'
 import FormDialog from '@/components/FormDialog.vue'
+import { getBlogSettingsDetail } from '@/api/frontend/blogsettings';
 
 const router = useRouter()
 
@@ -181,6 +181,19 @@ const rules = {
         },
     ]
 }
+
+
+
+
+const avatarUrl = ref('');
+
+onMounted(() => {
+  getBlogSettingsDetail().then((res) => {
+    avatarUrl.value = res.data.avatar;
+  });
+})
+
+
 
 const onSubmit = () => {
     // 先验证 form 表单字段
