@@ -32,7 +32,8 @@ public interface StatisticsArticlePVMapper extends BaseMapper<StatisticsArticleP
      */
     default List<StatisticsArticlePVDO> selectLatestWeekRecords() {
         return selectList(Wrappers.<StatisticsArticlePVDO>lambdaQuery()
-                .le(StatisticsArticlePVDO::getPvDate, LocalDate.now()) // 小于等于当前日期
+                .le(StatisticsArticlePVDO::getPvDate, LocalDate.now())
+                .orderByDesc(StatisticsArticlePVDO::getPvDate)// 小于等于当前日期
                 .last("limit 7")); // 仅查询七条
     }
 }
