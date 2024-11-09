@@ -80,9 +80,14 @@ public class AdminArticleServiceImpl implements AdminArticleService {
 
         // 3. 处理文章关联的分类
         Long categoryId = publishArticleReqVO.getCategoryId();
-
         // 3.1 校验提交的分类是否真实存在
+
+
+
         CategoryDO categoryDO = categoryMapper.selectById(categoryId);
+
+
+
         if (Objects.isNull(categoryDO)) {
             log.warn("==> 分类不存在, categoryId: {}", categoryId);
             throw new BizException(ResponseCodeEnum.CATEGORY_NOT_EXISTED);
