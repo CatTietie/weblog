@@ -14,8 +14,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * @author: 犬小哈
- * @url: www.quanxiaoha.com
+ * @author: Group 5
+
  * @date: 2023-08-27 17:32
  * @description: 登录成功访问收保护的资源，但是权限不够
  **/

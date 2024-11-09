@@ -26,8 +26,8 @@ import java.io.IOException;
 import java.util.Objects;
 
 /**
- * @author: 犬小哈
- * @url: www.quanxiaoha.com
+ * @author: Group 5
+
  * @date: 2023-08-27 16:58
  * @description: Token 校验过滤器
  **/

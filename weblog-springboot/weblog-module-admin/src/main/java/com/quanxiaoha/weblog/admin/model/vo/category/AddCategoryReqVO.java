@@ -11,8 +11,8 @@ import org.hibernate.validator.constraints.Length;
 import javax.validation.constraints.NotBlank;
 
 /**
- * @author: 犬小哈
- * @url: www.quanxiaoha.com
+ * @author: Group 5
+
  * @date: 2023-09-15 14:07
  * @description: 分类新增
  **/

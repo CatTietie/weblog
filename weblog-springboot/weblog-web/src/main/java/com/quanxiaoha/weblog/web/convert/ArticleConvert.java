@@ -10,8 +10,8 @@ import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 /**
- * @author: 犬小哈
- * @url: www.quanxiaoha.com
+ * @author: Group 5
+
  * @date: 2023/10/8 14:57
  * @description: 文章转换
  **/

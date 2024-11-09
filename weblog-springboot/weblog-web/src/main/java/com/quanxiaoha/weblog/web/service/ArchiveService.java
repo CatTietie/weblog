@@ -4,8 +4,8 @@ import com.quanxiaoha.weblog.common.utils.Response;
 import com.quanxiaoha.weblog.web.model.vo.archive.FindArchiveArticlePageListReqVO;
 
 /**
- * @author: 犬小哈
- * @url: www.quanxiaoha.com
+ * @author: Group 5
+
  * @date: 2023-09-15 14:03
  * @description: 归档文章
  **/

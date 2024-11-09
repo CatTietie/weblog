@@ -15,8 +15,8 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * @author: 犬小哈
- * @url: www.quanxiaoha.com
+ * @author: Group 5
+
  * @date: 2023/10/31 21:16
  * @description: Markdown 转换器
  **/

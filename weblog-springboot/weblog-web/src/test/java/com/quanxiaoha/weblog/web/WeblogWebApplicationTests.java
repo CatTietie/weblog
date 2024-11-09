@@ -42,7 +42,7 @@ class WeblogWebApplicationTests {
         log.error("这是一行 Error 级别日志");
 
         // 占位符
-        String author = "犬小哈";
+        String author = "Group 5";
         log.info("这是一行带有占位符日志，作者：{}", author);
     }
 
@@ -50,7 +50,7 @@ class WeblogWebApplicationTests {
     void insertTest() {
         // 构建数据库实体类
         UserDO userDO = UserDO.builder()
-                .username("犬小哈")
+                .username("Group 5")
                 .password("123456")
                 .createTime(LocalDateTime.now())
                 .updateTime(LocalDateTime.now())

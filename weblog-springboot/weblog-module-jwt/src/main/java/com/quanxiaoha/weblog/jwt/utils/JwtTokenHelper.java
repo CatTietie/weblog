@@ -16,8 +16,8 @@ import java.time.ZoneId;
 import java.util.Base64;
 
 /**
- * @author: 犬小哈
- * @url: www.quanxiaoha.com
+ * @author: Group 5
+
  * @date: 2023-08-24 8:16
  * @description: JWT Token 工具类
  **/

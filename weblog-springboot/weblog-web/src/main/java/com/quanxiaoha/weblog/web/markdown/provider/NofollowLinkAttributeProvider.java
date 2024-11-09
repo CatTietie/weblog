@@ -7,8 +7,8 @@ import org.commonmark.renderer.html.AttributeProvider;
 import java.util.Map;
 
 /**
- * @author: 犬小哈
- * @url: www.quanxiaoha.com
+ * @author: Group 5
+
  * @date: 2023/11/1 14:40
  * @description: 超链接添加 nofollow
  **/

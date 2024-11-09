@@ -3,8 +3,8 @@ package com.quanxiaoha.weblog.common.model;
 import lombok.Data;
 
 /**
- * @author: 犬小哈
- * @url: www.quanxiaoha.com
+ * @author: Group 5
+
  * @date: 2023-09-19 8:54
  * @description: TODO
  **/

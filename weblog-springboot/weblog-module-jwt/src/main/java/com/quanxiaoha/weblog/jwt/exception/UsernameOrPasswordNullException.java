@@ -3,8 +3,8 @@ package com.quanxiaoha.weblog.jwt.exception;
 import org.springframework.security.core.AuthenticationException;
 
 /**
- * @author: 犬小哈
- * @url: www.quanxiaoha.com
+ * @author: Group 5
+
  * @date: 2023-08-24 17:11
  * @description: 用户名或者密码为空异常
  **/

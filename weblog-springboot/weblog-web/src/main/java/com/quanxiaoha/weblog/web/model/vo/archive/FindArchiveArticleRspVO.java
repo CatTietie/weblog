@@ -9,8 +9,8 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 
 /**
- * @author: 犬小哈
- * @url: www.quanxiaoha.com
+ * @author: Group 5
+
  * @date: 2023-09-15 14:07
  * @description: 归档列表中的文章
  **/

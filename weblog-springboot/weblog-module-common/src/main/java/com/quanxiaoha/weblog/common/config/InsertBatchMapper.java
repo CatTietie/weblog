@@ -6,8 +6,7 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 /**
- * @author: 犬小哈
- * @url: www.quanxiaoha.com
+ * @author: Group 5
  * @date: 2023-06-13 22:50
  * @description: 批量插入
  **/
