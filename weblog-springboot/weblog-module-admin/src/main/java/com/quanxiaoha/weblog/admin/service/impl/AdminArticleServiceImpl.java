@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 
 /**
  * @author: Group 5
-
  * @date: 2023-09-15 14:03
  * @description: 文章
  **/
@@ -48,6 +47,8 @@ public class AdminArticleServiceImpl implements AdminArticleService {
     private TagMapper tagMapper;
     @Autowired
     private ArticleTagRelMapper articleTagRelMapper;
+    @Autowired
+    private ArticleUpdateHistoryMapper articleUpdateHistoryMapper;
 
     /**
      * 发布文章
@@ -83,9 +84,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
         // 3.1 校验提交的分类是否真实存在
 
 
-
         CategoryDO categoryDO = categoryMapper.selectById(categoryId);
-
 
 
         if (Objects.isNull(categoryDO)) {
@@ -215,6 +214,12 @@ public class AdminArticleServiceImpl implements AdminArticleService {
     public Response updateArticle(UpdateArticleReqVO updateArticleReqVO) {
         Long articleId = updateArticleReqVO.getId();
 
+        //插入更新数据
+        ArticleUpdateHistoryDO articleUpdateHistoryDO = ArticleUpdateHistoryDO.builder()
+                .articleId(articleId)
+                .updateTime(LocalDateTime.now())
+                .build();
+        articleUpdateHistoryMapper.insert(articleUpdateHistoryDO);
         // 1. VO 转 ArticleDO, 并更新
         ArticleDO articleDO = ArticleDO.builder()
                 .id(articleId)
@@ -224,6 +229,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
                 .updateTime(LocalDateTime.now())
                 .build();
         int count = articleMapper.updateById(articleDO);
+
 
         // 根据更新是否成功，来判断该文章是否存在
         if (count == 0) {
@@ -268,6 +274,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
 
     /**
      * 保存标签
+     *
      * @param articleId
      * @param publishTags
      */

@@ -19,3 +19,15 @@ export function getArticlePVStatisticsInfo(data) {
 export function getArticleReadNumInfo(data) {
     return axios.post("/admin/dashboard/ArticlesReadNumber", data)
 }
+
+export function getArticleReadNumTop(data) {
+    return axios.post("/admin/dashboard/ArticlesReadNumber/top6", data)
+}
+export function getArticleUpdateTop(data) {
+    return axios.post("/admin/dashboard/updateArticle/statistics", data)
+
+}
+
+export function getCategoryCount(data) {
+    return axios.post("/admin/dashboard/category", data)
+}

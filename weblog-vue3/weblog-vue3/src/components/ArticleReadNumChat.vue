@@ -1,6 +1,6 @@
 <template>
     <!-- PV 折线图容器 -->
-    <div id="barChat" class="overflow-x-auto w-full h-60"></div>
+    <div id="barChat1" class="overflow-x-auto w-full h-60"></div>
 </template>
 
 <script setup>
@@ -17,63 +17,77 @@ const props = defineProps({
 
 // 初始化柱状图
 function initBarChat() {
-    var chartDom = document.getElementById('barChat');
+    var chartDom = document.getElementById('barChat1');
     var myChart = echarts.init(chartDom);
     var option;
 
 
-    const titles = props.value.titles
-    const readNums = props.value.readNums
+    const titles = props.value.xData
+    const readNums = props.value.seriesData
+
+    // 定义渐变颜色
+    const colors = [
+        { offset: 0, color: '#FF0000' }, // 最深的红色
+        { offset: 1, color: '#FFAAAA' }  // 最浅的红色
+    ];
+
+    // 生成每个柱子的渐变色
+    const itemStyles = readNums.map((_, index) => {
+        return {
+            color: new echarts.graphic.LinearGradient(
+                0, 0, 0, 1, // 渐变方向，从上到下
+                [
+                    { offset: 0, color: `hsl(0, 100%, ${60 - (index * 5)}%)` }, // 计算每个柱子的起始颜色
+                    { offset: 1, color: `hsl(0, 100%, ${80 - (index * 5)}%)` }  // 计算每个柱子的结束颜色
+                ]
+            )
+        };
+    });
+
+
+
 
     option = {
-        legend:{},
         tooltip: {
-            show: true,
-            trigger: 'item',
+            trigger: 'axis',
+            axisPointer: {
+                type: 'shadow'
+            }
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
         },
         xAxis: {
+            type: 'value',
+            boundaryGap: [0, 0.01]
+        },
+        yAxis: {
             type: 'category',
             data: titles
         },
-        yAxis: {
-            type: 'value'
-        },
         series: [
-            {
-                name:'文章',
-                data: readNums,
-                barWidth:50,
+        {
+                name: '阅读量',
                 type: 'bar',
-                markPoint:{
-                    data:[
-                        {
-                            type:"max",
-                            name:"Max",
-                        },
-                        {
-                            type:"min",
-                            name:"Min"
-                        }
-                    ]
-                },
+                data: readNums,
                 itemStyle: {
-                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                        { offset: 0, color: '#83bff6' },
-                        { offset: 0.5, color: '#188df0' },
-                        { offset: 1, color: '#188df0' }
-                    ])
-                },
-                emphasis: {
-                    itemStyle: {
-                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                            { offset: 0, color: '#2378f7' },
-                            { offset: 0.7, color: '#2378f7' },
-                            { offset: 1, color: '#83bff6' }
-                        ])
+                    normal: {
+                        color: function(params) {
+                            return itemStyles[params.dataIndex].color;
+                        }
                     }
                 }
             }
-        ]
+        ],
+        legend: {
+            show: 'true',
+            itemStyle:{
+                color:'#d50909'
+            }
+        },
     };
 
     option && myChart.setOption(option);

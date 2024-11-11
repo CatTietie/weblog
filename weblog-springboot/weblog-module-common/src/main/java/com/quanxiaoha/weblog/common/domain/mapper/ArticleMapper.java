@@ -134,4 +134,11 @@ public interface ArticleMapper extends BaseMapper<ArticleDO> {
      */
     @Select("SELECT title , read_num AS readNum FROM t_article WHERE is_deleted = 0")
     List<JSONObject> getArticleReadNum();
+
+    /**
+     * 查找文章与对应的阅读量前6
+     * @return
+     */
+    @Select("SELECT title , read_num AS readNum FROM t_article WHERE is_deleted = 0 ORDER BY read_num LIMIT 6")
+    List<JSONObject> orderArticle();
 }

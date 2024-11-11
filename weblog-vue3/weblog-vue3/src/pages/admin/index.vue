@@ -160,9 +160,9 @@
                 </div>
             </div> -->
 
-            <div class="col-span-4 md:col-span-4">
+            <div class="col-span-4 md:col-span-2">
                 <div
-                    class="w-full h-full px-5 py-7 mb-3 bg-white border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                    class="w-full h-full px-5 py-8 mb-3 bg-white border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700">
                     <h2 class="flex items-center mb-2 font-bold text-gray-600 uppercase dark:text-white">
                         <svg t="1731223792040" class="icon w-5 h-5 mr-2" viewBox="0 0 1024 1024" version="1.1"
                             xmlns="http://www.w3.org/2000/svg" p-id="1427" width="200" height="200">
@@ -171,9 +171,9 @@
                                 fill="#666666" p-id="1428">
                             </path>
                         </svg>
-                        文章阅读量
+                        文章阅读量TOP6
                     </h2>
-                    <ArticleReadNumChat :value="articleReadNumInfo"></ArticleReadNumChat>
+                    <ArticleReadNumChat :value="articleReadNumTop"></ArticleReadNumChat>
                 </div>
             </div>
 
@@ -205,8 +205,7 @@
                         </svg>
                         文章属分类统计
                     </h2>
-                    <CategoryTotalCount ></CategoryTotalCount>
-                    <!-- <ArticleReadNumChat :value="articleReadNumInfo"></ArticleReadNumChat> -->
+                    <CategoryCountPieChat :value="categoryCountInfo"></CategoryCountPieChat>
                 </div>
             </div>
 
@@ -266,33 +265,13 @@
                                 d="M700.2 514.5H200.5c-16.6 0-30 13.4-30 30s13.4 30 30 30h499.7c16.6 0 30-13.4 30-30s-13.5-30-30-30zM668.4 689.8h-74c-16.6 0-30 13.4-30 30s13.4 30 30 30h74c16.6 0 30-13.4 30-30s-13.4-30-30-30zM479.3 689.8H200.5c-16.6 0-30 13.4-30 30s13.4 30 30 30h278.8c16.6 0 30-13.4 30-30s-13.4-30-30-30z"
                                 fill="#33CC99" p-id="43939"></path>
                         </svg>
-                        近半年文章发布热点图
+                        文章更新频率TOP6
                     </h2>
-                    <ArticlePublishCalendar :value="articlePublishInfo"></ArticlePublishCalendar>
+                    <ArticleUpdateChat :value="articleUpdateTop"> </ArticleUpdateChat>
                 </div>
             </div>
 
-            <!-- 文章日 PV 访问量折线图 -->
-            <div class="col-span-4 md:col-span-2">
-                <!-- 卡片 -->
-                <div
-                    class="w-full h-full px-5 py-7 mb-3 bg-white border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700">
-                    <h2 class="flex items-center mb-2 font-bold text-gray-600 uppercase dark:text-white">
-                        <!-- 折线图标 -->
-                        <svg t="1699872552774" class="icon w-5 h-5 mr-2" viewBox="0 0 1024 1024" version="1.1"
-                            xmlns="http://www.w3.org/2000/svg" p-id="58226" width="200" height="200">
-                            <path
-                                d="M629.892 323.414c-6.226-11.274-18.33-18.156-31.126-17.914-12.796 0.242-24.554 7.608-30.086 19.124l-143.52 286.87-63.29-115.164c-6.224-11.032-17.982-17.914-30.432-17.914h-60.52c-19.022 0-34.584 15.494-34.584 34.584 0 19.09 15.56 34.584 34.582 34.584h40.118l85.074 155c6.226 11.276 18.33 18.158 31.126 17.916 12.796-0.242 24.554-7.608 30.086-19.124l143.52-286.87 63.29 115.164c6.224 11.032 17.982 17.914 30.432 17.914h60.52c19.022 0 34.584-15.494 34.584-34.584 0-19.09-15.56-34.584-34.582-34.584h-40.118l-85.074-155z"
-                                fill="#767BFA" p-id="58227"></path>
-                            <path
-                                d="M513 98C854.684 98 928 171.248 928 513S854.684 928 513 928C171.316 928 98 854.752 98 513S171.316 98 513 98z m0 69.166c-83.692 0-146.634 4.6-194.012 15.148-46.688 10.376-74.354 25.592-92.684 43.92-18.33 18.364-33.546 46.032-43.92 92.754-10.72 47.482-15.218 110.148-15.218 194.012s4.496 146.53 15.218 194.012c10.374 46.722 25.59 74.39 43.92 92.754 18.33 18.328 45.996 33.544 92.684 43.92 47.38 10.548 110.32 15.148 194.012 15.148 83.692 0 146.634-4.6 194.012-15.148 46.688-10.376 74.354-25.592 92.684-43.92 18.328-18.364 33.546-46.032 43.92-92.754 10.72-47.482 15.218-110.148 15.218-194.012s-4.496-146.53-15.218-194.012c-10.374-46.722-25.592-74.39-43.92-92.752-18.33-18.33-45.996-33.546-92.684-43.92-47.38-10.55-110.32-15.15-194.012-15.15z"
-                                fill="#ABAFD1" p-id="58228"></path>
-                        </svg>
-                        近一周 PV 访问量
-                    </h2>
-                    <ArticlePVLineChat :value="articlePVInfo"></ArticlePVLineChat>
-                </div>
-            </div>
+
         </div>
 
     </main>
@@ -300,13 +279,12 @@
 
 <script setup>
 import { ref } from 'vue'
-import { getBaseStatisticsInfo, getPublishArticleStatisticsInfo, getArticlePVStatisticsInfo, getArticleReadNumInfo } from '@/api/admin/dashboard'
+import { getBaseStatisticsInfo, getCategoryCount, getArticleReadNumInfo, getArticleReadNumTop, getArticleUpdateTop } from '@/api/admin/dashboard'
 import CountTo from '@/components/CountTo.vue'
-import ArticlePublishCalendar from '@/components/ArtilcePublishCalendar.vue'
-import ArticlePVLineChat from '@/components/ArticlePVLineChat.vue'
 import ArticleReadNumChat from '@/components/ArticleReadNumChat.vue'
-import CategoryTotalCount from '@/components/CategoryCountPieChat.vue'
+import CategoryCountPieChat from '@/components/CategoryCountPieChat.vue'
 import TagsCountChat from '@/components/TagsCountChat.vue'
+import ArticleUpdateChat from '@/components/ArticleUpdateChat.vue';
 
 // 文章总数，默认值为 0
 const articleTotalCount = ref(0)
@@ -326,19 +304,10 @@ getBaseStatisticsInfo().then(res => {
     }
 })
 
-// 按日统计文章发布数据
-const articlePublishInfo = ref({})
-getPublishArticleStatisticsInfo().then((res) => {
+const categoryCountInfo = ref([])
+getCategoryCount().then((res) => {
     if (res.success) {
-        articlePublishInfo.value = res.data
-    }
-})
-
-// 近一周文章 PV 数据
-const articlePVInfo = ref({})
-getArticlePVStatisticsInfo().then((res) => {
-    if (res.success) {
-        articlePVInfo.value = res.data
+        categoryCountInfo.value = res.data
     }
 })
 
@@ -346,6 +315,19 @@ const articleReadNumInfo = ref({})
 getArticleReadNumInfo().then((res) => {
     if (res.success) {
         articleReadNumInfo.value = res.data
+    }
+})
+
+const articleReadNumTop = ref({})
+getArticleReadNumTop().then((res) => {
+    if (res.success) {
+        articleReadNumTop.value = res.data
+    }
+})
+const articleUpdateTop = ref({})
+getArticleUpdateTop().then((res) => {
+    if (res.success) {
+        articleUpdateTop.value = res.data
     }
 })
 

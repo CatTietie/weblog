@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author: Group 5
-
  * @date: 2023-09-15 14:01
  * @description: 仪表盘
  **/
@@ -28,7 +27,16 @@ public class AdminDashboardController {
     @PostMapping("/ArticlesReadNumber")
     @ApiOperation(value = "获取全部文章阅读量统计")
     @ApiOperationLog(description = "获取全部文章阅读量统计")
-    public Response findArticlePvStatistics(){ return dashboardService.findArticlePvCount();}
+    public Response findArticlePvStatistics() {
+        return dashboardService.findArticlePvCount();
+    }
+
+    @PostMapping("/ArticlesReadNumber/top6")
+    @ApiOperation(value = "获取全部文章阅读量前6")
+    @ApiOperationLog(description = "获取全部文章阅读量前6")
+    public Response orderArticlePvStatistics() {
+        return dashboardService.orderArticlePvCount();
+    }
 
     @PostMapping("/statistics")
     @ApiOperation(value = "获取后台仪表盘基础统计信息")
@@ -51,4 +59,18 @@ public class AdminDashboardController {
         return dashboardService.findDashboardPVStatistics();
     }
 
+
+    @PostMapping("/updateArticle/statistics")
+    @ApiOperation(value = "统计文章更新频率")
+    @ApiOperationLog(description = "统计文章更新频率")
+    public Response countArticleUpdateTimes() {
+        return dashboardService.countArticleUpdateTimes();
+    }
+
+    @PostMapping("/category")
+    @ApiOperation(value = "统计分类下的文章数量")
+    @ApiOperationLog(description = "统计分类下的文章数量")
+    public Response countCategory() {
+        return dashboardService.countCategory();
+    }
 }

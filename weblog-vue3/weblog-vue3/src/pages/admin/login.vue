@@ -116,7 +116,7 @@ const onSubmit = () => {
                 userStore.setUserInfo()
 
                 // 跳转到后台首页
-                router.push('/admin/index')
+                router.push('/admin/index/article-stats')
             } else {
                 // 获取服务端返回的错误消息
                 let message = res.message

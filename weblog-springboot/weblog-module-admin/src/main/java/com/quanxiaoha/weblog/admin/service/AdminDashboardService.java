@@ -33,4 +33,22 @@ public interface AdminDashboardService {
      * @return
      */
     Response findArticlePvCount();
+
+    /**
+     * 获取文章更新频率
+     * @return
+     */
+    Response countArticleUpdateTimes();
+
+    /**
+     * 获取文章阅读量前6
+     * @return
+     */
+    Response orderArticlePvCount();
+
+    /**
+     * 获取每个分类下的文章数量
+     * @return
+     */
+    Response countCategory();
 }

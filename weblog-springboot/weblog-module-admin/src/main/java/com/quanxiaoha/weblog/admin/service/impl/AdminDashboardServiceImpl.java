@@ -11,10 +11,7 @@ import com.quanxiaoha.weblog.common.constant.Constants;
 import com.quanxiaoha.weblog.common.domain.dos.ArticleDO;
 import com.quanxiaoha.weblog.common.domain.dos.ArticlePublishCountDO;
 import com.quanxiaoha.weblog.common.domain.dos.StatisticsArticlePVDO;
-import com.quanxiaoha.weblog.common.domain.mapper.ArticleMapper;
-import com.quanxiaoha.weblog.common.domain.mapper.CategoryMapper;
-import com.quanxiaoha.weblog.common.domain.mapper.StatisticsArticlePVMapper;
-import com.quanxiaoha.weblog.common.domain.mapper.TagMapper;
+import com.quanxiaoha.weblog.common.domain.mapper.*;
 import com.quanxiaoha.weblog.common.utils.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +42,11 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
     private TagMapper tagMapper;
     @Autowired
     private StatisticsArticlePVMapper articlePVMapper;
+    @Autowired
+    private ArticleUpdateHistoryMapper articleUpdateHistoryMapper;
+
+    @Autowired
+    private StatisticsMapper statisticsMapper;
 
     /**
      * 获取仪表盘基础统计信息
@@ -181,4 +183,42 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
 
         return Response.success(result);
     }
+
+    @Override
+    public Response countArticleUpdateTimes() {
+        List<JSONObject> queryJsonObject = articleUpdateHistoryMapper.countUpdateTimes();
+        return Response.success(convertBarData(queryJsonObject, "title", "count"));
+    }
+
+    @Override
+    public Response orderArticlePvCount() {
+        List<JSONObject> queryJsonObject = articleMapper.orderArticle();
+        return Response.success(convertBarData(queryJsonObject, "title", "readNum"));
+    }
+
+    @Override
+    public Response countCategory() {
+        return Response.success(statisticsMapper.categoryAndArticleCount());
+    }
+
+
+    public JSONObject convertBarData(List<JSONObject> res, String XKey, String YKey) {
+        // 创建两个列表分别存储 title 和 readNum
+        List<String> XItems = new ArrayList<>();
+        List<Integer> YItems = new ArrayList<>();
+
+        // 遍历 res 列表，提取 title 和 readNum
+        for (JSONObject item : res) {
+            XItems.add(item.getString(XKey));
+            YItems.add(item.getInteger(YKey));
+        }
+
+        // 将两个列表封装到一个 JSONObject 中
+        JSONObject result = new JSONObject();
+        result.put("xData", XItems);
+        result.put("seriesData", YItems);
+
+        return result;
+    }
+
 }
