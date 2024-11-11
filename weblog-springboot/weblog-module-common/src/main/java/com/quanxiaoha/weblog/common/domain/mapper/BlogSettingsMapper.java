@@ -11,6 +11,7 @@ import org.apache.ibatis.annotations.Select;
  * @description: TODO
  **/
 public interface BlogSettingsMapper extends BaseMapper<BlogSettingsDO> {
-    @Select("select * from weblog.t_blog_settings where userName = #{username}")
+
+    @Select("select * from t_blog_settings where userName = #{username}")
     BlogSettingsDO selectByUsername(String username);
 }
