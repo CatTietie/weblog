@@ -15,3 +15,7 @@ export function getArticlePVStatisticsInfo(data) {
     return axios.post("/admin/dashboard/pv/statistics", data)
 }
 
+
+export function getArticleReadNumInfo(data) {
+    return axios.post("/admin/dashboard/ArticlesReadNumber", data)
+}
