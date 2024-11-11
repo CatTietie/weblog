@@ -12,8 +12,11 @@ import AdminArticleList from '@/pages/admin/article-list.vue'
 import AdminCategoryList from '@/pages/admin/category-list.vue'
 import AdminTagList from '@/pages/admin/tag-list.vue'
 import AdminBlogSettings from '@/pages/admin/blog-settings.vue'
+import AdminUserStatistics from '@/pages/admin/userStatistics.vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
+
 import Admin from '@/layouts/admin/admin.vue'
+import { time } from 'echarts'
 
 // 统一在这里声明所有路由
 const routes = [
@@ -87,10 +90,17 @@ const routes = [
         // 使用到 admin.vue 布局的，都需要放置在其子路由下面
         children: [
             {
-                path: "/admin/index",
+                path: "/admin/index/article-stats",
                 component: AdminIndex,
                 meta: {
-                    title: '仪表盘'
+                    title: '文章统计'
+                }
+            },
+            {
+                path:"/admin/index/user-stats",
+                component: AdminUserStatistics,
+                meta:{
+                    title:'用户统计'
                 }
             },
             {

@@ -26,6 +26,7 @@ function initBarChat() {
     const readNums = props.value.readNums
 
     option = {
+        legend:{},
         tooltip: {
             show: true,
             trigger: 'item',
@@ -39,6 +40,7 @@ function initBarChat() {
         },
         series: [
             {
+                name:'文章',
                 data: readNums,
                 barWidth:50,
                 type: 'bar',

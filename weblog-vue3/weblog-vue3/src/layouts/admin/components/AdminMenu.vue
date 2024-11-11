@@ -9,7 +9,19 @@
         <!-- 下方菜单 -->
         <el-menu :default-active="defaultActive" @select="handleSelect" :collapse="isCollapse" :collapse-transition="false">
             <template v-for="(item, index) in menus" :key="index">
-                <el-menu-item :index="item.path">
+                <el-sub-menu v-if="item.children" :index="item.path">
+                    <template #title>
+                        <el-icon>
+                            <!-- 动态图标 -->
+                            <component :is="item.icon"></component>
+                        </el-icon>
+                        <span>{{ item.name }}</span>
+                    </template>
+                    <el-menu-item v-for="(child, childIndex) in item.children" :key="childIndex" :index="child.path">
+                        <span>{{ child.name }}</span>
+                    </el-menu-item>
+                </el-sub-menu>
+                <el-menu-item v-else :index="item.path">
                     <el-icon>
                         <!-- 动态图标 -->
                         <component :is="item.icon"></component>
@@ -18,8 +30,8 @@
                 </el-menu-item>
             </template>
         </el-menu>
-
-</div></template>
+    </div>
+</template>
 
 <script setup>
 import { ref, computed } from 'vue'
@@ -32,10 +44,10 @@ const route = useRoute()
 const router = useRouter()
 
 // 是否折叠
-const isCollapse = computed(() =>  !(menuStore.menuWidth == '250px'))
+const isCollapse = computed(() => !(menuStore.menuWidth == '250px'))
 
 // 根据路由地址判断哪个菜单被选中
-const defaultActive = ref(route.path)
+const defaultActive = ref('/admin/index/article-stats')
 
 // 菜单选择事件
 const handleSelect = (path) => {
@@ -46,7 +58,17 @@ const menus = [
     {
         'name': '仪表盘',
         'icon': 'Monitor',
-        'path': '/admin/index'
+        'path': '/admin/index',
+        'children': [
+            {
+                'name': '文章统计',
+                'path': '/admin/index/article-stats'
+            },
+            {
+                'name': '用户统计',
+                'path': '/admin/index/user-stats'
+            }
+        ]
     },
     {
         'name': '文章管理',
@@ -85,7 +107,6 @@ const menus = [
     background-color: #ffffff10;
 }
 
-
 .el-menu-item.is-active {
     background-color: #409eff10;
     color: #fff;
@@ -108,5 +129,4 @@ const menus = [
 .el-menu-item:hover {
     background-color: #ffffff10;
 }
-
 </style>

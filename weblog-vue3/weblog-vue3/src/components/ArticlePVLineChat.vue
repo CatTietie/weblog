@@ -26,6 +26,7 @@ function initLineChat() {
     const pvCounts = props.value.pvCounts
 
     option = {
+        legend:{},
         tooltip:{
             show:true,
             trigger: 'item',
@@ -40,7 +41,8 @@ function initLineChat() {
         series: [
             {
                 data: pvCounts,
-                type: 'line'
+                type: 'line',
+                name:'pv统计'
             }
         ]
     };
