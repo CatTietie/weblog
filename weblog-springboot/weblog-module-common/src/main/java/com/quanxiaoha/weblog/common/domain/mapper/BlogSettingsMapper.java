@@ -1,12 +1,8 @@
 package com.quanxiaoha.weblog.common.domain.mapper;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.quanxiaoha.weblog.common.domain.dos.BlogSettingsDO;
-import com.quanxiaoha.weblog.common.domain.dos.UserDO;
-
-import java.time.LocalDateTime;
+import org.apache.ibatis.annotations.Select;
 
 /**
  * @author: Group 5
@@ -15,4 +11,6 @@ import java.time.LocalDateTime;
  * @description: TODO
  **/
 public interface BlogSettingsMapper extends BaseMapper<BlogSettingsDO> {
+    @Select("select * from weblog.t_blog_settings where userName = #{username}")
+    BlogSettingsDO selectByUsername(String username);
 }

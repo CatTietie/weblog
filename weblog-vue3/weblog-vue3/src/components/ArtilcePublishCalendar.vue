@@ -44,6 +44,10 @@ function initCalendar() {
     var option;
 
     option = {
+        tooltip: {
+            show: true,
+            trigger: 'item',
+        },
         visualMap: {
             show: false,
             min: 0,
@@ -56,7 +60,7 @@ function initCalendar() {
             type: 'heatmap',
             coordinateSystem: 'calendar',
             data: myData
-        }, 
+        },
         gradientColor: [ // 自定义热点颜色，参考了 GitHub 代码提交的颜色
             '#fff',
             '#40c463',

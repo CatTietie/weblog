@@ -1,5 +1,6 @@
 package com.quanxiaoha.weblog.common.domain.mapper;
 
+import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
@@ -15,7 +16,6 @@ import java.util.Objects;
 
 /**
  * @author: Group 5
-
  * @date: 2023-08-22 17:06
  * @description: 文章
  **/
@@ -23,6 +23,7 @@ public interface ArticleMapper extends BaseMapper<ArticleDO> {
 
     /**
      * 分页查询
+     *
      * @param current
      * @param size
      * @param title
@@ -46,6 +47,7 @@ public interface ArticleMapper extends BaseMapper<ArticleDO> {
 
     /**
      * 根据文章 ID 批量分页查询
+     *
      * @param current
      * @param size
      * @param articleIds
@@ -65,6 +67,7 @@ public interface ArticleMapper extends BaseMapper<ArticleDO> {
 
     /**
      * 查询上一篇文章
+     *
      * @param articleId
      * @return
      */
@@ -77,6 +80,7 @@ public interface ArticleMapper extends BaseMapper<ArticleDO> {
 
     /**
      * 查询下一篇文章
+     *
      * @param articleId
      * @return
      */
@@ -89,6 +93,7 @@ public interface ArticleMapper extends BaseMapper<ArticleDO> {
 
     /**
      * 阅读量+1
+     *
      * @param articleId
      * @return
      */
@@ -100,6 +105,7 @@ public interface ArticleMapper extends BaseMapper<ArticleDO> {
 
     /**
      * 查询所有记录的总阅读量
+     *
      * @return
      */
     default List<ArticleDO> selectAllReadNum() {
@@ -110,6 +116,7 @@ public interface ArticleMapper extends BaseMapper<ArticleDO> {
 
     /**
      * 按日分组，并统计每日发布的文章数量
+     *
      * @param startDate
      * @param endDate
      * @return
@@ -119,4 +126,12 @@ public interface ArticleMapper extends BaseMapper<ArticleDO> {
             "WHERE create_time >= #{startDate} AND create_time <= #{endDate}\n" +
             "GROUP BY DATE(create_time)")
     List<ArticlePublishCountDO> selectDateArticlePublishCount(LocalDate startDate, LocalDate endDate);
+
+
+    /**
+     * 查找文章与对应的阅读量
+     * @return
+     */
+    @Select("SELECT title , read_num AS readNum FROM t_article WHERE is_deleted = 0")
+    List<JSONObject> getArticleReadNum();
 }

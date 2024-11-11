@@ -24,6 +24,12 @@ public class AdminDashboardController {
     @Autowired
     private AdminDashboardService dashboardService;
 
+
+    @PostMapping("/ArticlesReadNumber")
+    @ApiOperation(value = "获取全部文章阅读量统计")
+    @ApiOperationLog(description = "获取全部文章阅读量统计")
+    public Response findArticlePvStatistics(){ return dashboardService.findArticlePvCount();}
+
     @PostMapping("/statistics")
     @ApiOperation(value = "获取后台仪表盘基础统计信息")
     @ApiOperationLog(description = "获取后台仪表盘基础统计信息")

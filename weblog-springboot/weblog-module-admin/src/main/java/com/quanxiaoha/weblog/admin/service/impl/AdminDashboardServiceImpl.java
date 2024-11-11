@@ -1,5 +1,6 @@
 package com.quanxiaoha.weblog.admin.service.impl;
 
+import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -28,7 +30,6 @@ import java.util.stream.Collectors;
 
 /**
  * @author: Group 5
-
  * @date: 2023-09-15 14:03
  * @description: 仪表盘
  **/
@@ -157,5 +158,27 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
         }
 
         return Response.success(vo);
+    }
+
+    @Override
+    public Response findArticlePvCount() {
+        List<JSONObject> res = articleMapper.getArticleReadNum();
+
+        // 创建两个列表分别存储 title 和 readNum
+        List<String> titles = new ArrayList<>();
+        List<Integer> readNums = new ArrayList<>();
+
+        // 遍历 res 列表，提取 title 和 readNum
+        for (JSONObject item : res) {
+            titles.add(item.getString("title"));
+            readNums.add(item.getInteger("readNum"));
+        }
+
+        // 将两个列表封装到一个 JSONObject 中
+        JSONObject result = new JSONObject();
+        result.put("titles", titles);
+        result.put("readNums", readNums);
+
+        return Response.success(result);
     }
 }

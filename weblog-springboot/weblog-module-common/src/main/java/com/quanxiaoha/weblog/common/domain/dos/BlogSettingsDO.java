@@ -8,8 +8,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 /**
  * @author: Group 5
 
@@ -25,6 +23,8 @@ public class BlogSettingsDO {
 
     @TableId(type = IdType.AUTO)
     private Long id;
+
+    private String username;
 
     private String logo;
 

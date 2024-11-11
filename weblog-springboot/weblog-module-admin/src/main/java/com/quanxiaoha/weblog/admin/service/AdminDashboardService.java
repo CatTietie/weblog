@@ -27,4 +27,10 @@ public interface AdminDashboardService {
      * @return
      */
     Response findDashboardPVStatistics();
+
+    /**
+     *获取文章阅读量统计
+     * @return
+     */
+    Response findArticlePvCount();
 }

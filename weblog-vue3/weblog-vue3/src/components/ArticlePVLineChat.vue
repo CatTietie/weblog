@@ -26,6 +26,10 @@ function initLineChat() {
     const pvCounts = props.value.pvCounts
 
     option = {
+        tooltip:{
+            show:true,
+            trigger: 'item',
+        },
         xAxis: {
             type: 'category',
             data: pvDates

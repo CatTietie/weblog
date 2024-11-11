@@ -8,6 +8,7 @@ import com.quanxiaoha.weblog.web.model.vo.blogsettings.FindBlogSettingsDetailRsp
 import com.quanxiaoha.weblog.web.service.BlogSettingsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 /**
@@ -30,8 +31,16 @@ public class BlogSettingsServiceImpl implements BlogSettingsService {
      */
     @Override
     public Response findDetail() {
-        // 查询博客设置信息（约定的 ID 为 1）
-        BlogSettingsDO blogSettingsDO = blogSettingsMapper.selectById(1L);
+
+        //获取到当前用户名
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        BlogSettingsDO blogSettingsDO;
+        if (username.equals("anonymousUser")){
+            //默认为站主的BlogSetting
+            blogSettingsDO= blogSettingsMapper.selectById(1L);
+        }else {
+            blogSettingsDO = blogSettingsMapper.selectByUsername(username);
+        }
         // DO 转 VO
         FindBlogSettingsDetailRspVO vo = BlogSettingsConvert.INSTANCE.convertDO2VO(blogSettingsDO);
 

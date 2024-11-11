@@ -1,0 +1,82 @@
+<template>
+    <!-- PV 折线图容器 -->
+    <div id="barChat" class="overflow-x-auto w-full h-60"></div>
+</template>
+
+<script setup>
+import * as echarts from 'echarts'
+import { watch } from 'vue'
+
+// 对外暴露的属性值
+const props = defineProps({
+    value: { // 属性值名称
+        type: Object, // 类型为对象
+        default: null // 默认为 null
+    }
+})
+
+// 初始化柱状图
+function initBarChat() {
+    var chartDom = document.getElementById('barChat');
+    var myChart = echarts.init(chartDom);
+    var option;
+
+
+    const titles = props.value.titles
+    const readNums = props.value.readNums
+
+    option = {
+        tooltip: {
+            show: true,
+            trigger: 'item',
+        },
+        xAxis: {
+            type: 'category',
+            data: titles
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [
+            {
+                data: readNums,
+                barWidth:50,
+                type: 'bar',
+                markPoint:{
+                    data:[
+                        {
+                            type:"max",
+                            name:"Max",
+                        },
+                        {
+                            type:"min",
+                            name:"Min"
+                        }
+                    ]
+                },
+                itemStyle: {
+                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                        { offset: 0, color: '#83bff6' },
+                        { offset: 0.5, color: '#188df0' },
+                        { offset: 1, color: '#188df0' }
+                    ])
+                },
+                emphasis: {
+                    itemStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            { offset: 0, color: '#2378f7' },
+                            { offset: 0.7, color: '#2378f7' },
+                            { offset: 1, color: '#83bff6' }
+                        ])
+                    }
+                }
+            }
+        ]
+    };
+
+    option && myChart.setOption(option);
+}
+
+// 侦听属性, 监听 props.value 的变化，一旦 props.value 发生变化，就调用 initLineChat 初始化折线图
+watch(() => props.value, () => initBarChat())
+</script>
