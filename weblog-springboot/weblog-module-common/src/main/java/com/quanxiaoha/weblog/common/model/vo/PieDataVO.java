@@ -20,6 +20,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PieDataVO {
-    private String value;
+    private Long value;
     private String name;
 }

@@ -73,4 +73,11 @@ public class AdminDashboardController {
     public Response countCategory() {
         return dashboardService.countCategory();
     }
+
+    @PostMapping("/tag")
+    @ApiOperation(value = "统计标签下的文章数量")
+    @ApiOperationLog(description = "统计标签下的文章数量")
+    public Response countTags() {
+        return dashboardService.countTags();
+    }
 }

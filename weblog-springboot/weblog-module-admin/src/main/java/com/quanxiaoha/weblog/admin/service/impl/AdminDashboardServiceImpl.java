@@ -12,6 +12,7 @@ import com.quanxiaoha.weblog.common.domain.dos.ArticleDO;
 import com.quanxiaoha.weblog.common.domain.dos.ArticlePublishCountDO;
 import com.quanxiaoha.weblog.common.domain.dos.StatisticsArticlePVDO;
 import com.quanxiaoha.weblog.common.domain.mapper.*;
+import com.quanxiaoha.weblog.common.model.vo.PieDataVO;
 import com.quanxiaoha.weblog.common.utils.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -184,6 +185,11 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
         return Response.success(result);
     }
 
+    /**
+     * 统计文章更新频率
+     *
+     * @return
+     */
     @Override
     public Response countArticleUpdateTimes() {
         List<JSONObject> queryJsonObject = articleUpdateHistoryMapper.countUpdateTimes();
@@ -199,6 +205,15 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
     @Override
     public Response countCategory() {
         return Response.success(statisticsMapper.categoryAndArticleCount());
+    }
+
+    @Override
+    public Response countTags() {
+
+        List<PieDataVO> dataVOS = statisticsMapper.tagsAndArticleCount();
+        //过滤掉value值为0的数据
+        List<PieDataVO> res = dataVOS.stream().filter(pieDataVO -> pieDataVO.getValue() != 0L).collect(Collectors.toList());
+        return Response.success(res);
     }
 
 

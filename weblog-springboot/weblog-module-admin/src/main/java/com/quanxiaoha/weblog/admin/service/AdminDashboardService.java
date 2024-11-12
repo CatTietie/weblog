@@ -51,4 +51,10 @@ public interface AdminDashboardService {
      * @return
      */
     Response countCategory();
+
+    /**
+     * 获取每个标签下的文章数量
+     * @return
+     */
+    Response countTags();
 }
