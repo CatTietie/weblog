@@ -31,3 +31,7 @@ export function getArticleUpdateTop(data) {
 export function getCategoryCount(data) {
     return axios.post("/admin/dashboard/category", data)
 }
+
+export function getTagCount(data) {
+    return axios.post("/admin/dashboard/tag", data)
+}

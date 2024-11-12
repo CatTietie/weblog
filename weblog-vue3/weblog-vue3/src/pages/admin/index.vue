@@ -238,7 +238,7 @@
                         </svg>
                         文章属标签统计
                     </h2>
-                    <TagsCountChat></TagsCountChat>
+                    <TagsCountChat :value="tagCountInfo"></TagsCountChat>
                     <!-- <ArticleReadNumChat :value="articleReadNumInfo"></ArticleReadNumChat> -->
                 </div>
             </div>
@@ -279,7 +279,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import { getBaseStatisticsInfo, getCategoryCount, getArticleReadNumInfo, getArticleReadNumTop, getArticleUpdateTop } from '@/api/admin/dashboard'
+import { getBaseStatisticsInfo, getCategoryCount, getArticleReadNumInfo, getArticleReadNumTop, getArticleUpdateTop, getTagCount } from '@/api/admin/dashboard'
 import CountTo from '@/components/CountTo.vue'
 import ArticleReadNumChat from '@/components/ArticleReadNumChat.vue'
 import CategoryCountPieChat from '@/components/CategoryCountPieChat.vue'
@@ -331,4 +331,18 @@ getArticleUpdateTop().then((res) => {
     }
 })
 
+const tagCountInfo = ref([])
+getTagCount().then((res) => {
+    if (res.success) {
+        tagCountInfo.value = res.data
+    }
+})
+
 </script>
+
+<style scoped>
+.col-span-4 md:col-span-2 {
+    overflow: hidden;
+    /* 隐藏滚动条 */
+}
+</style>

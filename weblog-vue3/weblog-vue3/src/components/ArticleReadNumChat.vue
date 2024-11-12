@@ -25,25 +25,6 @@ function initBarChat() {
     const titles = props.value.xData
     const readNums = props.value.seriesData
 
-    // 定义渐变颜色
-    const colors = [
-        { offset: 0, color: '#FF0000' }, // 最深的红色
-        { offset: 1, color: '#FFAAAA' }  // 最浅的红色
-    ];
-
-    // 生成每个柱子的渐变色
-    const itemStyles = readNums.map((_, index) => {
-        return {
-            color: new echarts.graphic.LinearGradient(
-                0, 0, 0, 1, // 渐变方向，从上到下
-                [
-                    { offset: 0, color: `hsl(0, 100%, ${60 - (index * 5)}%)` }, // 计算每个柱子的起始颜色
-                    { offset: 1, color: `hsl(0, 100%, ${80 - (index * 5)}%)` }  // 计算每个柱子的结束颜色
-                ]
-            )
-        };
-    });
-
 
 
 
@@ -68,24 +49,31 @@ function initBarChat() {
             type: 'category',
             data: titles
         },
+        visualMap: {
+            orient: 'horizontal',
+            left: 'center',
+            top:'10',
+            min: 5,
+            max: 50,
+            text: ['High', 'Low'],
+            // Map the score column to color
+            dimension: 0,
+            inRange: {
+                color: ['#65B581', '#FFCE34', '#FD665F']
+            }
+        },
         series: [
-        {
+            {
                 name: '阅读量',
                 type: 'bar',
                 data: readNums,
-                itemStyle: {
-                    normal: {
-                        color: function(params) {
-                            return itemStyles[params.dataIndex].color;
-                        }
-                    }
-                }
             }
         ],
         legend: {
             show: 'true',
-            itemStyle:{
-                color:'#d50909'
+            left:'left',
+            itemStyle: {
+                color: '#d50909'
             }
         },
     };

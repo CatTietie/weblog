@@ -70,9 +70,9 @@ function initPieChat() {
     option && myChart.setOption(option);
 }
 
-onMounted(() => {
-    initPieChat()
-})
+// onMounted(() => {
+//     initPieChat()
+// })
 
 // 侦听属性, 监听 props.value 的变化，一旦 props.value 发生变化，就调用 initLineChat 初始化折线图
 watch(() => props.value, () => initPieChat())
