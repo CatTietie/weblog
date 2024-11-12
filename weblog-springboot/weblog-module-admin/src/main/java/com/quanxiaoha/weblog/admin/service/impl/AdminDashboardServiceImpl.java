@@ -12,6 +12,7 @@ import com.quanxiaoha.weblog.common.domain.dos.ArticleDO;
 import com.quanxiaoha.weblog.common.domain.dos.ArticlePublishCountDO;
 import com.quanxiaoha.weblog.common.domain.dos.StatisticsArticlePVDO;
 import com.quanxiaoha.weblog.common.domain.mapper.*;
+import com.quanxiaoha.weblog.common.model.vo.LineDataVO;
 import com.quanxiaoha.weblog.common.model.vo.PieDataVO;
 import com.quanxiaoha.weblog.common.utils.Response;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +20,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -145,7 +148,7 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
             // 当前日期
             LocalDate currDate = LocalDate.now();
             // 一周前
-            LocalDate tmpDate = currDate.minusWeeks(1);
+            LocalDate tmpDate = currDate.minusMonths(1);
             // 从一周前开始循环
             for (; tmpDate.isBefore(currDate) || tmpDate.isEqual(currDate); tmpDate = tmpDate.plusDays(1)) {
                 // 设置对应日期的 PV 访问量
@@ -216,6 +219,22 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
         return Response.success(res);
     }
 
+    @Override
+    public Response findDashboardUpdateStatistics() {
+        List<LineDataVO> queryList = statisticsMapper.countUpdateOneMonth();
+        List<String> xData;
+        List<Long> seriesData;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd");
+        xData = queryList.stream().map(LineDataVO::getXData).collect(Collectors.toList()).stream().map(localDate ->
+                localDate.format(formatter)
+        ).collect(Collectors.toList());
+        seriesData = queryList.stream().map(LineDataVO::getSeriesData).collect(Collectors.toList());
+        JSONObject res = new JSONObject();
+        res.put("xData", xData);
+        res.put("seriesData", seriesData);
+        return Response.success(res);
+    }
+
 
     public JSONObject convertBarData(List<JSONObject> res, String XKey, String YKey) {
         // 创建两个列表分别存储 title 和 readNum
@@ -236,4 +255,30 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
         return result;
     }
 
+
+    public static JSONObject formatPvData(List<LineDataVO> pvDatesJsonList) {
+        List<String> formattedDates = new ArrayList<>();
+        List<Long> cumulativeCounts = new ArrayList<>();
+
+        Long cumulativeCount = 0L;
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd");
+
+        for (LineDataVO pvDateJson : pvDatesJsonList) {
+            LocalDate xData = pvDateJson.getXData();
+            Long count = pvDateJson.getSeriesData();
+
+            String formattedDate = dateFormat.format(xData);
+            formattedDates.add(formattedDate);
+
+            cumulativeCount += count;
+            cumulativeCounts.add(cumulativeCount);
+        }
+
+        JSONObject res = new JSONObject();
+        res.put("updateDates", formattedDates);
+        res.put("updateCounts", cumulativeCounts);
+
+        return res;
+
+    }
 }

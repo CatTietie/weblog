@@ -149,7 +149,7 @@
                     </div>
                 </div>
             </div>
-            
+
 
             <!-- 文章日 PV 访问量折线图 -->
             <div class="col-span-4 md:col-span-4">
@@ -167,9 +167,9 @@
                                 d="M513 98C854.684 98 928 171.248 928 513S854.684 928 513 928C171.316 928 98 854.752 98 513S171.316 98 513 98z m0 69.166c-83.692 0-146.634 4.6-194.012 15.148-46.688 10.376-74.354 25.592-92.684 43.92-18.33 18.364-33.546 46.032-43.92 92.754-10.72 47.482-15.218 110.148-15.218 194.012s4.496 146.53 15.218 194.012c10.374 46.722 25.59 74.39 43.92 92.754 18.33 18.328 45.996 33.544 92.684 43.92 47.38 10.548 110.32 15.148 194.012 15.148 83.692 0 146.634-4.6 194.012-15.148 46.688-10.376 74.354-25.592 92.684-43.92 18.328-18.364 33.546-46.032 43.92-92.754 10.72-47.482 15.218-110.148 15.218-194.012s-4.496-146.53-15.218-194.012c-10.374-46.722-25.592-74.39-43.92-92.752-18.33-18.33-45.996-33.546-92.684-43.92-47.38-10.55-110.32-15.15-194.012-15.15z"
                                 fill="#ABAFD1" p-id="58228"></path>
                         </svg>
-                        近一周 PV 访问量
+                        近一月 PV 访问量
                     </h2>
-                    <ArticlePVLineChat :value="articlePVInfo"></ArticlePVLineChat>
+                    <ArticlePVLineChat :articlePVInfo="articlePVInfo" :updateCount="updateCount"></ArticlePVLineChat>
                 </div>
             </div>
         </div>
@@ -179,7 +179,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import { getBaseStatisticsInfo, getPublishArticleStatisticsInfo, getArticlePVStatisticsInfo, getArticleReadNumInfo } from '@/api/admin/dashboard'
+import { getBaseStatisticsInfo, getArticlePVStatisticsInfo, getUpdateCount } from '@/api/admin/dashboard'
 import CountTo from '@/components/CountTo.vue'
 import ArticlePVLineChat from '@/components/ArticlePVLineChat.vue'
 
@@ -203,13 +203,25 @@ getBaseStatisticsInfo().then(res => {
 })
 
 
-// 近一周文章 PV 数据
+
+// 近一周文章 PV 数据 默认为对象
 const articlePVInfo = ref({})
+// 更新次数数据 默认为对象
+const updateCount = ref({})
+
 getArticlePVStatisticsInfo().then((res) => {
     if (res.success) {
         articlePVInfo.value = res.data
     }
 })
 
+getUpdateCount().then((res) => {
+    if (res.success) {
+        updateCount.value = res.data
+    }
+})
+
 
 </script>
+
+<style></style>

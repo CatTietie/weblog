@@ -35,3 +35,6 @@ export function getCategoryCount(data) {
 export function getTagCount(data) {
     return axios.post("/admin/dashboard/tag", data)
 }
+export function getUpdateCount(data) {
+    return axios.post("/admin/dashboard/updateTimes/statistics", data)
+}

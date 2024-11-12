@@ -53,10 +53,17 @@ public class AdminDashboardController {
     }
 
     @PostMapping("/pv/statistics")
-    @ApiOperation(value = "获取后台仪表盘最近一周 PV 访问量信息")
-    @ApiOperationLog(description = "获取后台仪表盘最近一周 PV 访问量信息")
+    @ApiOperation(value = "获取后台仪表盘最近一个月 PV 访问量信息")
+    @ApiOperationLog(description = "获取后台仪表盘最近一个月 PV 访问量信息")
     public Response findDashboardPVStatistics() {
         return dashboardService.findDashboardPVStatistics();
+    }
+
+    @PostMapping("/updateTimes/statistics")
+    @ApiOperation(value = "获取后台仪表盘最近一个月 更新频率 访问量信息")
+    @ApiOperationLog(description = "获取后台仪表盘最近一个月 更新频率 访问量信息")
+    public Response findDashboardUpdateStatistics() {
+        return dashboardService.findDashboardUpdateStatistics();
     }
 
 

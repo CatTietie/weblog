@@ -34,6 +34,6 @@ public interface StatisticsArticlePVMapper extends BaseMapper<StatisticsArticleP
         return selectList(Wrappers.<StatisticsArticlePVDO>lambdaQuery()
                 .le(StatisticsArticlePVDO::getPvDate, LocalDate.now())
                 .orderByDesc(StatisticsArticlePVDO::getPvDate)// 小于等于当前日期
-                .last("limit 7")); // 仅查询七条
+                .last("limit 30")); // 仅查询七条
     }
 }

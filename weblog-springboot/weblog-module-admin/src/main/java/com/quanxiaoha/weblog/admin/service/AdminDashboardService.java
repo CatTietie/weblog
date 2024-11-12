@@ -57,4 +57,10 @@ public interface AdminDashboardService {
      * @return
      */
     Response countTags();
+
+    /**
+     * 获取最近一个月的更新频率
+     * @return
+     */
+    Response findDashboardUpdateStatistics();
 }

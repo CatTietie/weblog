@@ -1,6 +1,7 @@
 package com.quanxiaoha.weblog.common.domain.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.quanxiaoha.weblog.common.model.vo.LineDataVO;
 import com.quanxiaoha.weblog.common.model.vo.PieDataVO;
 import org.apache.ibatis.annotations.Select;
 
@@ -23,4 +24,10 @@ public interface StatisticsMapper extends BaseMapper<PieDataVO> {
             "WHERE tt.is_deleted = 0\n" +
             "GROUP BY name\n")
     List<PieDataVO> tagsAndArticleCount();
+
+    @Select("SELECT DATE(update_time) AS xData, COUNT(DISTINCT article_id) AS seriesData\n" +
+            "FROM t_article_update_history\n" +
+            "WHERE update_time >= CURDATE() - INTERVAL 1 MONTH\n" +
+            "GROUP BY DATE(update_time)")
+    List<LineDataVO> countUpdateOneMonth();
 }
