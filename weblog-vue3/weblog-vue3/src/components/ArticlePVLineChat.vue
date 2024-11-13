@@ -1,6 +1,6 @@
 <template>
     <!-- PV 折线图容器 -->
-    <div id="lineChat" class="overflow-x-auto w-full h-60"></div>
+    <div id="lineChat" class="overflow-x-auto w-full min-h-[300px]"></div>
 </template>
 
 <script setup>

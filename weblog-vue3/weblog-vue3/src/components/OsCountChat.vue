@@ -1,6 +1,6 @@
 <template>
     <!-- PV 折线图容器 -->
-    <div id="radarChat" class="overflow-x-auto w-full h-80"></div>
+    <div id="radarChat" class="overflow-x-auto w-full min-h-[320px]"></div>
 </template>
 
 <script setup>
