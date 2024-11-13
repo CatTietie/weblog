@@ -72,6 +72,7 @@ function initBarChat() {
         legend: {
             show: 'true',
             left:'left',
+            top:'5%',
             itemStyle: {
                 color: '#d50909'
             }

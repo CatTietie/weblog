@@ -58,7 +58,7 @@ const menus = [
     {
         'name': '仪表盘',
         'icon': 'Monitor',
-        'path': '/admin/index',
+        'path': '/admin/index/article-stats',
         'children': [
             {
                 'name': '文章统计',

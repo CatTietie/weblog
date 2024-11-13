@@ -1,6 +1,6 @@
 <template>
     <!-- PV 折线图容器 -->
-    <div id="barChat" class="overflow-x-auto w-full h-60"></div>
+    <div id="lineChat" class="overflow-x-auto w-full h-60"></div>
 </template>
 
 <script setup>
@@ -17,7 +17,7 @@ const props = defineProps({
 
 // 初始化柱状图
 function initBarChat() {
-    var chartDom = document.getElementById('barChat');
+    var chartDom = document.getElementById('lineChat');
     var myChart = echarts.init(chartDom);
     var option;
 

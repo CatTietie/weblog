@@ -16,6 +16,7 @@ import AdminUserStatistics from '@/pages/admin/userStatistics.vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
 
 import Admin from '@/layouts/admin/admin.vue'
+
 import { time } from 'echarts'
 
 // 统一在这里声明所有路由
@@ -85,7 +86,7 @@ const routes = [
         }
     },
     {
-        path: "/admin", // 后台首页
+        path: "/admin/index", // 后台首页
         component: Admin,
         // 使用到 admin.vue 布局的，都需要放置在其子路由下面
         children: [
