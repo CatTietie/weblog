@@ -1,6 +1,6 @@
 <template>
     <!-- PV 折线图容器 -->
-    <div id="pieChat1" class="overflow-x-auto w-full h-80"></div>
+    <div id="pieChat2" class="overflow-x-auto w-full min-h-[300px]"></div>
 </template>
 
 <script setup>
@@ -17,7 +17,7 @@ import { onMounted, watch } from 'vue'
 
 // 初始化折线图
 function initPieChat() {
-    var chartDom = document.getElementById('pieChat1');
+    var chartDom = document.getElementById('pieChat2');
     var myChart = echarts.init(chartDom);
     var option;
     // 处理接收到的数据

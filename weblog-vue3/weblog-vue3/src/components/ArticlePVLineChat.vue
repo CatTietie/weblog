@@ -1,6 +1,6 @@
 <template>
     <!-- PV 折线图容器 -->
-    <div id="lineChat" class="overflow-x-auto w-full h-60"></div>
+    <div id="lineChat" class="overflow-x-auto w-full min-h-[300px]"></div>
 </template>
 
 <script setup>
@@ -107,16 +107,16 @@ function initLineChat() {
 onMounted(async () => {
     // 模拟异步数据加载
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    articlePVInfo.value = {
-        pvDates: ['2023-01-01', '2023-01-02', '2023-01-03'],
-        pvCounts: [10, 20, 30]
-    };
-    updateCount.value = {
-        xData: ['2023-01-01', '2023-01-02', '2023-01-03'],
-        seriesData: [10, 20, 30]
-    };
-    console.log("Parent Component Data:", articlePVInfo.value);
-    await nextTick(); // 确保数据更新后再渲染子组件
+    // articlePVInfo.value = {
+    //     pvDates: ['2023-01-01', '2023-01-02', '2023-01-03'],
+    //     pvCounts: [10, 20, 30]
+    // };
+    // updateCount.value = {
+    //     xData: ['2023-01-01', '2023-01-02', '2023-01-03'],
+    //     seriesData: [10, 20, 30]
+    // };
+    // console.log("Parent Component Data:", articlePVInfo.value);
+    // await nextTick(); // 确保数据更新后再渲染子组件
 });
 // 侦听属性, 监听 props.value 的变化，一旦 props.value 发生变化，就调用 initLineChat 初始化折线图
 watch([() => props.articlePVInfo, () => props.updateCount], ([newArticlePVInfo, newUpdateCount]) => {
