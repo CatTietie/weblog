@@ -74,7 +74,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
                 .is_new_visitor(newVisitor)
                 .visit_time(LocalDateTime.now())
                 .build();
-        userVisitStatsMapper.insert(userVisitStatsDO);
+//        userVisitStatsMapper.insert(userVisitStatsDO);
 
         if (requestURI.startsWith("/admin")) {
             // 从请求头中获取 key 为 Authorization 的值
