@@ -76,7 +76,7 @@
 
 
             <!-- 访问前后台分布 -->
-            <div class="col-span-5 md:col-span-2">
+            <div class="col-span-5 md:col-span-1">
                 <!-- 卡片 -->
                 <div
                     class="w-full min-h-[300px] px-5 py-7 mb-3 bg-white border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700">
@@ -96,12 +96,12 @@
                         </svg>
                         访问前后台分布
                     </h2>
-                    <FrontBackChat></FrontBackChat>
+                    <FrontBackChat :value="pageCountInfo"></FrontBackChat>
                 </div>
             </div>
 
             <!-- 访问浏览器分布 -->
-            <div class="col-span-5 md:col-span-3">
+            <div class="col-span-5 md:col-span-4">
                 <!-- 卡片 -->
                 <div
                     class="w-full min-h-[300px] px-5 py-7 mb-3 bg-white border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700">
@@ -115,7 +115,7 @@
                         </svg>
                         访问浏览器分布
                     </h2>
-                    <BrowserCountChat></BrowserCountChat>
+                    <BrowserCountChat :value="browserCountInfo"></BrowserCountChat>
                 </div>
             </div>
 
@@ -146,7 +146,7 @@
 <script setup>
 import { ref } from 'vue'
 import { getBaseStatisticsInfo, getArticlePVStatisticsInfo, getUpdateCount } from '@/api/admin/dashboard'
-import { getOsCount, getDeviceCount } from '@/api/admin/userStats'
+import { getOsCount, getDeviceCount, getPageCount, getBrowserCount } from '@/api/admin/userStats'
 import ArticlePVLineChat from '@/components/ArticlePVLineChat.vue'
 import OsCountChat from '@/components/OsCountChat.vue'
 import DeviceCountChat from '@/components/DeviceCountChat.vue'
@@ -212,6 +212,21 @@ const deviceCountInfo = ref([])
 getDeviceCount().then((res) => {
     if (res.success) {
         deviceCountInfo.value = res.data
+    }
+})
+
+
+const pageCountInfo = ref([])
+getPageCount().then((res) => {
+    if (res.success) {
+        pageCountInfo.value = res.data
+    }
+})
+
+const browserCountInfo = ref({})
+getBrowserCount().then((res) => {
+    if (res.success) {
+        browserCountInfo.value = res.data
     }
 })
 </script>

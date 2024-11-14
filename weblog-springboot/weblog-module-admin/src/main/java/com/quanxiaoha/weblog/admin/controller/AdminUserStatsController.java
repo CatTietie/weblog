@@ -41,11 +41,32 @@ public class AdminUserStatsController {
 
     /**
      * 统计用户设备
+     *
      * @return
      */
     @GetMapping("/device")
     public Response countByDevice() {
         return adminUserStatsService.countByDevice();
+    }
+
+    /**
+     * 统计用户访问前后台
+     *
+     * @return
+     */
+    @GetMapping("/pageUrl")
+    public Response countByPageUrl() {
+        return adminUserStatsService.countPageUrl();
+    }
+
+    /**
+     * 统计用户访问浏览器
+     *
+     * @return
+     */
+    @GetMapping("/browser")
+    public Response countByBrowser() {
+        return adminUserStatsService.countByBrowser();
     }
 
 

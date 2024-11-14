@@ -47,6 +47,22 @@ public class AdminUserStatsServiceImpl implements AdminUserStatsService {
         return Response.success(res);
     }
 
+    @Override
+    public Response countPageUrl() {
+        Long adminCount = userVisitStatsMapper.countByAdmin();
+        Long frontCount = userVisitStatsMapper.countByFront();
+        ArrayList<PieDataVO> res = new ArrayList<>();
+        res.add(PieDataVO.builder().name("后台访问").value(adminCount).build());
+        res.add(PieDataVO.builder().name("前台访问").value(frontCount).build());
+        return Response.success(res);
+    }
+
+    @Override
+    public Response countByBrowser() {
+        List<JSONObject> queryRes = userVisitStatsMapper.countByBrowser();
+        return Response.success(convertJsonQuery(queryRes, "xData", "seriesData"));
+    }
+
     private JSONObject convertJsonQuery(List<JSONObject> queryRes, String xKey, String seriesKey) {
         ArrayList<Long> seriesData = new ArrayList<>();
         ArrayList<String> XData = new ArrayList<>();

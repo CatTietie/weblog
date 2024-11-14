@@ -19,4 +19,16 @@ public interface AdminUserStatsService {
      * @return
      */
     Response countByDevice();
+
+    /**
+     * 统计用户访问的前后台
+     * @return
+     */
+    Response countPageUrl();
+
+    /**
+     * 统计用户访问浏览器
+     * @return
+     */
+    Response countByBrowser();
 }

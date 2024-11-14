@@ -168,17 +168,17 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
     private static String getBrowserName(HttpServletRequest request) {
         String userAgent = request.getHeader("User-Agent");
         if (userAgent.toLowerCase().contains("edg")) {
-            return "Microsoft Edge";
+            return "Edge";
         } else if (userAgent.toLowerCase().contains("chrome")) {
-            return "Google Chrome";
+            return "Chrome";
         } else if (userAgent.toLowerCase().contains("firefox")) {
-            return "Mozilla Firefox";
+            return "Firefox";
         } else if (userAgent.toLowerCase().contains("safari")) {
-            return "Apple Safari";
+            return "Safari";
         } else if (userAgent.toLowerCase().contains("opera")) {
             return "Opera";
         } else if (userAgent.toLowerCase().contains("msie") || userAgent.toLowerCase().contains("trident")) {
-            return "Internet Explorer";
+            return "Explorer";
         } else {
             return "Unknown";
         }
