@@ -28,7 +28,7 @@
             <div class="col-span-5 md:col-span-3">
                 <!-- 卡片 -->
                 <div
-                    class="w-full min-h-[300px] px-5 py-7 mb-3 bg-white border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                    class="w-full min-h-[300px] py-7 mb-3 bg-white border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700">
                     <h2 class="flex items-center mb-2 font-bold text-gray-600 uppercase dark:text-white">
                         <!-- 折线图标 -->
                         <svg t="1731509603507" class="icon w-5 h-5 mx-2" viewBox="0 0 1024 1024" version="1.1"
@@ -42,7 +42,7 @@
                         </svg>
                         操作系统访问分布
                     </h2>
-                    <OsCountChat></OsCountChat>
+                    <OsCountChat :mobileInfo="osCountInfoOfMobile" :deskInfo="osCountInfoOfDesk"></OsCountChat>
                 </div>
             </div>
 
@@ -70,7 +70,7 @@
                         </svg>
                         访问设备分布
                     </h2>
-                    <DeviceCountChat></DeviceCountChat>
+                    <DeviceCountChat :value="deviceCountInfo"></DeviceCountChat>
                 </div>
             </div>
 
@@ -146,6 +146,7 @@
 <script setup>
 import { ref } from 'vue'
 import { getBaseStatisticsInfo, getArticlePVStatisticsInfo, getUpdateCount } from '@/api/admin/dashboard'
+import { getOsCount, getDeviceCount } from '@/api/admin/userStats'
 import ArticlePVLineChat from '@/components/ArticlePVLineChat.vue'
 import OsCountChat from '@/components/OsCountChat.vue'
 import DeviceCountChat from '@/components/DeviceCountChat.vue'
@@ -191,7 +192,28 @@ getUpdateCount().then((res) => {
     }
 })
 
+const osCountInfoOfMobile = ref({})
 
+const osCountInfoOfDesk = ref({})
+
+getOsCount('移动端').then((res) => {
+    if (res.success) {
+        osCountInfoOfMobile.value = res.data
+    }
+})
+getOsCount('桌面端').then((res) => {
+    if (res.success) {
+        osCountInfoOfDesk.value = res.data
+    }
+})
+
+
+const deviceCountInfo = ref([])
+getDeviceCount().then((res) => {
+    if (res.success) {
+        deviceCountInfo.value = res.data
+    }
+})
 </script>
 
 <style></style>

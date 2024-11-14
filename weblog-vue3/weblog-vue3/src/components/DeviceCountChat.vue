@@ -8,23 +8,22 @@ import * as echarts from 'echarts'
 import { onMounted, watch } from 'vue'
 
 // 对外暴露的属性值
-// const props = defineProps({
-//     value: { // 属性值名称
-//         type: Array, // 类型为对象
-//         default: () => [] // 默认为 null
-//     }
-// })
+const props = defineProps({
+    value: { // 属性值名称
+        type: Array, // 类型为数组
+        default: () => [] // 默认为 null
+    }
+})
 
 // 初始化折线图
 function initPieChat() {
     var chartDom = document.getElementById('pieChat1');
     var myChart = echarts.init(chartDom);
     var option;
-    // 处理接收到的数据
-    // const data = props.value.map(item => ({
-    //     value: parseInt(item.value, 10),
-    //     name: item.name
-    // }));
+
+    const data = props.value
+
+    console.log("data:",data)
 
     option = {
         tooltip: {
@@ -39,10 +38,7 @@ function initPieChat() {
                 name: 'Access From',
                 type: 'pie',
                 radius: '50%',
-                data: [
-                    { value: 1048, name: 'Search Engine' },
-                    { value: 735, name: 'Direct' },
-                ],
+                data: data,
                 emphasis: {
                     itemStyle: {
                         shadowBlur: 10,
@@ -57,10 +53,10 @@ function initPieChat() {
     option && myChart.setOption(option);
 }
 
-onMounted(() => {
-    initPieChat()
-})
+// onMounted(() => {
+//     initPieChat()
+// })
 
 // 侦听属性, 监听 props.value 的变化，一旦 props.value 发生变化，就调用 initLineChat 初始化折线图
-// watch(() => props.value, () => initPieChat())
+watch(() => props.value, () => initPieChat())
 </script>

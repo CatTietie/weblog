@@ -8,30 +8,36 @@
 import * as echarts from 'echarts'
 import { onMounted, watch } from 'vue'
 
-// 对外暴露的属性值
-// const props = defineProps({
-//     value: { // 属性值名称
-//         type: Array, // 类型为对象
-//         default: () => [] // 默认为 null
-//     }
-// })
+// 定义 props 并设置默认值
+const props = defineProps({
+    mobileInfo: {
+        type: Object,
+        default: null
+    },
+    deskInfo: {
+        type: Object,
+        default: null
+    }
+});
 
 // 初始化折线图
 function initRadarChat() {
     var chartDom = document.getElementById('radarChat');
     var myChart = echarts.init(chartDom);
     var option;
-    // 处理接收到的数据
-    // const data = props.value.map(item => ({
-    //     value: parseInt(item.value, 10),
-    //     name: item.name
-    // }));
+
+    const mobileInfoData = props.mobileInfo
+    const deskInfoData = props.deskInfo
+
     option = {
+        tooltip: {
+            trigger: 'item'
+        },
         legend: {
             orient: 'vertical',
             left: '10%',
             top: '5%',
-            data: ['Allocated Budget', 'Actual Spending']
+            data: ['移动端', '桌面端']
         },
         radar: {
             // 控制雷达图的半径，让其变大，这里可以根据实际需求调整具体数值
@@ -40,25 +46,25 @@ function initRadarChat() {
             center: ['60%', '50%'],
             // shape: 'circle',
             indicator: [
-                { name: 'Sales', max: 6500 },
-                { name: 'Administration', max: 16000 },
-                { name: 'Information Technology', max: 30000 },
-                { name: 'Customer Support', max: 38000 },
-                { name: 'Development', max: 52000 }
+                { name: "Android", max: mobileInfoData.max },
+                { name: "iOS", max: mobileInfoData.max },
+                { name: "Linux", max: mobileInfoData.max },
+                { name: "macOS", max: mobileInfoData.max },
+                { name: "Windows", max: mobileInfoData.max }
             ]
         },
         series: [
             {
-                name: 'Budget vs spending',
+                name: '操作系统分布',
                 type: 'radar',
                 data: [
                     {
-                        value: [4200, 3000, 20000, 35000, 50000, 18000],
-                        name: 'Allocated Budget'
+                        value: deskInfoData.seriesData,
+                        name: '桌面端'
                     },
                     {
-                        value: [5000, 14000, 28000, 26000, 42000, 21000],
-                        name: 'Actual Spending'
+                        value: mobileInfoData.seriesData,
+                        name: '移动端'
                     }
                 ]
             }
@@ -68,11 +74,13 @@ function initRadarChat() {
     option && myChart.setOption(option);
 
 }
-onMounted(() => {
-    initRadarChat();
-})
+// onMounted(() => {
+//     initRadarChat();
+// })
 
 
 // 侦听属性, 监听 props.value 的变化，一旦 props.value 发生变化，就调用 initLineChat 初始化折线图
-// watch(() => props.value, () => initRadarChat())
+watch([() => props.mobileInfo, () => props.deskInfo], () => {
+    initRadarChat();
+});
 </script>

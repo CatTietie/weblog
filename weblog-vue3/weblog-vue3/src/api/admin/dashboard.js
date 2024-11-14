@@ -38,3 +38,4 @@ export function getTagCount(data) {
 export function getUpdateCount(data) {
     return axios.post("/admin/dashboard/updateTimes/statistics", data)
 }
+
