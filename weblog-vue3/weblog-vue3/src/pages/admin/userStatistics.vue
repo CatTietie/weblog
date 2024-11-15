@@ -76,10 +76,10 @@
 
 
             <!-- 访问前后台分布 -->
-            <div class="col-span-5 md:col-span-1">
+            <div class="col-span-5 md:col-span-2">
                 <!-- 卡片 -->
                 <div
-                    class="w-full min-h-[300px] px-5 py-7 mb-3 bg-white border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                    class="w-full min-h-[300px] pl-5 py-7 mb-3 bg-white border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700">
                     <h2 class="flex items-center mb-2 font-bold text-gray-600 uppercase dark:text-white">
                         <!-- 折线图标 -->
                         <svg t="1731509701979" class="icon w-5 h-5 mr-2" viewBox="0 0 1024 1024" version="1.1"
@@ -101,7 +101,7 @@
             </div>
 
             <!-- 访问浏览器分布 -->
-            <div class="col-span-5 md:col-span-4">
+            <div class="col-span-5 md:col-span-3">
                 <!-- 卡片 -->
                 <div
                     class="w-full min-h-[300px] px-5 py-7 mb-3 bg-white border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700">
@@ -123,7 +123,7 @@
             <div class="col-span-5 md:col-span-5">
                 <!-- 卡片 -->
                 <div
-                    class="w-full min-h-[500px]  py-7 mb-3 bg-white border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                    class="w-full min-h-[500px] pt-5 bg-white border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700">
                     <h2 class="flex items-center mb-2 font-bold text-gray-600 uppercase dark:text-white">
                         <!-- 折线图标 -->
                         <svg t="1731509835656" class="icon w-5 h-5 mx-2" viewBox="0 0 1024 1024" version="1.1"
@@ -134,7 +134,7 @@
                         </svg>
                         访问时间段分布
                     </h2>
-                    <PeriodCountChat></PeriodCountChat>
+                    <PeriodCountChat :value="periodCountInfo"></PeriodCountChat>
                 </div>
             </div>
 
@@ -146,7 +146,7 @@
 <script setup>
 import { ref } from 'vue'
 import { getBaseStatisticsInfo, getArticlePVStatisticsInfo, getUpdateCount } from '@/api/admin/dashboard'
-import { getOsCount, getDeviceCount, getPageCount, getBrowserCount } from '@/api/admin/userStats'
+import { getOsCount, getDeviceCount, getPageCount, getBrowserCount, getPeriodCount } from '@/api/admin/userStats'
 import ArticlePVLineChat from '@/components/ArticlePVLineChat.vue'
 import OsCountChat from '@/components/OsCountChat.vue'
 import DeviceCountChat from '@/components/DeviceCountChat.vue'
@@ -229,6 +229,14 @@ getBrowserCount().then((res) => {
         browserCountInfo.value = res.data
     }
 })
+
+const periodCountInfo = ref({})
+getPeriodCount().then((res) => {
+    if(res.success){
+        periodCountInfo.value = res.data
+    }
+})
+
 </script>
 
 <style></style>

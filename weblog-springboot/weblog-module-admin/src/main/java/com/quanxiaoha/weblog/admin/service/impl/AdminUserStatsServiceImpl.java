@@ -8,6 +8,7 @@ import com.quanxiaoha.weblog.common.utils.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,6 +62,65 @@ public class AdminUserStatsServiceImpl implements AdminUserStatsService {
     public Response countByBrowser() {
         List<JSONObject> queryRes = userVisitStatsMapper.countByBrowser();
         return Response.success(convertJsonQuery(queryRes, "xData", "seriesData"));
+    }
+
+    @Override
+    public Response countByPeriod() {
+        //获取到十天的日期
+        List<LocalDateTime> lastTenDays = generateLastTenDays();
+        LocalDateTime lastTenDay = lastTenDays.get(0);
+
+
+        JSONObject res = new JSONObject();
+
+        ArrayList<Long> zhuomianCounts = new ArrayList<>();
+
+        zhuomianCounts.add(userVisitStatsMapper.countByPeriod(lastTenDay, "00:00:00", "06:00:00", "桌面端"));
+        zhuomianCounts.add(userVisitStatsMapper.countByPeriod(lastTenDay, "06:00:00", "10:00:00", "桌面端"));
+        zhuomianCounts.add(userVisitStatsMapper.countByPeriod(lastTenDay, "10:00:00", "16:00:00", "桌面端"));
+        zhuomianCounts.add(userVisitStatsMapper.countByPeriod(lastTenDay, "16:00:00", "20:00:00", "桌面端"));
+        zhuomianCounts.add(userVisitStatsMapper.countByPeriod(lastTenDay, "20:00:00", "25:00:00", "桌面端"));
+        res.put("desk", zhuomianCounts);
+        ArrayList<Long> mobileCounts = new ArrayList<>();
+
+        mobileCounts.add(userVisitStatsMapper.countByPeriod(lastTenDay, "00:00:00", "06:00:00", "移动端"));
+        mobileCounts.add(userVisitStatsMapper.countByPeriod(lastTenDay, "06:00:00", "10:00:00", "移动端"));
+        mobileCounts.add(userVisitStatsMapper.countByPeriod(lastTenDay, "10:00:00", "16:00:00", "移动端"));
+        mobileCounts.add(userVisitStatsMapper.countByPeriod(lastTenDay, "16:00:00", "20:00:00", "移动端"));
+        mobileCounts.add(userVisitStatsMapper.countByPeriod(lastTenDay, "20:00:00", "25:00:00", "移动端"));
+        res.put("mobile", mobileCounts);
+        ArrayList<Long> adminPage = new ArrayList<>();
+
+        adminPage.add(userVisitStatsMapper.countByPage(lastTenDay, "00:00:00", "06:00:00", "Admin"));
+        adminPage.add(userVisitStatsMapper.countByPage(lastTenDay, "06:00:00", "10:00:00", "Admin"));
+        adminPage.add(userVisitStatsMapper.countByPage(lastTenDay, "10:00:00", "16:00:00", "Admin"));
+        adminPage.add(userVisitStatsMapper.countByPage(lastTenDay, "16:00:00", "20:00:00", "Admin"));
+        adminPage.add(userVisitStatsMapper.countByPage(lastTenDay, "20:00:00", "25:00:00", "Admin"));
+        res.put("back", adminPage);
+        ArrayList<Long> frontPage = new ArrayList<>();
+
+        frontPage.add(userVisitStatsMapper.countByPageUrl(lastTenDay, "00:00:00", "06:00:00", "Admin"));
+        frontPage.add(userVisitStatsMapper.countByPageUrl(lastTenDay, "06:00:00", "10:00:00", "Admin"));
+        frontPage.add(userVisitStatsMapper.countByPageUrl(lastTenDay, "10:00:00", "16:00:00", "Admin"));
+        frontPage.add(userVisitStatsMapper.countByPageUrl(lastTenDay, "16:00:00", "20:00:00", "Admin"));
+        frontPage.add(userVisitStatsMapper.countByPageUrl(lastTenDay, "20:00:00", "25:00:00", "Admin"));
+        res.put("front", frontPage);
+
+
+        //需要返回十组数据，且每组数据包含四组，每子组对应的name，对应的value
+        return Response.success(res);
+    }
+
+
+    public static List<LocalDateTime> generateLastTenDays() {
+        List<LocalDateTime> dateTimes = new ArrayList<>();
+        LocalDateTime now = LocalDateTime.now();
+
+        for (int i = 0; i < 10; i++) {
+            dateTimes.add(now.minusDays(i));
+        }
+
+        return dateTimes;
     }
 
     private JSONObject convertJsonQuery(List<JSONObject> queryRes, String xKey, String seriesKey) {

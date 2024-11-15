@@ -31,4 +31,10 @@ public interface AdminUserStatsService {
      * @return
      */
     Response countByBrowser();
+
+    /**
+     * 统计指定时间段内的数据
+     * @return
+     */
+    Response countByPeriod();
 }

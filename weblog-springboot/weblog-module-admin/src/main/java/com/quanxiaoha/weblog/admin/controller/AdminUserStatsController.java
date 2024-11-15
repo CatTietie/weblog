@@ -69,5 +69,15 @@ public class AdminUserStatsController {
         return adminUserStatsService.countByBrowser();
     }
 
+    /**
+     * 统计指定时间段访问
+     *
+     * @return
+     */
+    @GetMapping("/period")
+    public Response countByPeriod() {
+        return adminUserStatsService.countByPeriod();
+    }
+
 
 }

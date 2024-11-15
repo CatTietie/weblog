@@ -23,19 +23,29 @@ function initPieChat() {
 
     const data = props.value
 
-    console.log("data:",data)
+    console.log("data:", data)
 
     option = {
         tooltip: {
-            trigger: 'item'
-        },
-        legend: {
-            orient: 'vertical',
-            left: 'left'
+            trigger: 'item',
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            borderColor: '#ccc',
+            borderWidth: 1,
+            padding: 10,
+            textStyle: {
+                fontSize: 14,
+                color: '#333'
+            },
+            formatter: function (params) {
+                let total = 0;
+                option.series[0].data.forEach(item => total += item.value);
+                let percentage = ((params.value / total) * 100).toFixed(2);
+                return `${params.name}：${params.value}（占比${percentage}%）`;
+            }
         },
         series: [
             {
-                name: 'Access From',
+                name: '访问次数',
                 type: 'pie',
                 radius: '50%',
                 data: data,
@@ -44,6 +54,32 @@ function initPieChat() {
                         shadowBlur: 10,
                         shadowOffsetX: 0,
                         shadowColor: 'rgba(0, 0, 0, 0.5)'
+                    }
+                },
+                itemStyle: {
+                    normal: {
+                        color: function (params) {
+                            const colorList = ['#66ccff', '#ff9999', '#99cc99', '#ffcc66', '#cc99ff'];
+                            return colorList[params.dataIndex % colorList.length];
+                        }
+                    }
+                },
+                label: {
+                    show: true,
+                    position: 'inner',
+                    distance: 15,
+                    formatter: '{b}：{d}%',
+                    textStyle: {
+                        fontSize: 12,
+                        color: '#333'
+                    }
+                },
+                labelLine: {
+                    show: true,
+                    length: 8,
+                    length2: 8,
+                    lineStyle: {
+                        color: '#ccc'
                     }
                 }
             }

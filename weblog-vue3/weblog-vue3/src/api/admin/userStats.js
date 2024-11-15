@@ -21,3 +21,7 @@ export function getPageCount(data) {
 export function getBrowserCount(data) {
     return axios.get("/admin/userStats/browser", data)
 }
+
+export function getPeriodCount(data) {
+    return axios.get("/admin/userStats/period", data)
+}

@@ -88,7 +88,7 @@ function initLineChat() {
             {
                 data: pvCounts,
                 type: 'line',
-                name: 'pv统计',
+                name: 'PV统计',
                 showSymbol: false,
             },
             {

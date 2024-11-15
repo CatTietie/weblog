@@ -7,6 +7,7 @@ import com.quanxiaoha.weblog.common.model.vo.PieDataVO;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -32,4 +33,37 @@ public interface UserVisitStatsMapper extends BaseMapper<UserVisitStatsDO> {
             "FROM user_visit_stats\n" +
             "GROUP BY TRIM(browser_name);")
     List<JSONObject> countByBrowser();
+
+    @Select("SELECT count(1) as count\n" +
+            "FROM user_visit_stats\n" +
+            "WHERE TIME(visit_time) >= #{startTime}\n" +
+            "  AND TIME(visit_time) <= #{endTime}\n" +
+            "AND visit_time < #{date}\n" +
+            "AND device_type = #{device}")
+    Long countByPeriod(@Param("date") LocalDateTime date,
+                       @Param("startTime") String start,
+                       @Param("endTime") String end,
+                       @Param("device") String device);
+
+    @Select("SELECT count(1) as count\n" +
+            "FROM user_visit_stats\n" +
+            "WHERE TIME(visit_time) >= #{startTime}\n" +
+            "  AND TIME(visit_time) <= #{endTime}\n" +
+            "AND visit_time < #{date}\n" +
+            "AND page_url like concat('%',#{pageUrl},'%')")
+    Long countByPage(@Param("date") LocalDateTime date,
+                     @Param("startTime") String start,
+                     @Param("endTime") String end,
+                     @Param("pageUrl") String pageUrl);
+
+    @Select("SELECT count(1) as count\n" +
+            "FROM user_visit_stats\n" +
+            "WHERE TIME(visit_time) >= #{startTime}\n" +
+            "  AND TIME(visit_time) <= #{endTime}\n" +
+            "AND visit_time < #{date}\n" +
+            "AND page_url NOT like concat('%',#{pageUrl},'%')")
+    Long countByPageUrl(@Param("date") LocalDateTime date,
+                     @Param("startTime") String start,
+                     @Param("endTime") String end,
+                     @Param("pageUrl") String pageUrl);
 }

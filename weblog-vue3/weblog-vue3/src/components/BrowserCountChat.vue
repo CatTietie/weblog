@@ -21,27 +21,12 @@ function initBarChat() {
     var myChart = echarts.init(chartDom);
     var option;
 
+    const xData = props.value.xData
+    const seriesData = props.value.seriesData
 
-
-
-    // Generate data
-    let category = [];
-    let dottedBase = +new Date();
-    let lineData = [];
-    let barData = [];
-    for (let i = 0; i < 20; i++) {
-        let date = new Date((dottedBase += 3600 * 24 * 1000));
-        category.push(
-            [date.getFullYear(), date.getMonth() + 1, date.getDate()].join('-')
-        );
-        let b = Math.random() * 200;
-        let d = Math.random() * 200;
-        barData.push(b);
-        lineData.push(d + b);
-    }
     // option
     option = {
-        backgroundColor: '#0f375f',
+        backgroundColor: '#1e293b',
         tooltip: {
             trigger: 'axis',
             axisPointer: {
@@ -55,7 +40,7 @@ function initBarChat() {
             }
         },
         xAxis: {
-            data: category,
+            data: xData,
             axisLine: {
                 lineStyle: {
                     color: '#ccc'
@@ -72,55 +57,46 @@ function initBarChat() {
         },
         series: [
             {
-                name: 'line',
-                type: 'line',
+                name: '用户访问',
+                type: 'bar',
                 smooth: true,
+                barWidth: 50,
+                barGap: '20%',
+                barCategoryGap: 30,
+                barAlign: 'center',
+                barBorderRadius: [5, 5, 0, 0],
+                itemStyle: {
+                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                        { offset: 0, color: '#83bff6' },
+                        { offset: 0.5, color: '#188df0' },
+                        { offset: 1, color: '#188df0' }
+                    ]),
+
+                },
+                emphasis: {
+                    itemStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            { offset: 0, color: '#2378f7' },
+                            { offset: 0.7, color: '#2378f7' },
+                            { offset: 1, color: '#83bff6' }
+                        ])
+                    }
+                },
                 showAllSymbol: true,
                 symbol: 'emptyCircle',
                 symbolSize: 15,
-                data: lineData
-            },
-            {
-                name: 'bar',
-                type: 'bar',
-                barWidth: 10,
-                itemStyle: {
-                    borderRadius: 5,
-                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                        { offset: 0, color: '#14c8d4' },
-                        { offset: 1, color: '#43eec6' }
-                    ])
+                data: seriesData,
+                markPoint: {
+                    data: [
+                        { type: 'max', name: 'Max' },
+                        { type: 'min', name: 'Min' }
+                    ]
                 },
-                data: barData
-            },
-            {
-                name: 'line',
-                type: 'bar',
-                barGap: '-100%',
-                barWidth: 10,
-                itemStyle: {
-                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                        { offset: 0, color: 'rgba(20,200,212,0.5)' },
-                        { offset: 0.2, color: 'rgba(20,200,212,0.2)' },
-                        { offset: 1, color: 'rgba(20,200,212,0)' }
-                    ])
-                },
-                z: -12,
-                data: lineData
-            },
-            {
-                name: 'dotted',
-                type: 'pictorialBar',
-                symbol: 'rect',
-                itemStyle: {
-                    color: '#0f375f'
-                },
-                symbolRepeat: true,
-                symbolSize: [12, 4],
-                symbolMargin: 1,
-                z: -10,
-                data: lineData
+                markLine: {
+                    data: [{ type: 'average', name: 'Avg' }]
+                }
             }
+
         ]
     };
 
@@ -129,10 +105,10 @@ function initBarChat() {
 
 }
 
-onMounted(() => {
-    initBarChat()
-})
+// onMounted(() => {
+//     initBarChat()
+// })
 
 // 侦听属性, 监听 props.value 的变化，一旦 props.value 发生变化，就调用 initLineChat 初始化折线图
-// watch(() => props.value, () => initBarChat())
+watch(() => props.value, () => initBarChat())
 </script>
