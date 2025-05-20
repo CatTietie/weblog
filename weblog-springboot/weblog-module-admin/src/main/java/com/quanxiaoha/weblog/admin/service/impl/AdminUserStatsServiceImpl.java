@@ -64,6 +64,64 @@ public class AdminUserStatsServiceImpl implements AdminUserStatsService {
         return Response.success(convertJsonQuery(queryRes, "xData", "seriesData"));
     }
 
+
+
+    @Override
+    public Response countByPeriod2() {
+        List<LocalDateTime> lastTenDays = generateLastTenDays();
+        LocalDateTime lastTenDay = lastTenDays.get(0);
+
+        // 定义时间区间
+        String[][] timeRanges = {
+                {"00:00:00", "06:00:00"},
+                {"06:00:00", "10:00:00"},
+                {"10:00:00", "16:00:00"},
+                {"16:00:00", "20:00:00"},
+                {"20:00:00", "25:00:00"}
+        };
+
+        List<JSONObject> result = userVisitStatsMapper.countByPeriodBatch(
+                lastTenDay,
+                timeRanges[0][0], timeRanges[0][1],
+                timeRanges[1][0], timeRanges[1][1],
+                timeRanges[2][0], timeRanges[2][1],
+                timeRanges[3][0], timeRanges[3][1],
+                timeRanges[4][0], timeRanges[4][1]
+        );
+
+        // 初始化结果结构
+        List<Long> deskData = new ArrayList<>(List.of(0L, 0L, 0L, 0L, 0L));
+        List<Long> mobileData = new ArrayList<>(List.of(0L, 0L, 0L, 0L, 0L));
+        List<Long> backData = new ArrayList<>(List.of(0L, 0L, 0L, 0L, 0L));
+        List<Long> frontData = new ArrayList<>(List.of(0L, 0L, 0L, 0L, 0L));
+
+        for (JSONObject item : result) {
+            Integer periodIndex = item.getInteger("period_index");
+            if (periodIndex == null || periodIndex < 0 || periodIndex >= 5) continue;
+
+            String deviceType = item.getString("device_type");
+            Long adminCount = item.getLong("admin_count");
+            Long frontCount = item.getLong("front_count");
+
+            if ("桌面端".equals(deviceType)) {
+                deskData.set(periodIndex, deskData.get(periodIndex) + adminCount + frontCount);
+            } else if ("移动端".equals(deviceType)) {
+                mobileData.set(periodIndex, mobileData.get(periodIndex) + adminCount + frontCount);
+            }
+
+            backData.set(periodIndex, backData.get(periodIndex) + adminCount);
+            frontData.set(periodIndex, frontData.get(periodIndex) + frontCount);
+        }
+
+        JSONObject res = new JSONObject();
+        res.put("desk", deskData);
+        res.put("mobile", mobileData);
+        res.put("back", backData);
+        res.put("front", frontData);
+
+        return Response.success(res);
+    }
+
     @Override
     public Response countByPeriod() {
         //获取到十天的日期

@@ -45,6 +45,34 @@ public interface UserVisitStatsMapper extends BaseMapper<UserVisitStatsDO> {
                        @Param("endTime") String end,
                        @Param("device") String device);
 
+    @Select("SELECT CASE " +
+            "WHEN TIME(visit_time) BETWEEN #{startTime1} AND #{endTime1} THEN 0 " +
+            "WHEN TIME(visit_time) BETWEEN #{startTime2} AND #{endTime2} THEN 1 " +
+            "WHEN TIME(visit_time) BETWEEN #{startTime3} AND #{endTime3} THEN 2 " +
+            "WHEN TIME(visit_time) BETWEEN #{startTime4} AND #{endTime4} THEN 3 " +
+            "WHEN TIME(visit_time) BETWEEN #{startTime5} AND #{endTime5} THEN 4 " +
+            "ELSE -1 END AS period_index, " +
+            "device_type, " +
+            "SUM(CASE WHEN page_url LIKE '%admin%' THEN 1 ELSE 0 END) AS admin_count, " +
+            "SUM(CASE WHEN page_url NOT LIKE '%admin%' THEN 1 ELSE 0 END) AS front_count " +
+            "FROM user_visit_stats " +
+            "WHERE visit_time < #{date} " +
+            "AND ( " +
+            "TIME(visit_time) BETWEEN #{startTime1} AND #{endTime1} OR " +
+            "TIME(visit_time) BETWEEN #{startTime2} AND #{endTime2} OR " +
+            "TIME(visit_time) BETWEEN #{startTime3} AND #{endTime3} OR " +
+            "TIME(visit_time) BETWEEN #{startTime4} AND #{endTime4} OR " +
+            "TIME(visit_time) BETWEEN #{startTime5} AND #{endTime5} " +
+            ") " +
+            "GROUP BY period_index, device_type")
+    List<JSONObject> countByPeriodBatch(@Param("date") LocalDateTime date,
+                                        @Param("startTime1") String startTime1, @Param("endTime1") String endTime1,
+                                        @Param("startTime2") String startTime2, @Param("endTime2") String endTime2,
+                                        @Param("startTime3") String startTime3, @Param("endTime3") String endTime3,
+                                        @Param("startTime4") String startTime4, @Param("endTime4") String endTime4,
+                                        @Param("startTime5") String startTime5, @Param("endTime5") String endTime5);
+
+
     @Select("SELECT count(1) as count\n" +
             "FROM user_visit_stats\n" +
             "WHERE TIME(visit_time) >= #{startTime}\n" +
@@ -63,7 +91,7 @@ public interface UserVisitStatsMapper extends BaseMapper<UserVisitStatsDO> {
             "AND visit_time < #{date}\n" +
             "AND page_url NOT like concat('%',#{pageUrl},'%')")
     Long countByPageUrl(@Param("date") LocalDateTime date,
-                     @Param("startTime") String start,
-                     @Param("endTime") String end,
-                     @Param("pageUrl") String pageUrl);
+                        @Param("startTime") String start,
+                        @Param("endTime") String end,
+                        @Param("pageUrl") String pageUrl);
 }

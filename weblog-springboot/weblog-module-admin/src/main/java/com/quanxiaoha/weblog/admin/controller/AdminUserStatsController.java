@@ -76,7 +76,7 @@ public class AdminUserStatsController {
      */
     @GetMapping("/period")
     public Response countByPeriod() {
-        return adminUserStatsService.countByPeriod();
+        return adminUserStatsService.countByPeriod2();
     }
 
 
