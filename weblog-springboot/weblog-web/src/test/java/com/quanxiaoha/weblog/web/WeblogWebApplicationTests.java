@@ -1,23 +1,18 @@
 package com.quanxiaoha.weblog.web;
 
-import com.quanxiaoha.weblog.admin.config.MinioProperties;
+import com.aliyun.oss.OSS;
+import com.quanxiaoha.weblog.admin.config.AliyunOSSProperties;
 import com.quanxiaoha.weblog.common.domain.dos.UserDO;
 import com.quanxiaoha.weblog.common.domain.mapper.UserMapper;
-import io.minio.MinioClient;
-import io.minio.PutObjectArgs;
-import io.minio.errors.*;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -29,11 +24,10 @@ class WeblogWebApplicationTests {
     private UserMapper userMapper;
 
     @Autowired
-    private MinioProperties minioProperties;
+    private AliyunOSSProperties aliyunOSSProperties;
 
     @Autowired
-    private MinioClient minioClient;
-
+    private OSS ossClient;
 
     @Test
     void testLog() {
@@ -41,14 +35,12 @@ class WeblogWebApplicationTests {
         log.warn("这是一行 Warn 级别日志");
         log.error("这是一行 Error 级别日志");
 
-        // 占位符
         String author = "Group 5";
         log.info("这是一行带有占位符日志，作者：{}", author);
     }
 
     @Test
     void insertTest() {
-        // 构建数据库实体类
         UserDO userDO = UserDO.builder()
                 .username("Group 5")
                 .password("123456")
@@ -61,26 +53,35 @@ class WeblogWebApplicationTests {
     }
 
     @Test
-    void uploadFile2MinioTest() throws IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    void uploadFile2OssTest() throws IOException {
         File file = new File("D:\\Backup\\Documents\\My Pictures\\111.jpg");
         String originalFileName = file.getName();
-        String contentType = "image/jpeg";
 
         String key = UUID.randomUUID().toString().replace("-", "");
         String suffix = originalFileName.substring(originalFileName.lastIndexOf("."));
-
         String objectName = String.format("%s%s", key, suffix);
 
-        log.info("==> 开始上传文件至 Minio, ObjectName: {}", objectName);
-        minioClient.putObject(PutObjectArgs.builder()
-                .bucket(minioProperties.getBucketName())
-                .object(objectName)
-                .stream(new FileInputStream(file), file.length(), -1)
-                .contentType(contentType)
-                .build());
+        log.info("==> 开始上传文件至阿里云 OSS, ObjectName: {}", objectName);
+        
+        FileInputStream inputStream = new FileInputStream(file);
+        try {
+            ossClient.putObject(aliyunOSSProperties.getBucketName(), objectName, inputStream);
+        } finally {
+            inputStream.close();
+        }
 
-        String url = String.format("%s/%s/%s", minioProperties.getEndpoint(), minioProperties.getBucketName(), objectName);
-        log.info("==> 上传文件至 Minio 成功，访问路径: {}", url);
+        String url;
+        String domain = aliyunOSSProperties.getDomain();
+        if (domain != null && !domain.isEmpty()) {
+            url = String.format("https://%s/%s", domain, objectName);
+        } else {
+            url = String.format("https://%s.%s/%s", 
+                aliyunOSSProperties.getBucketName(), 
+                aliyunOSSProperties.getEndpoint(), 
+                objectName);
+        }
+        
+        log.info("==> 上传文件至阿里云 OSS 成功，访问路径: {}", url);
     }
 
 }
