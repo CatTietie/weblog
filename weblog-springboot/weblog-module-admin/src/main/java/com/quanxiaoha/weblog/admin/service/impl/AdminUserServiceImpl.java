@@ -4,8 +4,10 @@ import com.quanxiaoha.weblog.admin.model.vo.user.FindUserInfoRspVO;
 import com.quanxiaoha.weblog.admin.model.vo.user.RegisterUserReqVO;
 import com.quanxiaoha.weblog.admin.model.vo.user.UpdateAdminUserPasswordReqVO;
 import com.quanxiaoha.weblog.admin.service.AdminUserService;
+import com.quanxiaoha.weblog.common.domain.dos.BlogSettingsDO;
 import com.quanxiaoha.weblog.common.domain.dos.UserDO;
 import com.quanxiaoha.weblog.common.domain.dos.UserRoleDO;
+import com.quanxiaoha.weblog.common.domain.mapper.BlogSettingsMapper;
 import com.quanxiaoha.weblog.common.domain.mapper.UserMapper;
 import com.quanxiaoha.weblog.common.domain.mapper.UserRoleMapper;
 import com.quanxiaoha.weblog.common.enums.ResponseCodeEnum;
@@ -28,6 +30,8 @@ public class AdminUserServiceImpl implements AdminUserService {
     private UserMapper userMapper;
     @Autowired
     private UserRoleMapper userRoleMapper;
+    @Autowired
+    private BlogSettingsMapper blogSettingsMapper;
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -81,6 +85,20 @@ public class AdminUserServiceImpl implements AdminUserService {
                 .createTime(new Date())
                 .build();
         userRoleMapper.insert(userRoleDO);
+
+        BlogSettingsDO blogSettingsDO = BlogSettingsDO.builder()
+                .username(username)
+                .author(username)
+                .logo("")
+                .name("")
+                .introduction("")
+                .avatar("")
+                .githubHomepage("")
+                .csdnHomepage("")
+                .giteeHomepage("")
+                .zhihuHomepage("")
+                .build();
+        blogSettingsMapper.insert(blogSettingsDO);
 
         return Response.success();
     }
