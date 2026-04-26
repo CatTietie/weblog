@@ -26,10 +26,12 @@ logging:
   config: classpath:logback-weblog.xml
 
 #=================================================================
-# minio (上传图片需要，需配置成自己的地址)
+# 阿里云 OSS (上传图片需要，密钥从环境变量读取)
 #=================================================================
-minio:
-  endpoint: http://116.62.199.48:9000
-  accessKey: quanxiaoha
-  secretKey: jiangbing1991+-
-  bucketName: weblog
+aliyun:
+  oss:
+    endpoint: oss-cn-beijing.aliyuncs.com
+    accessKeyId: ${OSS_ACCESS_KEY_ID:}
+    accessKeySecret: ${OSS_ACCESS_KEY_SECRET:}
+    bucketName: weblog-dev
+    domain: weblog-dev.oss-cn-beijing.aliyuncs.com
