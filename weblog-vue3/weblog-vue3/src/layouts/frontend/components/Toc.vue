@@ -1,6 +1,6 @@
 <template>
     <div v-if="titles && titles.length > 0"
-        class="sticky top-[5.5rem] text-sm/[30px] w-full p-5 mb-3 bg-white border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700">
+        class="text-sm/[30px] w-full p-5 mb-3 bg-white border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700">
         <h2 class="flex items-center mb-2 font-bold text-gray-900 uppercase dark:text-white">
             <svg t="1699441758495" class="icon w-3.5 h-3.5 mr-2" viewBox="0 0 1024 1024" version="1.1"
                 xmlns="http://www.w3.org/2000/svg" p-id="4043" width="200" height="200">

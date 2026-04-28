@@ -5,8 +5,15 @@
     <main class="container max-w-screen-xl mx-auto p-4">
         <!-- grid 表格布局，分为 4 列 -->
         <div class="grid grid-cols-4 gap-7">
-            <!-- 左边栏，占用 3 列 -->
-            <div class="col-span-4 md:col-span-3 mb-3">
+            <!-- 左侧边栏 - 文章目录（仅在大屏幕显示，sticky 固定悬浮） -->
+            <aside class="hidden md:block md:col-span-1">
+                <div class="sticky top-[5.5rem]">
+                    <Toc></Toc>
+                </div>
+            </aside>
+
+            <!-- 中间栏，文章内容区域 -->
+            <div class="col-span-4 md:col-span-2 mb-3">
                 <!-- 文章卡片父容器 -->
                 <div
                     class="w-full p-5 mb-3 bg-white border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700">
@@ -123,13 +130,15 @@
 
 
                 </div>
+
+                <!-- 文章目录 - 仅在小屏幕显示 -->
+                <div class="md:hidden">
+                    <Toc></Toc>
+                </div>
             </div>
 
-            <!-- 右边侧边栏，占用一列 -->
+            <!-- 右边侧边栏 - 博主信息、分类、标签 -->
             <aside class="col-span-4 md:col-span-1">
-                <!-- 文章目录 -->
-                <Toc></Toc>
-
                 <div>
                     <!-- 博主信息 -->
                     <UserInfoCard></UserInfoCard>
