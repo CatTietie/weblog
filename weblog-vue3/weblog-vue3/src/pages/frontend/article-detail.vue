@@ -127,6 +127,9 @@
 
             <!-- 右边侧边栏，占用一列 -->
             <aside class="col-span-4 md:col-span-1">
+                <!-- 文章目录 -->
+                <Toc></Toc>
+
                 <div>
                     <!-- 博主信息 -->
                     <UserInfoCard></UserInfoCard>
@@ -137,10 +140,6 @@
                     <!-- 标签 -->
                     <TagListCard></TagListCard>
                 </div>
-                
-                <!-- 文章目录 -->
-                <Toc></Toc>
-
             </aside>
         </div>
     </main>
