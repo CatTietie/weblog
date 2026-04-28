@@ -11,12 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-/**
- * @author: Group 5
+import java.util.Objects;
 
- * @date: 2023-09-15 14:03
- * @description: 博客设置
- **/
 @Service
 @Slf4j
 public class BlogSettingsServiceImpl implements BlogSettingsService {
@@ -24,25 +20,42 @@ public class BlogSettingsServiceImpl implements BlogSettingsService {
     @Autowired
     private BlogSettingsMapper blogSettingsMapper;
 
-    /**
-     * 获取博客设置信息
-     *
-     * @return
-     */
+    private static final Long GLOBAL_SETTINGS_ID = 1L;
+
     @Override
     public Response findDetail() {
-
-        //获取到当前用户名
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        BlogSettingsDO blogSettingsDO;
-        if (username.equals("anonymousUser")){
-            //默认为站主的BlogSetting
-            blogSettingsDO= blogSettingsMapper.selectById(1L);
-        }else {
-            blogSettingsDO = blogSettingsMapper.selectByUsername(username);
+
+        BlogSettingsDO globalSettings = blogSettingsMapper.selectById(GLOBAL_SETTINGS_ID);
+        if (Objects.isNull(globalSettings)) {
+            globalSettings = BlogSettingsDO.builder()
+                    .logo("")
+                    .name("")
+                    .introduction("")
+                    .build();
         }
-        // DO 转 VO
-        FindBlogSettingsDetailRspVO vo = BlogSettingsConvert.INSTANCE.convertDO2VO(blogSettingsDO);
+
+        BlogSettingsDO userSettings;
+        if (username.equals("anonymousUser")) {
+            userSettings = globalSettings;
+        } else {
+            userSettings = blogSettingsMapper.selectByUsername(username);
+            if (Objects.isNull(userSettings)) {
+                userSettings = globalSettings;
+            }
+        }
+
+        FindBlogSettingsDetailRspVO vo = FindBlogSettingsDetailRspVO.builder()
+                .logo(globalSettings.getLogo())
+                .name(globalSettings.getName())
+                .introduction(globalSettings.getIntroduction())
+                .author(userSettings.getAuthor())
+                .avatar(userSettings.getAvatar())
+                .githubHomepage(userSettings.getGithubHomepage())
+                .csdnHomepage(userSettings.getCsdnHomepage())
+                .giteeHomepage(userSettings.getGiteeHomepage())
+                .zhihuHomepage(userSettings.getZhihuHomepage())
+                .build();
 
         return Response.success(vo);
     }
