@@ -25,14 +25,14 @@
             <el-table :data="tableData" border stripe style="width: 100%" v-loading="tableLoading">
                 <el-table-column prop="username" label="用户名" width="180" />
                 <el-table-column prop="roleName" label="角色" width="120" />
-                <el-table-column prop="statusName" label="状态" width="100">
+                <el-table-column prop="statusName" label="状态" width="120">
                     <template #default="scope">
                         <el-tag :type="scope.row.status === 0 ? 'success' : 'danger'">
                             {{ scope.row.statusName }}
                         </el-tag>
                     </template>
                 </el-table-column>
-                <el-table-column prop="createTime" label="创建时间" width="180" />
+                <el-table-column prop="createTime" label="创建时间" min-width="180" />
             </el-table>
 
             <!-- 分页 -->
@@ -61,8 +61,8 @@
             </el-form-item>
             <el-form-item label="状态" prop="status">
                 <el-radio-group v-model="form.status">
-                    <el-radio :value="0">启用</el-radio>
-                    <el-radio :value="1">禁用</el-radio>
+                    <el-radio :label="0">启用</el-radio>
+                    <el-radio :label="1">禁用</el-radio>
                 </el-radio-group>
             </el-form-item>
         </el-form>
@@ -150,6 +150,14 @@ const validatePassword = (rule, value, callback) => {
     }
 }
 
+const validateStatus = (rule, value, callback) => {
+    if (value === undefined || value === null) {
+        callback(new Error('请选择状态'))
+    } else {
+        callback()
+    }
+}
+
 const rules = {
     username: [
         {
@@ -175,8 +183,7 @@ const rules = {
     ],
     status: [
         {
-            required: true,
-            message: '请选择状态',
+            validator: validateStatus,
             trigger: 'change',
         }
     ]
