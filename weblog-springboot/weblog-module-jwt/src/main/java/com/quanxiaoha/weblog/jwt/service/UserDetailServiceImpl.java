@@ -4,6 +4,7 @@ import com.quanxiaoha.weblog.common.domain.dos.UserDO;
 import com.quanxiaoha.weblog.common.domain.dos.UserRoleDO;
 import com.quanxiaoha.weblog.common.domain.mapper.UserMapper;
 import com.quanxiaoha.weblog.common.domain.mapper.UserRoleMapper;
+import com.quanxiaoha.weblog.common.enums.UserStatusEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -42,6 +43,11 @@ public class UserDetailServiceImpl implements UserDetailsService {
         // 判断用户是否存在
         if (Objects.isNull(userDO)) {
             throw new UsernameNotFoundException("该用户不存在");
+        }
+
+        // 检查用户状态是否被禁用
+        if (Objects.nonNull(userDO.getStatus()) && UserStatusEnum.DISABLED.getCode().equals(userDO.getStatus())) {
+            throw new UsernameNotFoundException("该用户已被禁用，请联系管理员！");
         }
 
         // 用户角色
