@@ -30,6 +30,8 @@ public class UserDO {
 
     private String password;
 
+    private Integer status;
+
     private LocalDateTime createTime;
 
     private LocalDateTime updateTime;
