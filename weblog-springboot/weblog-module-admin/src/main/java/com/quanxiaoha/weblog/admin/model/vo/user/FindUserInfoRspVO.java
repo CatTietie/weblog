@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
+import java.util.List;
 
 /**
  * @author: Group 5
@@ -24,5 +25,10 @@ public class FindUserInfoRspVO {
      * 用户名
      */
     private String username;
+
+    /**
+     * 角色列表
+     */
+    private List<String> roles;
 
 }

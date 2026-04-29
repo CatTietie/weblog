@@ -34,6 +34,7 @@ public enum ResponseCodeEnum implements BaseExceptionInterface {
     CATEGORY_CAN_NOT_DELETE("20011", "该分类下包含文章，请先删除对应文章，才能删除！"),
     TAG_CAN_NOT_DELETE("20012", "该标签下包含文章，请先删除对应文章，才能删除！"),
     USERNAME_IS_EXISTED("20013", "该用户名已存在，请勿重复注册！"),
+    USER_IS_DISABLED("20014", "该用户已被禁用，请联系管理员！"),
     ;
 
     // 异常码
