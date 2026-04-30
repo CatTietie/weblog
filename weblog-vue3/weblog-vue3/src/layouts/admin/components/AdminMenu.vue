@@ -34,11 +34,13 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useMenuStore } from '@/stores/menu'
+import { useUserStore } from '@/stores/user'
 
 const menuStore = useMenuStore()
+const userStore = useUserStore()
 
 const route = useRoute()
 const router = useRouter()
@@ -54,7 +56,14 @@ const handleSelect = (path) => {
     router.push(path)
 }
 
-const menus = [
+// 检查当前用户是否是管理员
+const isAdmin = computed(() => {
+    const roles = userStore.userInfo?.roles
+    return roles && roles.includes('ROLE_ADMIN')
+})
+
+// 基础菜单
+const baseMenus = [
     {
         'name': '仪表盘',
         'icon': 'Monitor',
@@ -91,6 +100,23 @@ const menus = [
         'path': '/admin/blog/settings',
     },
 ]
+
+// 管理员专属菜单
+const adminMenus = [
+    {
+        'name': '用户管理',
+        'icon': 'User',
+        'path': '/admin/user/list',
+    },
+]
+
+// 响应式菜单列表
+const menus = computed(() => {
+    if (isAdmin.value) {
+        return [...baseMenus, ...adminMenus]
+    }
+    return baseMenus
+})
 </script>
 
 <style>

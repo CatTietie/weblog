@@ -4,18 +4,13 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-/**
- * @author: Group 5
-
- * @date: 2023-05-11 8:49
- * @description: TODO
- **/
-@ConfigurationProperties(prefix = "minio")
+@ConfigurationProperties(prefix = "aliyun.oss")
 @Component
 @Data
-public class MinioProperties {
+public class AliyunOSSProperties {
     private String endpoint;
-    private String accessKey;
-    private String secretKey;
+    private String accessKeyId;
+    private String accessKeySecret;
     private String bucketName;
+    private String domain;
 }
