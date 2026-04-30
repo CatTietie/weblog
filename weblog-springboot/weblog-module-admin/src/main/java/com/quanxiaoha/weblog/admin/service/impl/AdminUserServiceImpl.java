@@ -264,10 +264,10 @@ public class AdminUserServiceImpl implements AdminUserService {
                         }
 
                         // 转换状态
-                        Integer status = userDO.getStatus();
+                        Integer userStatus = userDO.getStatus();
                         String statusName = "未知";
-                        if (Objects.nonNull(status)) {
-                            UserStatusEnum statusEnum = UserStatusEnum.valueOf(status);
+                        if (Objects.nonNull(userStatus)) {
+                            UserStatusEnum statusEnum = UserStatusEnum.valueOf(userStatus);
                             statusName = Objects.nonNull(statusEnum) ? statusEnum.getDescription() : "未知";
                         }
 
@@ -276,7 +276,7 @@ public class AdminUserServiceImpl implements AdminUserService {
                                 .username(userDO.getUsername())
                                 .role(roleCode)
                                 .roleName(roleName)
-                                .status(status)
+                                .status(userStatus)
                                 .statusName(statusName)
                                 .createTime(userDO.getCreateTime())
                                 .build();
