@@ -7,3 +7,7 @@ export function getUserPageList(data) {
 export function createUser(data) {
     return axios.post("/admin/users", data)
 }
+
+export function getRoleSelectList() {
+    return axios.post("/admin/role/select/list")
+}

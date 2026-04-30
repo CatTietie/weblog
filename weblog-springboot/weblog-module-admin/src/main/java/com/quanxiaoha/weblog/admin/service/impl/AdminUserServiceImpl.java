@@ -9,13 +9,14 @@ import com.quanxiaoha.weblog.admin.model.vo.user.UserPageListReqVO;
 import com.quanxiaoha.weblog.admin.model.vo.user.UserRspVO;
 import com.quanxiaoha.weblog.admin.service.AdminUserService;
 import com.quanxiaoha.weblog.common.domain.dos.BlogSettingsDO;
+import com.quanxiaoha.weblog.common.domain.dos.RoleDO;
 import com.quanxiaoha.weblog.common.domain.dos.UserDO;
 import com.quanxiaoha.weblog.common.domain.dos.UserRoleDO;
 import com.quanxiaoha.weblog.common.domain.mapper.BlogSettingsMapper;
+import com.quanxiaoha.weblog.common.domain.mapper.RoleMapper;
 import com.quanxiaoha.weblog.common.domain.mapper.UserMapper;
 import com.quanxiaoha.weblog.common.domain.mapper.UserRoleMapper;
 import com.quanxiaoha.weblog.common.enums.ResponseCodeEnum;
-import com.quanxiaoha.weblog.common.enums.UserRoleEnum;
 import com.quanxiaoha.weblog.common.enums.UserStatusEnum;
 import com.quanxiaoha.weblog.common.utils.PageResponse;
 import com.quanxiaoha.weblog.common.utils.Response;
@@ -29,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -46,8 +48,11 @@ public class AdminUserServiceImpl implements AdminUserService {
     private BlogSettingsMapper blogSettingsMapper;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private RoleMapper roleMapper;
 
     private static final String ROLE_ADMIN = "ROLE_ADMIN";
+    private static final Long ADMIN_ROLE_ID = 1L;
 
     @Override
     public Response updatePassword(UpdateAdminUserPasswordReqVO updateAdminUserPasswordReqVO) {
@@ -66,11 +71,25 @@ public class AdminUserServiceImpl implements AdminUserService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
 
-        // 查询用户角色
-        List<UserRoleDO> roleDOS = userRoleMapper.selectByUsername(username);
-        List<String> roles = null;
-        if (!CollectionUtils.isEmpty(roleDOS)) {
-            roles = roleDOS.stream().map(UserRoleDO::getRole).collect(Collectors.toList());
+        // 查询用户信息
+        UserDO userDO = userMapper.findByUsername(username);
+        
+        List<String> roles = new ArrayList<>();
+        
+        // 优先通过 roleId 从角色表获取角色
+        if (Objects.nonNull(userDO) && Objects.nonNull(userDO.getRoleId())) {
+            RoleDO roleDO = roleMapper.selectById(userDO.getRoleId());
+            if (Objects.nonNull(roleDO)) {
+                roles.add(roleDO.getCode());
+            }
+        }
+        
+        // 如果没有 roleId，则从 t_user_role 表获取（兼容旧数据）
+        if (CollectionUtils.isEmpty(roles)) {
+            List<UserRoleDO> roleDOS = userRoleMapper.selectByUsername(username);
+            if (!CollectionUtils.isEmpty(roleDOS)) {
+                roles = roleDOS.stream().map(UserRoleDO::getRole).collect(Collectors.toList());
+            }
         }
 
         return Response.success(FindUserInfoRspVO.builder()
@@ -95,13 +114,15 @@ public class AdminUserServiceImpl implements AdminUserService {
         UserDO userDO = UserDO.builder()
                 .username(username)
                 .password(encodePassword)
-                .status(UserStatusEnum.ENABLED.getCode()) // 注册用户默认启用
+                .status(UserStatusEnum.ENABLED.getCode())
+                .roleId(ADMIN_ROLE_ID)
                 .createTime(LocalDateTime.now())
                 .updateTime(LocalDateTime.now())
                 .isDeleted(false)
                 .build();
         userMapper.insert(userDO);
 
+        // 同时插入 t_user_role 表（兼容旧逻辑）
         UserRoleDO userRoleDO = UserRoleDO.builder()
                 .username(username)
                 .role(ROLE_ADMIN)
@@ -131,11 +152,12 @@ public class AdminUserServiceImpl implements AdminUserService {
     public Response createUser(CreateUserReqVO createUserReqVO) {
         String username = createUserReqVO.getUsername();
         String password = createUserReqVO.getPassword();
-        String role = createUserReqVO.getRole();
+        Long roleId = createUserReqVO.getRoleId();
         Integer status = createUserReqVO.getStatus();
 
-        // 校验角色是否合法
-        if (!ROLE_ADMIN.equals(role) && !UserRoleEnum.ROLE_USER.getCode().equals(role)) {
+        // 校验角色是否存在
+        RoleDO roleDO = roleMapper.selectById(roleId);
+        if (Objects.isNull(roleDO)) {
             return Response.fail(ResponseCodeEnum.PARAM_NOT_VALID);
         }
 
@@ -157,16 +179,17 @@ public class AdminUserServiceImpl implements AdminUserService {
                 .username(username)
                 .password(encodePassword)
                 .status(status)
+                .roleId(roleId)
                 .createTime(LocalDateTime.now())
                 .updateTime(LocalDateTime.now())
                 .isDeleted(false)
                 .build();
         userMapper.insert(userDO);
 
-        // 创建用户角色
+        // 同时插入 t_user_role 表（兼容旧逻辑）
         UserRoleDO userRoleDO = UserRoleDO.builder()
                 .username(username)
-                .role(role)
+                .role(roleDO.getCode())
                 .createTime(new Date())
                 .build();
         userRoleMapper.insert(userRoleDO);
@@ -206,14 +229,31 @@ public class AdminUserServiceImpl implements AdminUserService {
         if (!CollectionUtils.isEmpty(userDOS)) {
             vos = userDOS.stream()
                     .map(userDO -> {
-                        // 查询用户角色
-                        List<UserRoleDO> roleDOS = userRoleMapper.selectByUsername(userDO.getUsername());
-                        String role = null;
+                        String roleCode = null;
                         String roleName = null;
-                        if (!CollectionUtils.isEmpty(roleDOS)) {
-                            role = roleDOS.get(0).getRole();
-                            UserRoleEnum roleEnum = UserRoleEnum.valueOfCode(role);
-                            roleName = Objects.nonNull(roleEnum) ? roleEnum.getDescription() : role;
+                        
+                        // 优先通过 roleId 从角色表获取角色
+                        if (Objects.nonNull(userDO.getRoleId())) {
+                            RoleDO roleDO = roleMapper.selectById(userDO.getRoleId());
+                            if (Objects.nonNull(roleDO)) {
+                                roleCode = roleDO.getCode();
+                                roleName = roleDO.getName();
+                            }
+                        }
+                        
+                        // 如果没有 roleId，则从 t_user_role 表获取（兼容旧数据）
+                        if (Objects.isNull(roleCode)) {
+                            List<UserRoleDO> roleDOS = userRoleMapper.selectByUsername(userDO.getUsername());
+                            if (!CollectionUtils.isEmpty(roleDOS)) {
+                                roleCode = roleDOS.get(0).getRole();
+                                // 从角色表获取角色名称
+                                RoleDO roleDO = roleMapper.findByCode(roleCode);
+                                if (Objects.nonNull(roleDO)) {
+                                    roleName = roleDO.getName();
+                                } else {
+                                    roleName = roleCode;
+                                }
+                            }
                         }
 
                         // 转换状态
@@ -227,7 +267,7 @@ public class AdminUserServiceImpl implements AdminUserService {
                         return UserRspVO.builder()
                                 .id(userDO.getId())
                                 .username(userDO.getUsername())
-                                .role(role)
+                                .role(roleCode)
                                 .roleName(roleName)
                                 .status(status)
                                 .statusName(statusName)

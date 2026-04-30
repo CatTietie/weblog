@@ -25,9 +25,9 @@ public class CreateUserReqVO {
     @ApiModelProperty(value = "密码")
     private String password;
 
-    @NotBlank(message = "角色不能为空")
-    @ApiModelProperty(value = "角色")
-    private String role;
+    @NotNull(message = "角色不能为空")
+    @ApiModelProperty(value = "角色ID")
+    private Long roleId;
 
     @NotNull(message = "状态不能为空")
     @ApiModelProperty(value = "状态：0-启用，1-禁用")

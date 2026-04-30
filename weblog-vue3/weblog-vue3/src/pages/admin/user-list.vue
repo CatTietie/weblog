@@ -53,10 +53,9 @@
             <el-form-item label="密码" prop="password">
                 <el-input type="password" v-model="form.password" placeholder="请输入密码" show-password clearable />
             </el-form-item>
-            <el-form-item label="角色" prop="role">
-                <el-select v-model="form.role" placeholder="请选择角色" style="width: 100%">
-                    <el-option label="管理员" value="ROLE_ADMIN" />
-                    <el-option label="普通用户" value="ROLE_USER" />
+            <el-form-item label="角色" prop="roleId">
+                <el-select v-model="form.roleId" placeholder="请选择角色" style="width: 100%">
+                    <el-option v-for="role in roleList" :key="role.id" :label="role.name" :value="role.id" />
                 </el-select>
             </el-form-item>
             <el-form-item label="状态" prop="status">
@@ -73,8 +72,8 @@
 
 <script setup>
 import { Search, RefreshRight, Plus } from '@element-plus/icons-vue'
-import { ref, reactive, computed } from 'vue'
-import { getUserPageList, createUser } from '@/api/admin/userManage'
+import { ref, reactive, onMounted } from 'vue'
+import { getUserPageList, createUser, getRoleSelectList } from '@/api/admin/userManage'
 import { showMessage } from '@/composables/util'
 import FormDialog from '@/components/FormDialog.vue'
 
@@ -92,6 +91,9 @@ const total = ref(0)
 // 每页显示的数据量
 const size = ref(10)
 
+// 角色列表
+const roleList = ref([])
+
 // 获取分页数据
 function getTableData() {
     tableLoading.value = true
@@ -107,7 +109,20 @@ function getTableData() {
     })
     .finally(() => tableLoading.value = false)
 }
-getTableData()
+
+// 获取角色列表
+function getRoleList() {
+    getRoleSelectList().then((res) => {
+        if (res.success == true) {
+            roleList.value = res.data || []
+        }
+    })
+}
+
+onMounted(() => {
+    getTableData()
+    getRoleList()
+})
 
 // 每页展示数量变更事件
 const handleSizeChange = (chooseSize) => {
@@ -135,7 +150,7 @@ const formRef = ref(null)
 const form = reactive({
     username: '',
     password: '',
-    role: 'ROLE_USER',
+    roleId: null,
     status: 0
 })
 
@@ -174,7 +189,7 @@ const rules = {
             trigger: 'blur',
         }
     ],
-    role: [
+    roleId: [
         {
             required: true,
             message: '请选择角色',
@@ -202,7 +217,7 @@ const onSubmit = () => {
                 showMessage('添加成功')
                 form.username = ''
                 form.password = ''
-                form.role = 'ROLE_USER'
+                form.roleId = null
                 form.status = 0
                 formDialogRef.value.close()
                 getTableData()
