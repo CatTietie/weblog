@@ -5,10 +5,10 @@ import com.quanxiaoha.weblog.common.utils.Response;
 import com.quanxiaoha.weblog.jwt.exception.UsernameOrPasswordNullException;
 import com.quanxiaoha.weblog.jwt.utils.ResultUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
 
@@ -29,15 +29,26 @@ public class RestAuthenticationFailureHandler implements AuthenticationFailureHa
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
         log.warn("AuthenticationException: ", exception);
+        
         if (exception instanceof UsernameOrPasswordNullException) {
             // 用户名或密码为空
             ResultUtil.fail(response, Response.fail(exception.getMessage()));
         } else if (exception instanceof BadCredentialsException) {
             // 用户名或密码错误
             ResultUtil.fail(response, Response.fail(ResponseCodeEnum.USERNAME_OR_PWD_ERROR));
+        } else if (exception instanceof UsernameNotFoundException) {
+            // 用户不存在或被禁用
+            ResultUtil.fail(response, Response.fail(exception.getMessage()));
+        } else if (exception instanceof InternalAuthenticationServiceException) {
+            // 内部认证服务异常（可能是 loadUserByUsername 中抛出的异常）
+            Throwable cause = exception.getCause();
+            if (cause != null) {
+                log.error("InternalAuthenticationServiceException cause: ", cause);
+            }
+            ResultUtil.fail(response, Response.fail("登录失败：" + exception.getMessage()));
+        } else {
+            // 其他登录失败
+            ResultUtil.fail(response, Response.fail(ResponseCodeEnum.LOGIN_FAIL));
         }
-
-        // 登录失败
-        ResultUtil.fail(response, Response.fail(ResponseCodeEnum.LOGIN_FAIL));
     }
 }

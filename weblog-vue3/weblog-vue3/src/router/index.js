@@ -13,11 +13,11 @@ import AdminCategoryList from '@/pages/admin/category-list.vue'
 import AdminTagList from '@/pages/admin/tag-list.vue'
 import AdminBlogSettings from '@/pages/admin/blog-settings.vue'
 import AdminUserStatistics from '@/pages/admin/userStatistics.vue'
+import AdminUserList from '@/pages/admin/user-list.vue'
+import AdminRoleList from '@/pages/admin/role-list.vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
 
 import Admin from '@/layouts/admin/admin.vue'
-
-import { time } from 'echarts'
 
 // 统一在这里声明所有路由
 const routes = [
@@ -130,6 +130,20 @@ const routes = [
                 component: AdminBlogSettings,
                 meta: {
                     title: '博客设置'
+                }
+            },
+            {
+                path: "/admin/user/list",
+                component: AdminUserList,
+                meta: {
+                    title: '用户管理'
+                }
+            },
+            {
+                path: "/admin/role/list",
+                component: AdminRoleList,
+                meta: {
+                    title: '角色管理'
                 }
             },
         ]

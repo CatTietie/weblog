@@ -3,9 +3,12 @@ package com.quanxiaoha.weblog.common.domain.mapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.quanxiaoha.weblog.common.domain.dos.UserDO;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * @author: Group 5
@@ -27,6 +30,33 @@ public interface UserMapper extends BaseMapper<UserDO> {
          wrapper.set(UserDO::getUpdateTime, LocalDateTime.now());
          // 更新条件
          wrapper.eq(UserDO::getUsername, username);
+
+         return update(null, wrapper);
+    }
+
+    default Page<UserDO> selectPageList(long current, long size, String username, Integer status, Long roleId) {
+        // 分页对象(查询第几页、每页多少数据)
+        Page<UserDO> page = new Page<>(current, size);
+
+        // 构建查询条件
+        LambdaQueryWrapper<UserDO> wrapper = new LambdaQueryWrapper<>();
+
+        wrapper
+                .like(StringUtils.isNotBlank(username), UserDO::getUsername, username.trim()) // like 模块查询
+                .eq(Objects.nonNull(status), UserDO::getStatus, status)
+                .eq(Objects.nonNull(roleId), UserDO::getRoleId, roleId)
+                .orderByDesc(UserDO::getCreateTime); // 按创建时间倒叙
+
+        return selectPage(page, wrapper);
+    }
+
+    default int updatePasswordById(Long id, String password) {
+         LambdaUpdateWrapper<UserDO> wrapper = new LambdaUpdateWrapper<>();
+         // 设置要更新的字段
+         wrapper.set(UserDO::getPassword, password);
+         wrapper.set(UserDO::getUpdateTime, LocalDateTime.now());
+         // 更新条件
+         wrapper.eq(UserDO::getId, id);
 
          return update(null, wrapper);
     }
