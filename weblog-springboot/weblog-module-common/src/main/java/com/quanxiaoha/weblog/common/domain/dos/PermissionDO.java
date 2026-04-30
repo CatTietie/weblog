@@ -10,29 +10,31 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-/**
- * @author: Group 5
-
- * @date: 2023-08-22 17:01
- * @description: 用户
- **/
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@TableName("t_user")
-public class UserDO {
+@TableName("t_permission")
+public class PermissionDO {
 
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    private String username;
+    private String name;
 
-    private String password;
+    private String code;
 
-    private Integer status;
+    private String type;
 
-    private Long roleId;
+    private String path;
+
+    private String method;
+
+    private Long parentId;
+
+    private Integer sort;
+
+    private String description;
 
     private LocalDateTime createTime;
 

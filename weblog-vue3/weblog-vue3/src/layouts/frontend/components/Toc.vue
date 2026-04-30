@@ -1,10 +1,7 @@
 <template>
-    <!-- text-sm/[30px] 表示文字小号，行高为 30px -->
     <div v-if="titles && titles.length > 0"
-        class="sticky top-[5.5rem] text-sm/[30px] w-full p-5 mb-3 bg-white border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700">
-        <!-- 目录标题 -->
+        class="text-sm/[30px] w-full p-5 mb-3 bg-white border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700">
         <h2 class="flex items-center mb-2 font-bold text-gray-900 uppercase dark:text-white">
-            <!-- 目录图标 -->
             <svg t="1699441758495" class="icon w-3.5 h-3.5 mr-2" viewBox="0 0 1024 1024" version="1.1"
                 xmlns="http://www.w3.org/2000/svg" p-id="4043" width="200" height="200">
                 <path
@@ -16,15 +13,15 @@
             </svg>
             文章目录
         </h2>
-        <div class="border-l-2 border-gray-200">
+        <div class="border-l-2 border-gray-200 toc-container">
             <ul>
-                <!-- 二级标题 -->
-                <li v-for="(h2, index) in titles" :key="index" class="pl-5" :class="[h2.index == activeHeadingIndex ? 'active text-sky-600 border-l-2 border-sky-600 font-bold' : 'text-gray-500 font-normal']">
-                    <span @click="scrollToView(h2.offsetTop)" class="hover:text-sky-600">{{ h2.text }}</span>
-                    <!-- 三级标题 -->
+                <li v-for="(h2, index) in titles" :key="index" class="toc-item pl-5"
+                    :class="{ 'toc-item-active': h2.index === activeHeadingIndex }">
+                    <span @click="scrollToHeading(h2)" class="toc-link hover:text-sky-600 cursor-pointer">{{ h2.text }}</span>
                     <ul v-if="h2.children && h2.children.length > 0">
-                        <li v-for="(h3, index2) in h2.children" :key="index2" class="pl-5" :class="[h3.index == activeHeadingIndex ? 'active text-sky-600 border-l-2 border-sky-600 font-bold' : 'text-gray-500 font-normal']">
-                            <span @click="scrollToView(h3.offsetTop)" class="hover:text-sky-600">{{ h3.text }}</span>
+                        <li v-for="(h3, index2) in h2.children" :key="index2" class="toc-item pl-5"
+                            :class="{ 'toc-item-active': h3.index === activeHeadingIndex }">
+                            <span @click="scrollToHeading(h3)" class="toc-link hover:text-sky-600 cursor-pointer">{{ h3.text }}</span>
                         </li>
                     </ul>
                 </li>
@@ -34,125 +31,228 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 
-// 响应式的目录数据
 const titles = ref([])
-onMounted(() => {
-    // 通过 .artilce-content 样式来获取父级 div
-    const container = document.querySelector('.article-content')
-
-    // 使用 MutationObserver 监视 DOM 的变化
-    const observer = new MutationObserver(mutationsList => {
-        for (let mutation of mutationsList) {
-            if (mutation.type === 'childList') {
-                // 先清空目录缓存数据
-                titles.value = []
-                // 计算目录数据
-                initTocData(container)
-
-                // 监听所有图片的加载事件
-                const images = container.querySelectorAll('img');
-                images.forEach(img => {
-                    img.addEventListener('load', () => {
-                        // 图片加载完成后重新计算标题的 offsetTop
-                        initTocData(container)
-                    })
-                })
-
-                // 添加滚动事件监听
-                window.addEventListener('scroll', handleContentScroll);
-            }
-        }
-    })
-
-    // 配置监视子节点的变化
-    const config = { childList: true, subtree: true }
-    // 开始观察正文 div 的内容变化
-    observer.observe(container, config)
-})
-
-// 记录当前被选中的标题下标
 const activeHeadingIndex = ref(-1)
-// 处理滚动事件
-function handleContentScroll() {
-    // 当前的滚动位置
-    let scrollY = window.scrollY
-    // 循环目录
-    titles.value.forEach(title => {
-        // 获取每个标题的 offset
-        let offsetTop = title.offsetTop
-        // 如果当前位置大于等于标题位置，则标记选中，记录被选中标题的下标
-        if (scrollY >= offsetTop) {
-            activeHeadingIndex.value = title.index
-        }
+const observer = ref(null)
+const isScrollListenerAdded = ref(false)
 
-        // 处理3级标题, 同样的逻辑
-        let children = title.children
-        if (children && children.length > 0) {
-            children.forEach(child => {
-                let childOffsetTop = child.offsetTop
-                if (scrollY >= childOffsetTop) {
-                    activeHeadingIndex.value = child.index
-                }
-            })
-        }
-    })
+function getAbsoluteOffsetTop(element) {
+    let offsetTop = 0
+    while (element) {
+        offsetTop += element.offsetTop
+        element = element.offsetParent
+    }
+    return offsetTop - 95
 }
 
-// 移除滚动监听
-onBeforeUnmount(() => window.removeEventListener('scroll', handleContentScroll))
-
-// 滚动到指定的位置
-function scrollToView(offsetTop) {
-    window.scrollTo({ top: offsetTop, behavior: "smooth" });
-}
-
-// 初始化标题数据
 function initTocData(container) {
-    // 只提取二级、三级标题
     let levels = ['h2', 'h3']
     let headings = container.querySelectorAll(levels)
 
-    console.log(headings)
+    if (!headings || headings.length === 0) {
+        titles.value = []
+        return
+    }
 
-    // 存放组装后的目录标题数据
     let titlesArr = []
-
-    // 下标
     let index = 1
-    headings.forEach(heading => {
-        // 标题等级， h2 -> 级别 2 ； h3 -> 级别3
-        let headingLevel = parseInt(heading.tagName.substring(1))
-        // 标题文字
-        let headingText = heading.innerText
-        // 标题的位置（距离顶部的距离）
-        let offsetTop = heading.offsetTop - 95
 
-        if (headingLevel === 2) { // 二级标题
+    headings.forEach(heading => {
+        let headingLevel = parseInt(heading.tagName.substring(1))
+        let headingText = heading.innerText
+        let offsetTop = getAbsoluteOffsetTop(heading)
+
+        heading.setAttribute('data-toc-index', index)
+        heading.setAttribute('data-toc-offset', offsetTop)
+
+        if (headingLevel === 2) {
             titlesArr.push({
                 index,
                 level: headingLevel,
                 text: headingText,
                 offsetTop,
-                children: [] // 二级标题下的子标题
+                element: heading,
+                children: []
             })
-        } else { // 三级标题
-            // 父级标题
-            let parentHeading = titlesArr[titlesArr.length - 1]
-            // 设置父级标题的 children
-            parentHeading.children.push({
-                index,
-                level: headingLevel,
-                text: headingText,
-                offsetTop
-            })
+        } else {
+            if (titlesArr.length > 0) {
+                let parentHeading = titlesArr[titlesArr.length - 1]
+                parentHeading.children.push({
+                    index,
+                    level: headingLevel,
+                    text: headingText,
+                    offsetTop,
+                    element: heading
+                })
+            }
         }
-        // 下标 +1
         index++
     })
 
-    // 设置数据
     titles.value = titlesArr
 }
+
+function getAllHeadings() {
+    const allHeadings = []
+    titles.value.forEach(h2 => {
+        allHeadings.push(h2)
+        if (h2.children && h2.children.length > 0) {
+            h2.children.forEach(h3 => {
+                allHeadings.push(h3)
+            })
+        }
+    })
+    return allHeadings.sort((a, b) => a.index - b.index)
+}
+
+function handleContentScroll() {
+    let scrollY = window.scrollY
+    const allHeadings = getAllHeadings()
+
+    if (allHeadings.length === 0) {
+        activeHeadingIndex.value = -1
+        return
+    }
+
+    let currentActive = -1
+
+    for (let i = 0; i < allHeadings.length; i++) {
+        const heading = allHeadings[i]
+        if (scrollY >= heading.offsetTop) {
+            currentActive = heading.index
+        } else {
+            break
+        }
+    }
+
+    activeHeadingIndex.value = currentActive
+}
+
+function scrollToHeading(heading) {
+    if (heading && heading.element) {
+        heading.element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        window.scrollBy(0, -95)
+    } else if (heading && typeof heading.offsetTop !== 'undefined') {
+        window.scrollTo({ top: heading.offsetTop, behavior: 'smooth' })
+    }
+}
+
+function waitForContainer() {
+    return new Promise((resolve) => {
+        const checkContainer = () => {
+            const container = document.querySelector('.article-content')
+            if (container) {
+                resolve(container)
+            } else {
+                requestAnimationFrame(checkContainer)
+            }
+        }
+        checkContainer()
+    })
+}
+
+onMounted(async () => {
+    const container = await waitForContainer()
+
+    observer.value = new MutationObserver((mutationsList) => {
+        for (let mutation of mutationsList) {
+            if (mutation.type === 'childList') {
+                nextTick(() => {
+                    initTocData(container)
+
+                    const images = container.querySelectorAll('img')
+                    images.forEach(img => {
+                        const handleImageLoad = () => {
+                            initTocData(container)
+                            handleContentScroll()
+                        }
+                        if (img.complete) {
+                            handleImageLoad()
+                        } else {
+                            img.addEventListener('load', handleImageLoad, { once: true })
+                        }
+                    })
+
+                    if (!isScrollListenerAdded.value) {
+                        window.addEventListener('scroll', handleContentScroll)
+                        isScrollListenerAdded.value = true
+                    }
+
+                    handleContentScroll()
+                })
+            }
+        }
+    })
+
+    const config = { childList: true, subtree: true, characterData: true }
+    observer.value.observe(container, config)
+
+    if (container.innerHTML && container.innerHTML.trim() !== '') {
+        nextTick(() => {
+            initTocData(container)
+            if (!isScrollListenerAdded.value) {
+                window.addEventListener('scroll', handleContentScroll)
+                isScrollListenerAdded.value = true
+            }
+            handleContentScroll()
+        })
+    }
+})
+
+onBeforeUnmount(() => {
+    if (observer.value) {
+        observer.value.disconnect()
+    }
+    if (isScrollListenerAdded.value) {
+        window.removeEventListener('scroll', handleContentScroll)
+        isScrollListenerAdded.value = false
+    }
+})
 </script>
+
+<style scoped>
+.toc-container {
+    position: relative;
+}
+
+.toc-item {
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.toc-item::before {
+    content: '';
+    position: absolute;
+    left: -2px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: transparent;
+    transition: background-color 0.2s ease;
+}
+
+.toc-item-active {
+    font-weight: 600;
+}
+
+.toc-item-active::before {
+    background-color: #0ea5e9;
+}
+
+.toc-item-active .toc-link {
+    color: #0ea5e9;
+}
+
+.toc-link {
+    display: block;
+    color: #6b7280;
+    transition: color 0.2s ease;
+    line-height: 2;
+}
+
+.toc-link:hover {
+    color: #0ea5e9;
+}
+</style>
