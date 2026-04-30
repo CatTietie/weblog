@@ -134,9 +134,13 @@ const handleLogin = () => {
             let token = res.data.token
             setToken(token)
 
-            userStore.setUserInfo()
-
-            router.push('/admin/index/article-stats')
+            // 等待获取用户信息完成后再跳转
+            userStore.setUserInfo().then(() => {
+                router.push('/admin/index/article-stats')
+            }).catch(() => {
+                // 即使获取用户信息失败，也跳转（防止卡死）
+                router.push('/admin/index/article-stats')
+            })
         } else {
             let message = res.message
             showMessage(message, 'error')

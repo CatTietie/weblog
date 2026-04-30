@@ -7,13 +7,20 @@ export const useUserStore = defineStore('user', () => {
   // 用户信息
   const userInfo = ref({})
 
-  // 设置用户信息
+  // 设置用户信息（返回 Promise，方便等待）
   function setUserInfo() {
-    // 调用后头获取用户信息接口
-    getUserInfo().then(res => {
-      if (res.success == true) {
-        userInfo.value = res.data
-      }
+    return new Promise((resolve, reject) => {
+      // 调用后端获取用户信息接口
+      getUserInfo().then(res => {
+        if (res.success == true) {
+          userInfo.value = res.data
+          resolve(res.data)
+        } else {
+          reject(new Error(res.message))
+        }
+      }).catch(err => {
+        reject(err)
+      })
     })
   }
 
