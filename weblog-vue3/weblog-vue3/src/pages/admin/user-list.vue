@@ -138,7 +138,7 @@ import {
     getUserPageList, 
     createUser, 
     updateUser,
-    deleteUser,
+    deleteUser as deleteUserApi,
     resetPassword,
     getRoleSelectList 
 } from '@/api/admin/userManage'
@@ -304,7 +304,7 @@ const submitUserForm = () => {
 
 const deleteUser = (row) => {
     showConfirm(`确定要删除用户「${row.username}」吗？`).then(() => {
-        deleteUser(row.id).then((res) => {
+        deleteUserApi(row.id).then((res) => {
             if (res.success == true) {
                 showMessage('删除成功')
                 getTableData()

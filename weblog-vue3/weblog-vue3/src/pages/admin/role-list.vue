@@ -22,7 +22,7 @@
                     <template #default="scope">
                         <el-button type="primary" link size="small" @click="editRole(scope.row)">编辑</el-button>
                         <el-button type="warning" link size="small" @click="assignPermissionsDialog(scope.row)">分配权限</el-button>
-                        <el-button type="danger" link size="small" @click="deleteRole(scope.row)" :disabled="scope.row.code === 'ROLE_ADMIN'">删除</el-button>
+                        <el-button type="danger" link size="small" @click="handleDeleteRole(scope.row)" :disabled="scope.row.code === 'ROLE_ADMIN'">删除</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -41,7 +41,7 @@
                 </el-form-item>
                 <el-form-item label="角色编码" prop="code" v-if="dialogType === 'add'">
                     <el-input v-model="roleForm.code" placeholder="请输入角色编码，如：ROLE_EDITOR" clearable />
-                    <el-text type="info" size="small">角色编码以 ROLE_ 开头，如 ROLE_EDITOR</el-text>
+                    <div class="text-xs text-gray-500 mt-1">角色编码以 ROLE_ 开头，如 ROLE_EDITOR</div>
                 </el-form-item>
                 <el-form-item label="角色编码" v-else>
                     <el-input v-model="roleForm.code" disabled />
@@ -63,7 +63,7 @@
             :close-on-click-modal="false"
         >
             <div class="mb-3">
-                <el-text>当前角色：</el-text>
+                <span>当前角色：</span>
                 <el-tag type="primary">{{ currentRoleName }}</el-tag>
             </div>
             <el-transfer
@@ -100,7 +100,7 @@ import {
     getRoleById,
     createRole, 
     updateRole,
-    deleteRole,
+    deleteRole as deleteRoleApi,
     assignPermissions,
     getAllPermissions 
 } from '@/api/admin/userManage'
@@ -208,9 +208,9 @@ const submitRoleForm = () => {
     })
 }
 
-const deleteRole = (row) => {
+const handleDeleteRole = (row) => {
     showConfirm(`确定要删除角色「${row.name}」吗？`).then(() => {
-        deleteRole(row.id).then((res) => {
+        deleteRoleApi(row.id).then((res) => {
             if (res.success == true) {
                 showMessage('删除成功')
                 getRoleList()
