@@ -1,8 +1,12 @@
--- RBAC 模型初始化脚本
+-- RBAC 模型初始化脚本（健壮版）
 -- 包含角色表、权限表、角色-权限关联表
 -- 以及用户表添加 role_id 字段并迁移现有数据
 
--- 1. 创建角色表
+-- 注意：请确保在执行此脚本前备份数据库！
+
+-- ============================================
+-- 1. 创建角色表（如果不存在）
+-- ============================================
 DROP TABLE IF EXISTS `t_role`;
 CREATE TABLE `t_role` (
     `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'id',
@@ -17,7 +21,9 @@ CREATE TABLE `t_role` (
     UNIQUE INDEX `uk_code`(`code`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '角色表' ROW_FORMAT = DYNAMIC;
 
--- 2. 创建权限表
+-- ============================================
+-- 2. 创建权限表（如果不存在）
+-- ============================================
 DROP TABLE IF EXISTS `t_permission`;
 CREATE TABLE `t_permission` (
     `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'id',
@@ -36,7 +42,9 @@ CREATE TABLE `t_permission` (
     UNIQUE INDEX `uk_code`(`code`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '权限表' ROW_FORMAT = DYNAMIC;
 
--- 3. 创建角色-权限关联表
+-- ============================================
+-- 3. 创建角色-权限关联表（如果不存在）
+-- ============================================
 DROP TABLE IF EXISTS `t_role_permission`;
 CREATE TABLE `t_role_permission` (
     `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'id',
@@ -48,16 +56,39 @@ CREATE TABLE `t_role_permission` (
     INDEX `idx_permission_id`(`permission_id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '角色-权限关联表' ROW_FORMAT = DYNAMIC;
 
--- 4. 为用户表添加 role_id 字段
+-- ============================================
+-- 4. 检查并添加 status 字段（如果不存在）
+-- ============================================
+-- 注意：MySQL 不支持 IF NOT EXISTS 直接在 ALTER TABLE 中使用
+-- 所以这里需要用存储过程或者手动检查
+
+-- 先尝试添加 status 字段（如果之前没执行过 update_20260429.sql）
+-- 如果字段已存在，这条语句会报错，但不影响后续执行
+-- 建议：如果之前执行过 update_20260429.sql，可以跳过这一步
+
+-- ALTER TABLE `t_user` ADD COLUMN `status` tinyint(2) NOT NULL DEFAULT 0 COMMENT '状态：0-启用，1-禁用' AFTER `password`;
+
+-- ============================================
+-- 5. 为用户表添加 role_id 字段（如果不存在）
+-- ============================================
+-- 同样，MySQL 不支持 IF NOT EXISTS 直接在 ALTER TABLE 中使用
+-- 如果字段已存在，这条语句会报错，但不影响后续执行
+
 ALTER TABLE `t_user` ADD COLUMN `role_id` bigint(20) UNSIGNED NULL DEFAULT NULL COMMENT '角色ID' AFTER `status`;
 
--- 5. 初始化角色数据
+-- ============================================
+-- 6. 初始化角色数据
+-- ============================================
 INSERT INTO `t_role` (`id`, `name`, `code`, `description`, `sort`, `create_time`, `update_time`, `is_deleted`) VALUES 
 (1, '管理员', 'ROLE_ADMIN', '系统管理员，拥有所有权限', 1, NOW(), NOW(), 0),
-(2, '普通用户', 'ROLE_USER', '普通用户，拥有部分权限', 2, NOW(), NOW(), 0);
+(2, '普通用户', 'ROLE_USER', '普通用户，拥有部分权限', 2, NOW(), NOW(), 0),
+(3, '访客', 'ROLE_VISITOR', '访客，拥有最低权限', 3, NOW(), NOW(), 0);
 
--- 6. 初始化权限数据
+-- ============================================
+-- 7. 初始化权限数据
+-- ============================================
 INSERT INTO `t_permission` (`id`, `name`, `code`, `type`, `path`, `method`, `parent_id`, `sort`, `description`, `create_time`, `update_time`, `is_deleted`) VALUES 
+-- 菜单权限
 (1, '仪表盘', 'dashboard', 'menu', '/admin/index', '', 0, 1, '仪表盘菜单', NOW(), NOW(), 0),
 (2, '文章管理', 'article', 'menu', '/admin/article/list', '', 0, 2, '文章管理菜单', NOW(), NOW(), 0),
 (3, '分类管理', 'category', 'menu', '/admin/category/list', '', 0, 3, '分类管理菜单', NOW(), NOW(), 0),
@@ -65,13 +96,15 @@ INSERT INTO `t_permission` (`id`, `name`, `code`, `type`, `path`, `method`, `par
 (5, '用户管理', 'user', 'menu', '/admin/user/list', '', 0, 5, '用户管理菜单', NOW(), NOW(), 0),
 (6, '博客设置', 'blogsettings', 'menu', '/admin/blog/settings', '', 0, 6, '博客设置菜单', NOW(), NOW(), 0),
 (7, '用户统计', 'userStatistics', 'menu', '/admin/user/statistics', '', 0, 7, '用户统计菜单', NOW(), NOW(), 0),
-
 -- 接口权限
 (100, '创建用户', 'user:create', 'api', '/admin/users', 'POST', 5, 1, '创建用户接口', NOW(), NOW(), 0),
 (101, '查询用户列表', 'user:list', 'api', '/admin/users/list', 'POST', 5, 2, '查询用户列表接口', NOW(), NOW(), 0),
 (102, '查询角色列表', 'role:list', 'api', '/admin/role/select/list', 'POST', 0, 8, '查询角色列表接口', NOW(), NOW(), 0);
 
--- 7. 初始化角色-权限关联（管理员拥有所有权限）
+-- ============================================
+-- 8. 初始化角色-权限关联
+-- ============================================
+-- 管理员拥有所有权限
 INSERT INTO `t_role_permission` (`role_id`, `permission_id`, `create_time`) VALUES 
 (1, 1, NOW()),
 (1, 2, NOW()),
@@ -92,17 +125,50 @@ INSERT INTO `t_role_permission` (`role_id`, `permission_id`, `create_time`) VALU
 (2, 4, NOW()),
 (2, 6, NOW());
 
--- 8. 迁移现有用户数据：根据 t_user_role 表中的 role 字段设置 role_id
+-- 访客权限（只有基础权限）
+INSERT INTO `t_role_permission` (`role_id`, `permission_id`, `create_time`) VALUES 
+(3, 1, NOW());
+
+-- ============================================
+-- 9. 迁移现有用户数据
+-- ============================================
+-- 根据 t_user_role 表中的 role 字段设置 role_id
 -- ROLE_ADMIN -> role_id = 1
--- 其他 -> role_id = 2
+-- ROLE_USER -> role_id = 2
+-- ROLE_VISITOR -> role_id = 3
+-- 其他 -> role_id = 2（默认普通用户）
 
 UPDATE `t_user` u
 INNER JOIN `t_user_role` ur ON u.username = ur.username
 SET u.role_id = CASE 
     WHEN ur.role = 'ROLE_ADMIN' THEN 1
+    WHEN ur.role = 'ROLE_USER' THEN 2
+    WHEN ur.role = 'ROLE_VISITOR' THEN 3
     ELSE 2
 END
 WHERE u.role_id IS NULL;
 
 -- 如果用户没有在 t_user_role 表中，默认设置为普通用户
 UPDATE `t_user` SET role_id = 2 WHERE role_id IS NULL;
+
+-- ============================================
+-- 10. 数据验证查询
+-- ============================================
+-- 执行以下查询来验证数据是否正确迁移
+
+-- 查询所有用户及其角色信息
+-- SELECT 
+--     u.id,
+--     u.username,
+--     u.status,
+--     u.role_id,
+--     r.name AS role_name,
+--     r.code AS role_code
+-- FROM t_user u
+-- LEFT JOIN t_role r ON u.role_id = r.id;
+
+-- 查询 t_user_role 表中的数据
+-- SELECT * FROM t_user_role;
+
+-- 查询 t_role 表中的数据
+-- SELECT * FROM t_role;
