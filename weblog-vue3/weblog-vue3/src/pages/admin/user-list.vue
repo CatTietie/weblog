@@ -142,8 +142,7 @@ import {
     resetPassword,
     getRoleSelectList 
 } from '@/api/admin/userManage'
-import { showMessage, showConfirm } from '@/composables/util'
-import { ElMessage } from 'element-plus'
+import { showMessage, showModel } from '@/composables/util'
 
 const userStore = useUserStore()
 
@@ -303,7 +302,7 @@ const submitUserForm = () => {
 }
 
 const deleteUser = (row) => {
-    showConfirm(`确定要删除用户「${row.username}」吗？`).then(() => {
+    showModel(`确定要删除用户「${row.username}」吗？`).then(() => {
         deleteUserApi(row.id).then((res) => {
             if (res.success == true) {
                 showMessage('删除成功')

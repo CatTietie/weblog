@@ -104,7 +104,7 @@ import {
     assignPermissions,
     getAllPermissions 
 } from '@/api/admin/userManage'
-import { showMessage, showConfirm } from '@/composables/util'
+import { showMessage, showModel } from '@/composables/util'
 
 const userStore = useUserStore()
 
@@ -209,7 +209,7 @@ const submitRoleForm = () => {
 }
 
 const handleDeleteRole = (row) => {
-    showConfirm(`确定要删除角色「${row.name}」吗？`).then(() => {
+    showModel(`确定要删除角色「${row.name}」吗？`).then(() => {
         deleteRoleApi(row.id).then((res) => {
             if (res.success == true) {
                 showMessage('删除成功')
