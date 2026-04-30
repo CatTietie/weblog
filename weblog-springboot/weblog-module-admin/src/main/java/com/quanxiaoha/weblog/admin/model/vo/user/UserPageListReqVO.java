@@ -16,4 +16,7 @@ public class UserPageListReqVO extends BasePageQuery {
 
     private String username;
 
+    private Integer status;
+
+    private Long roleId;
 }

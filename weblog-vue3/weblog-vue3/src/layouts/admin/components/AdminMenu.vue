@@ -108,6 +108,11 @@ const adminMenus = [
         'icon': 'User',
         'path': '/admin/user/list',
     },
+    {
+        'name': '角色管理',
+        'icon': 'Avatar',
+        'path': '/admin/role/list',
+    },
 ]
 
 // 响应式菜单列表
