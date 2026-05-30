@@ -226,9 +226,20 @@ public class AdminUserServiceImpl implements AdminUserService {
         Integer status = userPageListReqVO.getStatus();
         Long roleId = userPageListReqVO.getRoleId();
 
+        // 添加日志输出，方便排查问题
+        log.info("用户分页查询参数: current={}, size={}, username={}, status={}, roleId={}", 
+                current, size, username, status, roleId);
+        
+        // 兜底处理：处理字符串 "null" 的情况（前端可能会传）
+        if ("null".equals(username)) {
+            username = null;
+        }
+
         // 执行分页查询
         Page<UserDO> userDOPage = userMapper.selectPageList(current, size, username, status, roleId);
 
+        log.info("用户分页查询结果: total={}", userDOPage.getTotal());
+        
         List<UserDO> userDOS = userDOPage.getRecords();
 
         // DO 转 VO

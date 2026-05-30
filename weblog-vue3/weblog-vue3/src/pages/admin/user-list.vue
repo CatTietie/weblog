@@ -168,13 +168,28 @@ const roleList = ref([])
 function getTableData() {
     tableLoading.value = true
     
+    // 处理参数：空字符串、null、"null" 都不传
     const params = {
         current: current.value,
-        size: size.value,
-        username: searchForm.username || undefined,
-        status: searchForm.status,
-        roleId: searchForm.roleId
+        size: size.value
     }
+    
+    // 只有当 username 有有效值时才添加
+    if (searchForm.username && searchForm.username.trim() !== '' && searchForm.username !== 'null') {
+        params.username = searchForm.username.trim()
+    }
+    
+    // 只有当 status 不是 null 时才添加
+    if (searchForm.status !== null && searchForm.status !== undefined) {
+        params.status = searchForm.status
+    }
+    
+    // 只有当 roleId 不是 null 时才添加
+    if (searchForm.roleId !== null && searchForm.roleId !== undefined) {
+        params.roleId = searchForm.roleId
+    }
+    
+    console.log('用户列表查询参数:', params)
     
     getUserPageList(params)
     .then((res) => {

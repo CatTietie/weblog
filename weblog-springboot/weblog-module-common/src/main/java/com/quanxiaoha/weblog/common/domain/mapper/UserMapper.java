@@ -41,8 +41,11 @@ public interface UserMapper extends BaseMapper<UserDO> {
         // 构建查询条件
         LambdaQueryWrapper<UserDO> wrapper = new LambdaQueryWrapper<>();
 
+        // 处理 username 的 null 或空字符串情况
+        String usernameValue = StringUtils.isNotBlank(username) ? username.trim() : null;
+        
         wrapper
-                .like(StringUtils.isNotBlank(username), UserDO::getUsername, username.trim()) // like 模块查询
+                .like(StringUtils.isNotBlank(usernameValue), UserDO::getUsername, usernameValue) // like 模块查询
                 .eq(Objects.nonNull(status), UserDO::getStatus, status)
                 .eq(Objects.nonNull(roleId), UserDO::getRoleId, roleId)
                 .orderByDesc(UserDO::getCreateTime); // 按创建时间倒叙

@@ -5,6 +5,8 @@ import CategoryArticleList from '@/pages/frontend/category-article-list.vue'
 import TagList from '@/pages/frontend/tag-list.vue'
 import TagArticleList from '@/pages/frontend/tag-article-list.vue'
 import ArticleDetail from '@/pages/frontend/article-detail.vue'
+import ResumeList from '@/pages/frontend/resume-list.vue'
+import ResumeEdit from '@/pages/frontend/resume-edit.vue'
 import NotFound from '@/pages/frontend/404.vue'
 import Login from '@/pages/admin/login.vue'
 import AdminIndex from '@/pages/admin/index.vue'
@@ -75,6 +77,20 @@ const routes = [
         component: Login,
         meta: {
             title: 'Weblog 登录页'
+        }
+    },
+    {
+        path: '/resume/list',
+        component: ResumeList,
+        meta: {
+            title: '我的简历'
+        }
+    },
+    {
+        path: '/resume/edit',
+        component: ResumeEdit,
+        meta: {
+            title: '编辑简历'
         }
     },
     {

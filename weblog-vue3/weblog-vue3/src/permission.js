@@ -13,8 +13,8 @@ router.beforeEach((to, from, next) => {
     
     let token = getToken()
 
-    if (!token && to.path.startsWith('/admin')) { 
-        // 若用户想访问后台（以 /admin 为前缀的路由）
+    if (!token && (to.path.startsWith('/admin') || to.path.startsWith('/resume'))) {
+        // 若用户想访问后台或简历页面
         // 未登录，则强制跳转登录页
         showMessage('请先登录', 'warning')
         next({ path: '/login' })

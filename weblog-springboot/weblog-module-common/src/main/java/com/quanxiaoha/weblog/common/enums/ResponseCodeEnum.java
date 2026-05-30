@@ -35,6 +35,9 @@ public enum ResponseCodeEnum implements BaseExceptionInterface {
     TAG_CAN_NOT_DELETE("20012", "该标签下包含文章，请先删除对应文章，才能删除！"),
     USERNAME_IS_EXISTED("20013", "该用户名已存在，请勿重复注册！"),
     USER_IS_DISABLED("20014", "该用户已被禁用，请联系管理员！"),
+    RESUME_NOT_FOUND("20015", "该简历不存在！"),
+    RESUME_NOT_BELONG_TO_USER("20016", "无权操作该简历！"),
+    RESUME_UPLOAD_FILE_INVALID("20017", "仅支持上传 .md 文件！"),
     ;
 
     // 异常码
