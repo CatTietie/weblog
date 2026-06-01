@@ -38,6 +38,13 @@ public enum ResponseCodeEnum implements BaseExceptionInterface {
     RESUME_NOT_FOUND("20015", "该简历不存在！"),
     RESUME_NOT_BELONG_TO_USER("20016", "无权操作该简历！"),
     RESUME_UPLOAD_FILE_INVALID("20017", "仅支持上传 .md 文件！"),
+    RESUME_SHARE_DISABLED("20018", "该简历已关闭分享"),
+    RESUME_TEMPLATE_NAME_IS_EXISTED("20019", "该模板名称已存在！"),
+    RESUME_TEMPLATE_NOT_FOUND("20020", "该模板不存在！"),
+    APPLICATION_RECORD_NOT_FOUND("20021", "该投递记录不存在！"),
+    APPLICATION_RECORD_NOT_BELONG_TO_USER("20022", "无权操作该投递记录！"),
+    COMMENT_NOT_FOUND("20023", "该评论不存在！"),
+    COMMENT_LOGIN_REQUIRED("20024", "请先登录后再发表评论！"),
     ;
 
     // 异常码

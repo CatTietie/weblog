@@ -131,6 +131,9 @@
 
                 </div>
 
+                <!-- 评论区 -->
+                <CommentSection :articleId="route.params.articleId" />
+
                 <!-- 文章目录 - 仅在小屏幕显示 -->
                 <div class="md:hidden">
                     <Toc></Toc>
@@ -167,6 +170,7 @@ import TagListCard from '@/layouts/frontend/components/TagListCard.vue'
 import CategoryListCard from '@/layouts/frontend/components/CategoryListCard.vue'
 import ScrollToTopButton from '@/layouts/frontend/components/ScrollToTopButton.vue'
 import Toc from '@/layouts/frontend/components/Toc.vue'
+import CommentSection from '@/pages/frontend/components/CommentSection.vue'
 import { getArticleDetail } from '@/api/frontend/article'
 import { useRoute, useRouter } from 'vue-router'
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue'

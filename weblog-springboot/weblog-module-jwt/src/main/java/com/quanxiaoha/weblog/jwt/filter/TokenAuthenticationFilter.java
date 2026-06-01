@@ -76,7 +76,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
                 .build();
 //        userVisitStatsMapper.insert(userVisitStatsDO);
 
-        if (requestURI.startsWith("/admin")) {
+        if (requestURI.startsWith("/admin") || requestURI.startsWith("/comment")) {
             // 从请求头中获取 key 为 Authorization 的值
             String header = request.getHeader(tokenHeaderKey);
 
