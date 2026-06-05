@@ -25,6 +25,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AdminSensitiveWordServiceImpl implements AdminSensitiveWordService {
 
+    private final Object scanLock = new Object();
+
     @Autowired
     private SensitiveWordMapper sensitiveWordMapper;
     @Autowired
@@ -111,30 +113,32 @@ public class AdminSensitiveWordServiceImpl implements AdminSensitiveWordService 
 
     @Override
     public Response startScan() {
-        Long runningCount = scanTaskMapper.selectCount(
-                Wrappers.<SensitiveScanTaskDO>lambdaQuery().eq(SensitiveScanTaskDO::getStatus, 0));
-        if (runningCount > 0) {
-            throw new BizException(ResponseCodeEnum.SENSITIVE_SCAN_IN_PROGRESS);
+        synchronized (scanLock) {
+            Long runningCount = scanTaskMapper.selectCount(
+                    Wrappers.<SensitiveScanTaskDO>lambdaQuery().eq(SensitiveScanTaskDO::getStatus, 0));
+            if (runningCount > 0) {
+                throw new BizException(ResponseCodeEnum.SENSITIVE_SCAN_IN_PROGRESS);
+            }
+
+            Long articleCount = articleMapper.selectCount(
+                    Wrappers.<ArticleDO>lambdaQuery().eq(ArticleDO::getIsDeleted, false));
+            Long commentCount = commentMapper.selectCount(
+                    Wrappers.<CommentDO>lambdaQuery().eq(CommentDO::getIsDeleted, false));
+
+            SensitiveScanTaskDO taskDO = SensitiveScanTaskDO.builder()
+                    .status(0)
+                    .totalArticles(articleCount.intValue())
+                    .totalComments(commentCount.intValue())
+                    .scannedCount(0)
+                    .hitCount(0)
+                    .createTime(LocalDateTime.now())
+                    .build();
+            scanTaskMapper.insert(taskDO);
+
+            executeScanAsync(taskDO.getId());
+
+            return Response.success(taskDO.getId());
         }
-
-        Long articleCount = articleMapper.selectCount(
-                Wrappers.<ArticleDO>lambdaQuery().eq(ArticleDO::getIsDeleted, false));
-        Long commentCount = commentMapper.selectCount(
-                Wrappers.<CommentDO>lambdaQuery().eq(CommentDO::getIsDeleted, false));
-
-        SensitiveScanTaskDO taskDO = SensitiveScanTaskDO.builder()
-                .status(0)
-                .totalArticles(articleCount.intValue())
-                .totalComments(commentCount.intValue())
-                .scannedCount(0)
-                .hitCount(0)
-                .createTime(LocalDateTime.now())
-                .build();
-        scanTaskMapper.insert(taskDO);
-
-        executeScanAsync(taskDO.getId());
-
-        return Response.success(taskDO.getId());
     }
 
     @Async
