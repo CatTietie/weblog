@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${article.title} + ' - ' + ${blogName}">文章详情</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/tokyo-night-dark.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/highlight.min.js"></script>
+    <link th:href="${baseUrl} + 'assets/css/article.css'" rel="stylesheet">
+    <link rel="icon" th:href="${blogLogo}" type="image/x-icon">
+</head>
+<body class="bg-gray-50 dark:bg-gray-900">
+    <div th:replace="~{static/fragments/header :: header}"></div>
+
+    <main class="container max-w-screen-xl mx-auto p-4">
+        <div class="grid grid-cols-4 gap-7">
+            <!-- 左侧目录 -->
+            <aside class="hidden md:block md:col-span-1">
+                <div class="sticky top-[5.5rem]" id="toc-container">
+                    <nav class="bg-white border border-gray-200 rounded-lg p-4 dark:bg-gray-800 dark:border-gray-700">
+                        <h3 class="text-sm font-bold text-gray-900 mb-3 dark:text-white">目录</h3>
+                        <div id="toc-list" class="text-sm space-y-1"></div>
+                    </nav>
+                </div>
+            </aside>
+
+            <!-- 文章正文 -->
+            <div class="col-span-4 md:col-span-2 mb-3">
+                <div class="w-full p-5 mb-3 bg-white border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                    <article>
+                        <h1 class="mt-4 font-bold text-3xl" th:text="${article.title}">标题</h1>
+                        <div class="text-gray-400 flex items-center mt-5 text-sm">
+                            <span th:text="${#temporals.format(article.createTime, 'yyyy-MM-dd HH:mm')}">日期</span>
+                            <span class="ml-5" th:text="'分类: ' + ${article.categoryName}">分类</span>
+                            <span class="ml-5" th:text="'阅读 ' + ${article.readNum}">阅读量</span>
+                        </div>
+                        <div class="mt-5 article-content" th:utext="${article.content}">正文</div>
+
+                        <!-- 标签 -->
+                        <div class="mt-8 pt-4 border-t border-gray-100" th:if="${article.tags != null and !article.tags.isEmpty()}">
+                            <div class="flex flex-wrap gap-2">
+                                <a th:each="tag : ${article.tags}"
+                                   th:href="${baseUrl} + 'tag/' + ${tag.id} + '/index.html'"
+                                   class="inline-block bg-blue-50 text-blue-600 text-xs px-3 py-1 rounded-full hover:bg-blue-100">
+                                    <span th:text="'#' + ${tag.name}">标签</span>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- 上一篇/下一篇 -->
+                        <div class="mt-6 flex justify-between text-sm" th:if="${preArticle != null or nextArticle != null}">
+                            <a th:if="${preArticle != null}"
+                               th:href="${baseUrl} + 'article/' + ${preArticle.id} + '/index.html'"
+                               class="text-blue-600 hover:underline">
+                                &laquo; <span th:text="${preArticle.title}">上一篇</span>
+                            </a>
+                            <span th:if="${preArticle == null}"></span>
+                            <a th:if="${nextArticle != null}"
+                               th:href="${baseUrl} + 'article/' + ${nextArticle.id} + '/index.html'"
+                               class="text-blue-600 hover:underline">
+                                <span th:text="${nextArticle.title}">下一篇</span> &raquo;
+                            </a>
+                        </div>
+                    </article>
+
+                    <!-- 评论区 -->
+                    <div th:if="${commentProvider != null}" th:switch="${commentProvider}">
+                        <div th:case="'giscus'" th:insert="~{static/fragments/comment-giscus :: comment-giscus}"></div>
+                        <div th:case="'waline'" th:insert="~{static/fragments/comment-waline :: comment-waline}"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧边栏 -->
+            <aside class="hidden md:block md:col-span-1">
+                <div class="sticky top-[5.5rem]">
+                    <div th:replace="~{static/fragments/sidebar :: sidebar}"></div>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <div th:replace="~{static/fragments/footer :: footer}"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 代码高亮
+            document.querySelectorAll('pre code').forEach(function(block) {
+                hljs.highlightElement(block);
+            });
+            // 生成目录
+            var tocList = document.getElementById('toc-list');
+            var headings = document.querySelectorAll('.article-content h2, .article-content h3');
+            headings.forEach(function(heading) {
+                var link = document.createElement('a');
+                link.href = '#' + heading.id;
+                link.textContent = heading.textContent;
+                link.className = heading.tagName === 'H3'
+                    ? 'block pl-3 text-gray-500 hover:text-blue-600 truncate'
+                    : 'block text-gray-700 hover:text-blue-600 font-medium truncate';
+                tocList.appendChild(link);
+            });
+        });
+    </script>
+</body>
+</html>

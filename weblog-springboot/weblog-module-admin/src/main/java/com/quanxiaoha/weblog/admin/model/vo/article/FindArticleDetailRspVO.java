@@ -54,4 +54,9 @@ public class FindArticleDetailRspVO {
      */
     private String summary;
 
+    /**
+     * 文章状态
+     */
+    private Integer status;
+
 }

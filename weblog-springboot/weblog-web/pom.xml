@@ -37,6 +37,12 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+        <!-- WebSocket 依赖 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
+
         <!-- 免写冗余的 Java 样板式代码 -->
         <dependency>
             <groupId>org.projectlombok</groupId>

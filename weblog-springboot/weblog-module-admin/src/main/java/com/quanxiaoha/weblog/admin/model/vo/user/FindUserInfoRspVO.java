@@ -31,4 +31,9 @@ public class FindUserInfoRspVO {
      */
     private List<String> roles;
 
+    /**
+     * 权限列表
+     */
+    private List<String> permissions;
+
 }

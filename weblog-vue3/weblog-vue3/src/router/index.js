@@ -7,6 +7,7 @@ import TagArticleList from '@/pages/frontend/tag-article-list.vue'
 import ArticleDetail from '@/pages/frontend/article-detail.vue'
 import ResumeList from '@/pages/frontend/resume-list.vue'
 import ResumeEdit from '@/pages/frontend/resume-edit.vue'
+import ResumeShare from '@/pages/frontend/resume-share.vue'
 import NotFound from '@/pages/frontend/404.vue'
 import Login from '@/pages/admin/login.vue'
 import AdminIndex from '@/pages/admin/index.vue'
@@ -17,6 +18,17 @@ import AdminBlogSettings from '@/pages/admin/blog-settings.vue'
 import AdminUserStatistics from '@/pages/admin/userStatistics.vue'
 import AdminUserList from '@/pages/admin/user-list.vue'
 import AdminRoleList from '@/pages/admin/role-list.vue'
+import AdminResumeTemplateList from '@/pages/admin/resume-template-list.vue'
+import AdminCommentList from '@/pages/admin/comment-list.vue'
+import AdminNotificationSend from '@/pages/admin/notification-send.vue'
+import AdminRecommendDashboard from '@/pages/admin/recommendation-dashboard.vue'
+import AdminRecommendConfig from '@/pages/admin/recommendation-config.vue'
+import AdminStaticSiteConfig from '@/pages/admin/static-site-config.vue'
+import AdminStaticSiteTasks from '@/pages/admin/static-site-tasks.vue'
+import AdminWorkflowList from '@/pages/admin/workflow-list.vue'
+import AdminWorkflowEditor from '@/pages/admin/workflow-editor.vue'
+import AdminReminderLogList from '@/pages/admin/reminder-log-list.vue'
+import AdminSensitiveWordList from '@/pages/admin/sensitive-word-list.vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
 
 import Admin from '@/layouts/admin/admin.vue'
@@ -24,73 +36,80 @@ import Admin from '@/layouts/admin/admin.vue'
 // 统一在这里声明所有路由
 const routes = [
     {
-        path: '/', // 路由地址，首页
-        component: Index, // 对应组件
-        meta: { // meta 信息
-            title: 'Weblog 首页' // 页面标题
+        path: '/',
+        component: Index,
+        meta: {
+            titleKey: 'page.home'
         }
     },
     {
-        path: '/archive/list', // 归档页
+        path: '/archive/list',
         component: ArchiveList,
-        meta: { // meta 信息
-            title: 'Weblog 归档页'
+        meta: {
+            titleKey: 'page.archive'
         }
     },
     {
-        path: '/category/list', // 分类列表页
+        path: '/category/list',
         component: CategoryList,
-        meta: { // meta 信息
-            title: 'Weblog 分类列表页'
+        meta: {
+            titleKey: 'page.categoryList'
         }
     },
     {
-        path: '/category/article/list', // 分类文章页
+        path: '/category/article/list',
         component: CategoryArticleList,
-        meta: { // meta 信息
-            title: 'Weblog 分类文章页'
+        meta: {
+            titleKey: 'page.categoryArticles'
         }
     },
     {
-        path: '/tag/list', // 标签列表页
+        path: '/tag/list',
         component: TagList,
-        meta: { // meta 信息
-            title: 'Weblog 标签列表页'
+        meta: {
+            titleKey: 'page.tagList'
         }
     },
     {
-        path: '/tag/article/list', // 标签列表页
+        path: '/tag/article/list',
         component: TagArticleList,
-        meta: { // meta 信息
-            title: 'Weblog 标签文章页'
+        meta: {
+            titleKey: 'page.tagArticles'
         }
     },
     {
-        path: '/article/:articleId', // 文章详情页
+        path: '/article/:articleId',
         component: ArticleDetail,
-        meta: { // meta 信息
-            title: 'Weblog 详情页'
+        meta: {
+            titleKey: 'page.articleDetail'
         }
     },
     {
-        path: '/login', // 登录页
+        path: '/login',
         component: Login,
         meta: {
-            title: 'Weblog 登录页'
+            titleKey: 'page.login'
         }
     },
     {
         path: '/resume/list',
         component: ResumeList,
         meta: {
-            title: '我的简历'
+            titleKey: 'page.resume'
         }
     },
     {
         path: '/resume/edit',
         component: ResumeEdit,
         meta: {
-            title: '编辑简历'
+            titleKey: 'page.resumeEdit'
+        }
+    },
+    {
+        path: '/resume/s/:shareCode',
+        component: ResumeShare,
+        meta: {
+            titleKey: 'page.resumePreview'
         }
     },
     {
@@ -98,72 +117,155 @@ const routes = [
         name: 'NotFound',
         component: NotFound,
         meta: {
-            title: '404 页'
+            titleKey: 'page.notFound'
         }
     },
     {
-        path: "/admin/index", // 后台首页
+        path: "/admin/index",
         component: Admin,
-        // 使用到 admin.vue 布局的，都需要放置在其子路由下面
         children: [
             {
                 path: "/admin/index/article-stats",
                 component: AdminIndex,
                 meta: {
-                    title: '文章统计'
+                    titleKey: 'page.articleStats'
                 }
             },
             {
                 path:"/admin/index/user-stats",
                 component: AdminUserStatistics,
                 meta:{
-                    title:'用户统计'
+                    titleKey: 'page.userStats'
                 }
             },
             {
                 path: "/admin/article/list",
                 component: AdminArticleList,
                 meta: {
-                    title: '文章管理'
+                    titleKey: 'page.articleManage'
                 }
             },
             {
                 path: "/admin/category/list",
                 component: AdminCategoryList,
                 meta: {
-                    title: '分类管理'
+                    titleKey: 'page.categoryManage'
                 }
             },
             {
                 path: "/admin/tag/list",
                 component: AdminTagList,
                 meta: {
-                    title: '标签管理'
+                    titleKey: 'page.tagManage'
                 }
             },
             {
                 path: "/admin/blog/settings",
                 component: AdminBlogSettings,
                 meta: {
-                    title: '博客设置'
+                    titleKey: 'page.blogSettings'
                 }
             },
             {
                 path: "/admin/user/list",
                 component: AdminUserList,
                 meta: {
-                    title: '用户管理'
+                    titleKey: 'page.userManage'
                 }
             },
             {
                 path: "/admin/role/list",
                 component: AdminRoleList,
                 meta: {
-                    title: '角色管理'
+                    titleKey: 'page.roleManage'
+                }
+            },
+            {
+                path: "/admin/resume-template/list",
+                component: AdminResumeTemplateList,
+                meta: {
+                    titleKey: 'page.templateManage'
+                }
+            },
+            {
+                path: "/admin/comment/list",
+                component: AdminCommentList,
+                meta: {
+                    titleKey: 'page.commentManage'
+                }
+            },
+            {
+                path: "/admin/notification/send",
+                component: AdminNotificationSend,
+                meta: {
+                    titleKey: 'page.sendNotification'
+                }
+            },
+            {
+                path: "/admin/recommendation/dashboard",
+                component: AdminRecommendDashboard,
+                meta: {
+                    titleKey: 'page.recommendDashboard'
+                }
+            },
+            {
+                path: "/admin/recommendation/config",
+                component: AdminRecommendConfig,
+                meta: {
+                    titleKey: 'page.recommendConfig'
+                }
+            },
+            {
+                path: "/admin/static-site/config",
+                component: AdminStaticSiteConfig,
+                meta: {
+                    titleKey: 'page.staticSiteConfig'
+                }
+            },
+            {
+                path: "/admin/static-site/tasks",
+                component: AdminStaticSiteTasks,
+                meta: {
+                    titleKey: 'page.staticSiteTasks'
+                }
+            },
+            {
+                path: "/admin/workflow/list",
+                component: AdminWorkflowList,
+                meta: {
+                    titleKey: 'page.workflowList'
+                }
+            },
+            {
+                path: "/admin/workflow/editor",
+                component: AdminWorkflowEditor,
+                meta: {
+                    titleKey: 'page.workflowEditor'
+                }
+            },
+            {
+                path: "/admin/workflow/editor/:id",
+                component: AdminWorkflowEditor,
+                meta: {
+                    titleKey: 'page.workflowEditor'
+                }
+            },
+            {
+                path: "/admin/reminder-log/list",
+                component: AdminReminderLogList,
+                meta: {
+                    titleKey: 'page.reminderLog'
+                }
+            },
+            {
+                path: "/admin/sensitive-word/list",
+                component: AdminSensitiveWordList,
+                meta: {
+                    titleKey: 'page.sensitiveWord'
                 }
             },
         ]
-        
+
     }
 ]
 

@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -57,6 +58,8 @@ public class AdminResumeServiceImpl implements AdminResumeService {
                         .id(r.getId())
                         .name(r.getName())
                         .templateId(r.getTemplateId())
+                        .shareEnabled(r.getShareEnabled() != null && r.getShareEnabled() == 1)
+                        .shareCode(r.getShareCode())
                         .updateTime(r.getUpdateTime())
                         .build())
                 .collect(Collectors.toList());
@@ -221,5 +224,70 @@ public class AdminResumeServiceImpl implements AdminResumeService {
                 .build();
 
         return Response.success(vo);
+    }
+
+    @Override
+    public Response toggleShare(ToggleShareReqVO toggleShareReqVO) {
+        Long userId = getCurrentUserId();
+        ResumeDO resumeDO = resumeMapper.selectByIdAndUserId(toggleShareReqVO.getResumeId(), userId);
+
+        if (Objects.isNull(resumeDO)) {
+            throw new BizException(ResponseCodeEnum.RESUME_NOT_BELONG_TO_USER);
+        }
+
+        if (Boolean.TRUE.equals(toggleShareReqVO.getEnabled())) {
+            if (resumeDO.getShareCode() == null || resumeDO.getShareCode().isEmpty()) {
+                resumeDO.setShareCode(generateShareCode());
+            }
+            resumeDO.setShareEnabled(1);
+        } else {
+            resumeDO.setShareEnabled(0);
+        }
+        resumeDO.setUpdateTime(LocalDateTime.now());
+        resumeMapper.updateById(resumeDO);
+
+        ShareInfoRspVO vo = ShareInfoRspVO.builder()
+                .shareEnabled(resumeDO.getShareEnabled() == 1)
+                .shareCode(resumeDO.getShareCode())
+                .build();
+
+        return Response.success(vo);
+    }
+
+    @Override
+    public Response getShareInfo(FindResumeDetailReqVO findResumeDetailReqVO) {
+        Long userId = getCurrentUserId();
+        ResumeDO resumeDO = resumeMapper.selectByIdAndUserId(findResumeDetailReqVO.getResumeId(), userId);
+
+        if (Objects.isNull(resumeDO)) {
+            throw new BizException(ResponseCodeEnum.RESUME_NOT_FOUND);
+        }
+
+        ShareInfoRspVO vo = ShareInfoRspVO.builder()
+                .shareEnabled(resumeDO.getShareEnabled() != null && resumeDO.getShareEnabled() == 1)
+                .shareCode(resumeDO.getShareCode())
+                .build();
+
+        return Response.success(vo);
+    }
+
+    private String generateShareCode() {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        SecureRandom random = new SecureRandom();
+        for (int attempt = 0; attempt < 3; attempt++) {
+            StringBuilder sb = new StringBuilder(10);
+            for (int i = 0; i < 10; i++) {
+                sb.append(chars.charAt(random.nextInt(chars.length())));
+            }
+            String code = sb.toString();
+            if (resumeMapper.selectByShareCode(code) == null) {
+                return code;
+            }
+        }
+        StringBuilder sb = new StringBuilder(12);
+        for (int i = 0; i < 12; i++) {
+            sb.append(chars.charAt(random.nextInt(chars.length())));
+        }
+        return sb.toString();
     }
 }

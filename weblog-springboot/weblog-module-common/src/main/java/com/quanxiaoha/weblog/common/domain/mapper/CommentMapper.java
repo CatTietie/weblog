@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.quanxiaoha.weblog.common.domain.dos.CommentDO;
 
 import java.util.List;
+import java.util.Objects;
 
 public interface CommentMapper extends BaseMapper<CommentDO> {
 
@@ -16,6 +17,7 @@ public interface CommentMapper extends BaseMapper<CommentDO> {
                 .eq(CommentDO::getArticleId, articleId)
                 .isNull(CommentDO::getParentId)
                 .eq(CommentDO::getIsDeleted, false)
+                .eq(CommentDO::getStatus, 1)
                 .orderByDesc(CommentDO::getCreateTime);
         return selectPage(page, wrapper);
     }
@@ -24,7 +26,17 @@ public interface CommentMapper extends BaseMapper<CommentDO> {
         return selectList(Wrappers.<CommentDO>lambdaQuery()
                 .in(CommentDO::getParentId, parentIds)
                 .eq(CommentDO::getIsDeleted, false)
+                .eq(CommentDO::getStatus, 1)
                 .orderByAsc(CommentDO::getCreateTime));
+    }
+
+    default Page<CommentDO> selectPageListForAdmin(Long current, Long size, Integer status) {
+        Page<CommentDO> page = new Page<>(current, size);
+        LambdaQueryWrapper<CommentDO> wrapper = Wrappers.<CommentDO>lambdaQuery()
+                .eq(CommentDO::getIsDeleted, false)
+                .eq(Objects.nonNull(status), CommentDO::getStatus, status)
+                .orderByDesc(CommentDO::getCreateTime);
+        return selectPage(page, wrapper);
     }
 
     default Long selectCommentCountByArticleId(Long articleId) {

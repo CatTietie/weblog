@@ -21,4 +21,10 @@ public interface ResumeMapper extends BaseMapper<ResumeDO> {
                 .eq(ResumeDO::getUserId, userId);
         return selectOne(wrapper);
     }
+
+    default ResumeDO selectByShareCode(String shareCode) {
+        LambdaQueryWrapper<ResumeDO> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ResumeDO::getShareCode, shareCode);
+        return selectOne(wrapper);
+    }
 }

@@ -33,4 +33,6 @@ public class CategoryDO {
     private LocalDateTime updateTime;
 
     private Boolean isDeleted;
+
+    private Long tenantId;
 }

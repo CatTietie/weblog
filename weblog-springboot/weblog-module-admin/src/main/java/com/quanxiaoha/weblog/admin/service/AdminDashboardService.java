@@ -2,6 +2,9 @@ package com.quanxiaoha.weblog.admin.service;
 
 import com.quanxiaoha.weblog.common.utils.Response;
 
+import javax.servlet.http.HttpServletResponse;
+import java.time.LocalDate;
+
 /**
  * @author: Group 5
 
@@ -63,4 +66,9 @@ public interface AdminDashboardService {
      * @return
      */
     Response findDashboardUpdateStatistics();
+
+    /**
+     * 导出仪表盘数据为Excel
+     */
+    void exportDashboardExcel(LocalDate startDate, LocalDate endDate, HttpServletResponse response);
 }

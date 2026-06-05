@@ -47,7 +47,7 @@
         <!-- 依赖包版本 -->
         <lombok.version>1.18.28</lombok.version>
         <guava.version>31.1-jre</guava.version>
-        <commons-lang3.version>3.12.0</commons-lang3.version>
+        <commons-lang3.version>3.14.0</commons-lang3.version>
         <jackson.version>2.15.2</jackson.version>
         <knife4j.version>4.3.0</knife4j.version>
         <mybatis-plus.version>3.5.2</mybatis-plus.version>
@@ -56,6 +56,7 @@
         <aliyun.oss.version>3.16.1</aliyun.oss.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
         <commonmark.version>0.20.0</commonmark.version>
+        <poi.version>5.2.3</poi.version>
     </properties>
 
     <!-- 统一依赖管理 -->
@@ -186,6 +187,13 @@
                 <groupId>org.commonmark</groupId>
                 <artifactId>commonmark-ext-task-list-items</artifactId>
                 <version>${commonmark.version}</version>
+            </dependency>
+
+            <!-- Apache POI Excel -->
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml</artifactId>
+                <version>${poi.version}</version>
             </dependency>
 
 

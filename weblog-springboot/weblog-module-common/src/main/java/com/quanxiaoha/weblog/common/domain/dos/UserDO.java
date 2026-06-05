@@ -34,9 +34,13 @@ public class UserDO {
 
     private Long roleId;
 
+    private String email;
+
     private LocalDateTime createTime;
 
     private LocalDateTime updateTime;
 
     private Boolean isDeleted;
+
+    private Long tenantId;
 }

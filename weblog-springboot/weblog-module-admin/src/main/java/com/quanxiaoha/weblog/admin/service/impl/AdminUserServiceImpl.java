@@ -10,21 +10,27 @@ import com.quanxiaoha.weblog.admin.model.vo.user.UpdateUserReqVO;
 import com.quanxiaoha.weblog.admin.model.vo.user.UserPageListReqVO;
 import com.quanxiaoha.weblog.admin.model.vo.user.UserRspVO;
 import com.quanxiaoha.weblog.admin.service.AdminUserService;
+import com.quanxiaoha.weblog.admin.workflow.engine.UserRegisteredEvent;
 import com.quanxiaoha.weblog.common.domain.dos.BlogSettingsDO;
+import com.quanxiaoha.weblog.common.domain.dos.PermissionDO;
 import com.quanxiaoha.weblog.common.domain.dos.RoleDO;
+import com.quanxiaoha.weblog.common.domain.dos.RolePermissionDO;
 import com.quanxiaoha.weblog.common.domain.dos.UserDO;
 import com.quanxiaoha.weblog.common.domain.dos.UserRoleDO;
 import com.quanxiaoha.weblog.common.domain.mapper.BlogSettingsMapper;
+import com.quanxiaoha.weblog.common.domain.mapper.PermissionMapper;
 import com.quanxiaoha.weblog.common.domain.mapper.RoleMapper;
 import com.quanxiaoha.weblog.common.domain.mapper.RolePermissionMapper;
 import com.quanxiaoha.weblog.common.domain.mapper.UserMapper;
 import com.quanxiaoha.weblog.common.domain.mapper.UserRoleMapper;
+import com.quanxiaoha.weblog.jwt.service.PermissionCacheService;
 import com.quanxiaoha.weblog.common.enums.ResponseCodeEnum;
 import com.quanxiaoha.weblog.common.enums.UserStatusEnum;
 import com.quanxiaoha.weblog.common.utils.PageResponse;
 import com.quanxiaoha.weblog.common.utils.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -55,6 +61,12 @@ public class AdminUserServiceImpl implements AdminUserService {
     private RoleMapper roleMapper;
     @Autowired
     private RolePermissionMapper rolePermissionMapper;
+    @Autowired
+    private PermissionMapper permissionMapper;
+    @Autowired
+    private PermissionCacheService permissionCacheService;
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     private static final String ROLE_ADMIN = "ROLE_ADMIN";
     private static final Long ADMIN_ROLE_ID = 1L;
@@ -78,17 +90,19 @@ public class AdminUserServiceImpl implements AdminUserService {
 
         // 查询用户信息
         UserDO userDO = userMapper.findByUsername(username);
-        
+
         List<String> roles = new ArrayList<>();
-        
+        Long roleId = null;
+
         // 优先通过 roleId 从角色表获取角色
         if (Objects.nonNull(userDO) && Objects.nonNull(userDO.getRoleId())) {
+            roleId = userDO.getRoleId();
             RoleDO roleDO = roleMapper.selectById(userDO.getRoleId());
             if (Objects.nonNull(roleDO)) {
                 roles.add(roleDO.getCode());
             }
         }
-        
+
         // 如果没有 roleId，则从 t_user_role 表获取（兼容旧数据）
         if (CollectionUtils.isEmpty(roles)) {
             List<UserRoleDO> roleDOS = userRoleMapper.selectByUsername(username);
@@ -97,10 +111,26 @@ public class AdminUserServiceImpl implements AdminUserService {
             }
         }
 
+        // 加载权限列表
+        List<String> permissions = loadUserPermissions(roleId, roles);
+
         return Response.success(FindUserInfoRspVO.builder()
                 .username(username)
                 .roles(roles)
+                .permissions(permissions)
                 .build());
+    }
+
+    private List<String> loadUserPermissions(Long roleId, List<String> roles) {
+        if (Objects.isNull(roleId)) {
+            return new ArrayList<>();
+        }
+
+        if (roles.contains(ROLE_ADMIN)) {
+            return permissionCacheService.getAllPermissionCodes();
+        }
+
+        return permissionCacheService.getPermissionCodesByRoleId(roleId);
     }
 
     @Override
@@ -148,6 +178,8 @@ public class AdminUserServiceImpl implements AdminUserService {
                 .zhihuHomepage("")
                 .build();
         blogSettingsMapper.insert(blogSettingsDO);
+
+        eventPublisher.publishEvent(new UserRegisteredEvent(this, userDO.getId(), username, null));
 
         return Response.success();
     }

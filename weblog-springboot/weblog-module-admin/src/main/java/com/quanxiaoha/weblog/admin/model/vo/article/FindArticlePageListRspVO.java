@@ -39,4 +39,9 @@ public class FindArticlePageListRspVO  {
      */
     private LocalDateTime createTime;
 
+    /**
+     * 文章状态
+     */
+    private Integer status;
+
 }

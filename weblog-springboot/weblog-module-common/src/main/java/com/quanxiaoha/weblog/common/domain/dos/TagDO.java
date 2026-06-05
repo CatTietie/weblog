@@ -33,4 +33,6 @@ public class TagDO {
     private LocalDateTime updateTime;
 
     private Boolean isDeleted;
+
+    private Long tenantId;
 }

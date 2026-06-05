@@ -1,14 +1,21 @@
 
 <template>
-   <!-- 设置语言为中文 -->
-   <el-config-provider :locale="locale">
+   <el-config-provider :locale="elementLocale">
       <router-view></router-view>
    </el-config-provider>
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
-const locale = zhCn
+import en from 'element-plus/dist/locale/en.mjs'
+import { useLocaleStore } from '@/stores/locale'
+
+const localeStore = useLocaleStore()
+
+const elementLocale = computed(() => {
+  return localeStore.currentLocale === 'zh' ? zhCn : en
+})
 </script>
 
 <style>

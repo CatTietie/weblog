@@ -46,7 +46,7 @@
                                 :class="[current > 1 ? '' : 'cursor-not-allowed']"
                                 >
 
-                                <span class="sr-only">上一页</span>
+                                <span class="sr-only">{{ t('common.prevPage') }}</span>
                                 <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
                                     viewBox="0 0 6 10">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
@@ -69,7 +69,7 @@
                                 class="flex items-center justify-center px-4 h-10 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
                                 :class="[current < pages ? '' : 'cursor-not-allowed']"
                                 >
-                                <span class="sr-only">下一页</span>
+                                <span class="sr-only">{{ t('common.nextPage') }}</span>
                                 <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
                                     viewBox="0 0 6 10">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
@@ -115,6 +115,9 @@ import ScrollToTopButton from '@/layouts/frontend/components/ScrollToTopButton.v
 import { getArchivePageList } from '@/api/frontend/archive'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const router = useRouter()
 

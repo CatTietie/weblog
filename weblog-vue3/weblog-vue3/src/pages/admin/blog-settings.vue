@@ -3,13 +3,13 @@
         <!-- 卡片组件， shadow="never" 指定 card 卡片组件没有阴影 -->
         <el-card shadow="never">
             <el-form ref="formRef" :model="form" label-width="160px" :rules="rules">
-                <el-form-item label="博客名称" prop="name">
+                <el-form-item :label="t('settings.blogName')" prop="name">
                     <el-input v-model="form.name" clearable />
                 </el-form-item>
-                <el-form-item label="作者名" prop="author">
+                <el-form-item :label="t('settings.authorName')" prop="author">
                     <el-input v-model="form.author" clearable />
                 </el-form-item>
-                <el-form-item label="博客 LOGO" prop="logo">
+                <el-form-item :label="t('settings.blogLogo')" prop="logo">
                     <el-upload class="avatar-uploader" action="#" :on-change="handleLogoChange" :auto-upload="false"
                         :show-file-list="false">
                         <img v-if="form.logo" :src="form.logo" class="avatar" />
@@ -18,7 +18,7 @@
                         </el-icon>
                     </el-upload>
                 </el-form-item>
-                <el-form-item label="作者头像" prop="avatar">
+                <el-form-item :label="t('settings.authorAvatar')" prop="avatar">
                     <el-upload class="avatar-uploader" action="#" :on-change="handleAvatarChange" :auto-upload="false"
                         :show-file-list="false">
                         <img v-if="form.avatar" :src="form.avatar" class="avatar" />
@@ -27,46 +27,46 @@
                         </el-icon>
                     </el-upload>
                 </el-form-item>
-                <el-form-item label="介绍语" prop="introduction">
+                <el-form-item :label="t('settings.introduction')" prop="introduction">
                     <el-input v-model="form.introduction" type="textarea" />
                 </el-form-item>
                 <!-- 开启 Github 访问 -->
-                <el-form-item label="开启 GihHub 访问">
+                <el-form-item :label="t('settings.enableGithub')">
                     <el-switch v-model="isGithubChecked" inline-prompt :active-icon="Check" :inactive-icon="Close"
                         @change="githubSwitchChange" />
                 </el-form-item>
-                <el-form-item label="GitHub 主页访问地址" v-if="isGithubChecked">
-                    <el-input v-model="form.githubHomepage" clearable placeholder="请输入 GitHub 主页访问的 URL" />
+                <el-form-item :label="t('settings.githubUrl')" v-if="isGithubChecked">
+                    <el-input v-model="form.githubHomepage" clearable :placeholder="t('settings.githubPlaceholder')" />
                 </el-form-item>
 
                 <!-- 开启 Gitee 访问 -->
-                <el-form-item label="开启 Gitee 访问">
+                <el-form-item :label="t('settings.enableGitee')">
                     <el-switch v-model="isGiteeChecked" inline-prompt :active-icon="Check" :inactive-icon="Close"
                         @change="giteeSwitchChange" />
                 </el-form-item>
-                <el-form-item label="Gitee 主页访问地址" v-if="isGiteeChecked">
-                    <el-input v-model="form.giteeHomepage" clearable placeholder="请输入 Gitee 主页访问的 URL" />
+                <el-form-item :label="t('settings.giteeUrl')" v-if="isGiteeChecked">
+                    <el-input v-model="form.giteeHomepage" clearable :placeholder="t('settings.giteePlaceholder')" />
                 </el-form-item>
 
                 <!-- 开启知乎访问 -->
-                <el-form-item label="开启知乎访问">
+                <el-form-item :label="t('settings.enableZhihu')">
                     <el-switch v-model="isZhihuChecked" inline-prompt :active-icon="Check" :inactive-icon="Close"
                         @change="zhihuSwitchChange" />
                 </el-form-item>
-                <el-form-item label="知乎主页访问地址" v-if="isZhihuChecked">
-                    <el-input v-model="form.zhihuHomepage" clearable placeholder="请输入知乎主页访问的 URL" />
+                <el-form-item :label="t('settings.zhihuUrl')" v-if="isZhihuChecked">
+                    <el-input v-model="form.zhihuHomepage" clearable :placeholder="t('settings.zhihuPlaceholder')" />
                 </el-form-item>
 
                 <!-- 开启 CSDN 访问 -->
-                <el-form-item label="开启 CSDN 访问">
+                <el-form-item :label="t('settings.enableCsdn')">
                     <el-switch v-model="isCSDNChecked" inline-prompt :active-icon="Check" :inactive-icon="Close"
                         @change="csdnSwitchChange" />
                 </el-form-item>
-                <el-form-item label="CSDN 主页访问地址" v-if="isCSDNChecked">
-                    <el-input v-model="form.csdnHomepage" clearable placeholder="请输入 CSDN 主页访问的 URL" />
+                <el-form-item :label="t('settings.csdnUrl')" v-if="isCSDNChecked">
+                    <el-input v-model="form.csdnHomepage" clearable :placeholder="t('settings.csdnPlaceholder')" />
                 </el-form-item>
                 <el-form-item>
-                    <el-button type="primary" :loading="btnLoading" @click="onSubmit">保存</el-button>
+                    <el-button type="primary" :loading="btnLoading" @click="onSubmit">{{ t('common.save') }}</el-button>
                 </el-form-item>
             </el-form>
         </el-card>
@@ -79,6 +79,9 @@ import { Check, Close } from '@element-plus/icons-vue'
 import { getBlogSettingsDetail, updateBlogSettings } from '@/api/admin/blogsettings'
 import { uploadFile } from '@/api/admin/file'
 import { showMessage } from '@/composables/util'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 // 是否开启 GitHub
 const isGithubChecked = ref(false)
@@ -108,11 +111,11 @@ const form = reactive({
 
 // 规则校验
 const rules = {
-    name: [{ required: true, message: '请输入博客名称', trigger: 'blur' }],
-    author: [{ required: true, message: '请输入作者名', trigger: 'blur' }],
-    logo: [{ required: true, message: '请上传博客 LOGO', trigger: 'blur' }],
-    avatar: [{ required: true, message: '请上传作者头像', trigger: 'blur' }],
-    introduction: [{ required: true, message: '请输入介绍语', trigger: 'blur' }],
+    name: [{ required: true, message: t('validation.blogNameRequired'), trigger: 'blur' }],
+    author: [{ required: true, message: t('validation.authorNameRequired'), trigger: 'blur' }],
+    logo: [{ required: true, message: t('validation.blogLogoRequired'), trigger: 'blur' }],
+    avatar: [{ required: true, message: t('validation.authorAvatarRequired'), trigger: 'blur' }],
+    introduction: [{ required: true, message: t('validation.introductionRequired'), trigger: 'blur' }],
 }
 
 // 监听 Github Switch 改变事件
@@ -183,7 +186,7 @@ initBlogSettings()
 const handleLogoChange = (file) => {
     // 表单对象
     let formData = new FormData()
-    // 添加 file 字段，并将文件传入 
+    // 添加 file 字段，并将文件传入
     formData.append('file', file.raw)
     uploadFile(formData).then((e) => {
         // 响参失败，提示错误消息
@@ -195,7 +198,7 @@ const handleLogoChange = (file) => {
 
         // 成功则设置 logo 链接，并提示成功
         form.logo = e.data.url
-        showMessage('上传成功')
+        showMessage(t('common.uploadSuccess'))
     })
 }
 
@@ -203,7 +206,7 @@ const handleLogoChange = (file) => {
 const handleAvatarChange = (file) => {
     // 表单对象
     let formData = new FormData()
-    // 添加 file 字段，并将文件传入 
+    // 添加 file 字段，并将文件传入
     formData.append('file', file.raw)
     uploadFile(formData).then((e) => {
         // 响参失败，提示错误消息
@@ -215,7 +218,7 @@ const handleAvatarChange = (file) => {
 
         // 成功则设置作者头像链接，并提示成功
         form.avatar = e.data.url
-        showMessage('上传成功')
+        showMessage(t('common.uploadSuccess'))
     })
 }
 
@@ -238,10 +241,10 @@ const onSubmit = () => {
                 showMessage(message, 'error')
                 return
             }
-            
+
             // 重新渲染页面中的信息
             initBlogSettings()
-            showMessage('保存成功')
+            showMessage(t('common.saveSuccess'))
         }).finally(() => btnLoading.value = false) // 隐藏保存按钮 loading
     })
 }

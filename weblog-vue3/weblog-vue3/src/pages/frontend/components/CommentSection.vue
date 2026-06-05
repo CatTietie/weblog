@@ -2,7 +2,7 @@
     <div class="w-full p-5 mb-3 bg-white border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700">
         <!-- 评论数标题 -->
         <h3 class="text-lg font-semibold text-gray-800 mb-4">
-            评论 <span class="text-gray-400 text-sm font-normal">({{ totalCount }})</span>
+            {{ t('comment.title') }} <span class="text-gray-400 text-sm font-normal">({{ totalCount }})</span>
         </h3>
 
         <!-- 评论输入框 -->
@@ -12,7 +12,7 @@
                 rows="3"
                 maxlength="500"
                 class="w-full p-3 text-sm text-gray-700 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 resize-none"
-                placeholder="写下你的评论..."
+                :placeholder="t('comment.placeholder')"
             ></textarea>
             <div class="flex justify-between items-center mt-2">
                 <span class="text-xs text-gray-400">{{ commentContent.length }}/500</span>
@@ -20,7 +20,7 @@
                     @click="handlePublishComment"
                     class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none"
                 >
-                    发送
+                    {{ t('comment.send') }}
                 </button>
             </div>
         </div>
@@ -57,9 +57,8 @@
                                 @click="toggleReplyInput(comment.id)"
                                 class="text-xs text-gray-400 hover:text-blue-500 transition-colors"
                             >
-                                回复
-                            </button>
-                        </div>
+                                {{ t('comment.reply') }}
+                            </button>                        </div>
 
                         <!-- 回复输入框 -->
                         <div v-if="replyingTo === comment.id" class="mt-3">
@@ -75,13 +74,13 @@
                                     @click="replyingTo = null; replyContent = ''"
                                     class="px-3 py-1 text-xs text-gray-500 border border-gray-300 rounded-lg hover:bg-gray-100"
                                 >
-                                    取消
+                                    {{ t('common.cancel') }}
                                 </button>
                                 <button
                                     @click="handleReply(comment.id)"
                                     class="px-3 py-1 text-xs text-white bg-blue-600 rounded-lg hover:bg-blue-700"
                                 >
-                                    发送
+                                    {{ t('comment.send') }}
                                 </button>
                             </div>
                         </div>
@@ -96,7 +95,7 @@
                                     <div class="flex items-center space-x-2">
                                         <span class="text-xs font-medium text-gray-800">{{ reply.username }}</span>
                                         <span v-if="reply.replyToUsername" class="text-xs text-gray-400">
-                                            回复 <span class="text-gray-600">{{ reply.replyToUsername }}</span>
+                                            {{ t('comment.reply') }} <span class="text-gray-600">{{ reply.replyToUsername }}</span>
                                         </span>
                                         <span class="text-xs text-gray-400">{{ formatTime(reply.createTime) }}</span>
                                     </div>
@@ -124,7 +123,7 @@
 
         <!-- 空状态 -->
         <div v-else class="text-center py-8 text-gray-400 text-sm">
-            暂无评论，快来抢沙发吧~
+            {{ t('comment.noComments') }}
         </div>
 
         <!-- 加载更多 -->
@@ -133,7 +132,7 @@
                 @click="loadMore"
                 class="px-4 py-2 text-sm text-blue-600 border border-blue-300 rounded-lg hover:bg-blue-50"
             >
-                加载更多
+                {{ t('comment.loadMore') }}
             </button>
         </div>
     </div>
@@ -144,6 +143,9 @@ import { ref, onMounted, watch, computed } from 'vue'
 import { getCommentList, publishComment, likeComment } from '@/api/frontend/comment'
 import { useUserStore } from '@/stores/user'
 import { showMessage } from '@/composables/util'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps({
     articleId: {
@@ -190,12 +192,12 @@ function formatTime(timeStr) {
     const now = new Date()
     const diff = now - date
     const minutes = Math.floor(diff / 60000)
-    if (minutes < 1) return '刚刚'
-    if (minutes < 60) return minutes + ' 分钟前'
+    if (minutes < 1) return t('time.justNow')
+    if (minutes < 60) return minutes + ' ' + t('time.minutesAgo')
     const hours = Math.floor(minutes / 60)
-    if (hours < 24) return hours + ' 小时前'
+    if (hours < 24) return hours + ' ' + t('time.hoursAgo')
     const days = Math.floor(hours / 24)
-    if (days < 30) return days + ' 天前'
+    if (days < 30) return days + ' ' + t('time.daysAgo')
     const year = date.getFullYear()
     const month = String(date.getMonth() + 1).padStart(2, '0')
     const day = String(date.getDate()).padStart(2, '0')
@@ -226,11 +228,11 @@ function loadMore() {
 
 function handlePublishComment() {
     if (!isLoggedIn.value) {
-        showMessage('请先登录', 'warning')
+        showMessage(t('message.pleaseLogin'), 'warning')
         return
     }
     if (!commentContent.value.trim()) {
-        showMessage('评论内容不能为空', 'warning')
+        showMessage(t('validation.commentRequired'), 'warning')
         return
     }
     publishComment({
@@ -238,7 +240,7 @@ function handlePublishComment() {
         content: commentContent.value.trim()
     }).then(res => {
         if (res.success) {
-            showMessage('评论发表成功', 'success')
+            showMessage(t('message.commentSuccess'), 'success')
             commentContent.value = ''
             currentPage.value = 1
             loadComments()
@@ -248,11 +250,11 @@ function handlePublishComment() {
 
 function handleReply(parentId) {
     if (!isLoggedIn.value) {
-        showMessage('请先登录', 'warning')
+        showMessage(t('message.pleaseLogin'), 'warning')
         return
     }
     if (!replyContent.value.trim()) {
-        showMessage('回复内容不能为空', 'warning')
+        showMessage(t('validation.replyRequired'), 'warning')
         return
     }
     publishComment({
@@ -261,7 +263,7 @@ function handleReply(parentId) {
         parentId: parentId
     }).then(res => {
         if (res.success) {
-            showMessage('回复成功', 'success')
+            showMessage(t('message.replySuccess'), 'success')
             replyContent.value = ''
             replyingTo.value = null
             currentPage.value = 1

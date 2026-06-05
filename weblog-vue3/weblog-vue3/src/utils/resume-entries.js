@@ -1,6 +1,6 @@
 const EXPERIENCE_TYPES = ['education', 'work', 'project']
 
-const ENTRY_HEADER_PATTERN = /^(\d{4}|项目|[一-龥].*[-·—–])/
+export const ENTRY_HEADER_PATTERN = /^(\d{4}|项目|[一-龥].*[-·—–])/
 
 export function parseModuleEntries(content, type, moduleId) {
   if (!content || !content.trim()) {

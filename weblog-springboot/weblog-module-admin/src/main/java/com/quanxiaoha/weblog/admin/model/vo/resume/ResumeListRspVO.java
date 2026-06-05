@@ -19,5 +19,9 @@ public class ResumeListRspVO {
 
     private String templateId;
 
+    private Boolean shareEnabled;
+
+    private String shareCode;
+
     private LocalDateTime updateTime;
 }

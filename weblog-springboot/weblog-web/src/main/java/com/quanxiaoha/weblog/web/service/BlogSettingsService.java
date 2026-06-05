@@ -1,17 +1,11 @@
 package com.quanxiaoha.weblog.web.service;
 
 import com.quanxiaoha.weblog.common.utils.Response;
+import com.quanxiaoha.weblog.web.model.vo.blogsettings.FindBlogSettingsDetailRspVO;
 
-/**
- * @author: Group 5
-
- * @date: 2023-09-15 14:03
- * @description: 博客设置
- **/
 public interface BlogSettingsService {
-    /**
-     * 获取博客设置信息
-     * @return
-     */
+
     Response findDetail();
+
+    FindBlogSettingsDetailRspVO getLatestBlogSettings();
 }

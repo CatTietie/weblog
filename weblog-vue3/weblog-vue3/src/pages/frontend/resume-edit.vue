@@ -17,6 +17,9 @@
                     @add-language="handleAddLanguage"
                     @remove-language="handleRemoveLanguage"
                 />
+                <el-button @click="handleDiagnosis">
+                    <el-icon class="mr-1"><DataAnalysis /></el-icon>诊断
+                </el-button>
             </div>
             <div class="flex items-center gap-2">
                 <el-dropdown @command="handleExport" :disabled="exporting">
@@ -71,6 +74,8 @@
                 @update:module-content="handleModuleContentUpdate"
             />
         </div>
+
+        <ResumeDiagnosis ref="diagnosisRef" :modules="modules" :cover-data="coverData" />
     </main>
 
     <Footer></Footer>
@@ -80,7 +85,7 @@
 import { ref, reactive, onMounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useDebounceFn } from '@vueuse/core'
-import { Upload, Download, ArrowDown } from '@element-plus/icons-vue'
+import { Upload, Download, ArrowDown, DataAnalysis } from '@element-plus/icons-vue'
 import Header from '@/layouts/frontend/components/Header.vue'
 import Footer from '@/layouts/frontend/components/Footer.vue'
 import BlockEditor from '@/components/resume/BlockEditor.vue'
@@ -88,6 +93,7 @@ import ResumePreview from '@/components/resume/ResumePreview.vue'
 import TemplateSelector from '@/components/resume/TemplateSelector.vue'
 import CoverSettings from '@/components/resume/CoverSettings.vue'
 import LanguageSwitcher from '@/components/resume/LanguageSwitcher.vue'
+import ResumeDiagnosis from '@/components/resume/ResumeDiagnosis.vue'
 import { parseResume, serializeResume, validateResumeMarkdown, generateId } from '@/utils/resume-parser'
 import { exportResumePdf, exportResumePdfAsBlob } from '@/utils/resume-pdf-export'
 import { parseLanguagesData, serializeLanguagesData, getLanguageLabel } from '@/utils/resume-languages'
@@ -108,6 +114,7 @@ const saving = ref(false)
 const exporting = ref(false)
 const previewRef = ref(null)
 const fileInputRef = ref(null)
+const diagnosisRef = ref(null)
 const coverData = reactive({
     avatar: '',
     title: '',
@@ -175,11 +182,17 @@ onMounted(() => {
 const debouncedSerialize = useDebounceFn(() => {
     form.content = serializeResume({ name: form.name, modules: modules.value })
     contentMap[langState.currentLang] = form.content
-}, 300)
+}, 600)
 
 function onModulesChange() {
-    syncStructureToOtherLanguages()
-    previousModuleIds = modules.value.map(m => m.id)
+    const currentIds = modules.value.map(m => m.id)
+    const structureChanged = currentIds.length !== previousModuleIds.length ||
+        currentIds.some((id, i) => id !== previousModuleIds[i])
+
+    if (structureChanged) {
+        syncStructureToOtherLanguages()
+    }
+    previousModuleIds = currentIds
     debouncedSerialize()
 }
 
@@ -474,6 +487,12 @@ async function handleExportAllLanguages() {
 
 function handleImport() {
     fileInputRef.value.click()
+}
+
+// --- Diagnosis ---
+
+function handleDiagnosis() {
+    diagnosisRef.value.open()
 }
 
 function onFileSelected(event) {

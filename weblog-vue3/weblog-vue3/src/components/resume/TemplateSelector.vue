@@ -1,7 +1,7 @@
 <template>
     <div class="flex gap-3 overflow-x-auto py-2">
         <div
-            v-for="tpl in TEMPLATES"
+            v-for="tpl in templates"
             :key="tpl.id"
             class="cursor-pointer rounded-lg border-2 p-2 text-center w-28 flex-shrink-0 transition-all"
             :class="modelValue === tpl.id
@@ -10,8 +10,9 @@
             @click="$emit('update:modelValue', tpl.id)"
         >
             <div class="h-16 bg-gray-50 rounded mb-1.5 flex items-center justify-center">
+                <img v-if="tpl.thumbnail" :src="tpl.thumbnail" class="w-10 h-12 object-cover rounded" />
                 <!-- Classic: two-column layout -->
-                <svg v-if="tpl.id === 'default'" class="w-10 h-12" viewBox="0 0 40 52" fill="none">
+                <svg v-else-if="tpl.id === 'default'" class="w-10 h-12" viewBox="0 0 40 52" fill="none">
                     <rect x="1" y="1" width="38" height="50" rx="2" stroke="#cbd5e1" stroke-width="1"/>
                     <rect x="3" y="3" width="11" height="46" rx="1" fill="#475569"/>
                     <rect x="16" y="5" width="20" height="2" rx="1" fill="#94a3b8"/>
@@ -37,7 +38,7 @@
                     <rect x="5" y="44" width="32" height="5" rx="1" stroke="#e2e8f0" stroke-width="0.5" fill="#f9fafb"/>
                 </svg>
                 <!-- Simple: centered single column -->
-                <svg v-else class="w-10 h-12" viewBox="0 0 40 52" fill="none">
+                <svg v-else-if="tpl.id === 'simple'" class="w-10 h-12" viewBox="0 0 40 52" fill="none">
                     <rect x="1" y="1" width="38" height="50" rx="2" stroke="#cbd5e1" stroke-width="1"/>
                     <rect x="12" y="4" width="16" height="2.5" rx="1" fill="#374151"/>
                     <rect x="10" y="9" width="20" height="1" rx="0.5" fill="#d1d5db"/>
@@ -52,6 +53,15 @@
                     <line x1="5" y1="43" x2="35" y2="43" stroke="#e5e7eb"/>
                     <rect x="5" y="46" width="10" height="1.5" rx="0.75" fill="#9ca3af"/>
                 </svg>
+                <!-- Generic fallback for unknown templates -->
+                <svg v-else class="w-10 h-12" viewBox="0 0 40 52" fill="none">
+                    <rect x="1" y="1" width="38" height="50" rx="2" stroke="#cbd5e1" stroke-width="1"/>
+                    <rect x="8" y="12" width="24" height="3" rx="1.5" fill="#94a3b8"/>
+                    <rect x="8" y="20" width="24" height="2" rx="1" fill="#e2e8f0"/>
+                    <rect x="8" y="26" width="20" height="2" rx="1" fill="#e2e8f0"/>
+                    <rect x="8" y="32" width="24" height="2" rx="1" fill="#e2e8f0"/>
+                    <rect x="8" y="38" width="16" height="2" rx="1" fill="#e2e8f0"/>
+                </svg>
             </div>
             <span class="text-xs text-gray-600 font-medium">{{ tpl.name }}</span>
         </div>
@@ -59,11 +69,46 @@
 </template>
 
 <script setup>
+import { ref, onMounted, onUnmounted } from 'vue'
 import { TEMPLATES } from './templates/index.js'
+import { getEnabledTemplateList } from '@/api/frontend/resumeTemplate'
 
 defineProps({
     modelValue: { type: String, default: 'default' },
 })
 
 defineEmits(['update:modelValue'])
+
+const templates = ref(TEMPLATES.map(t => ({ id: t.id, name: t.name, thumbnail: '' })))
+
+async function fetchTemplates() {
+    try {
+        const res = await getEnabledTemplateList()
+        if (res.success && res.data && res.data.length > 0) {
+            templates.value = res.data.map(t => ({
+                id: t.componentName,
+                name: t.name,
+                thumbnail: t.thumbnail || '',
+                description: t.description || '',
+            }))
+        }
+    } catch (e) {
+        // Fallback to local hardcoded templates
+    }
+}
+
+function onVisibilityChange() {
+    if (document.visibilityState === 'visible') {
+        fetchTemplates()
+    }
+}
+
+onMounted(() => {
+    fetchTemplates()
+    document.addEventListener('visibilitychange', onVisibilityChange)
+})
+
+onUnmounted(() => {
+    document.removeEventListener('visibilitychange', onVisibilityChange)
+})
 </script>

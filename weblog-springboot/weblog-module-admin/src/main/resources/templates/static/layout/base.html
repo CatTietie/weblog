@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle} + ' - ' + ${blogName}">博客</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/tokyo-night-dark.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/core.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/javascript.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/java.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/python.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/sql.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/xml.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/css.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/bash.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/json.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/yaml.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/typescript.min.js"></script>
+    <link th:href="${baseUrl} + 'assets/css/article.css'" rel="stylesheet">
+    <link rel="icon" th:href="${blogLogo}" type="image/x-icon">
+</head>
+<body class="bg-gray-50 dark:bg-gray-900">
+    <div th:replace="~{static/fragments/header :: header}"></div>
+
+    <main class="container max-w-screen-xl mx-auto p-4">
+        <div th:replace="~{${contentTemplate}}"></div>
+    </main>
+
+    <div th:replace="~{static/fragments/footer :: footer}"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('pre code').forEach(function(block) {
+                hljs.highlightElement(block);
+            });
+        });
+    </script>
+</body>
+</html>

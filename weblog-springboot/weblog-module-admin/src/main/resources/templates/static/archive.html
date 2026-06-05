@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'归档 - ' + ${blogName}">归档</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" th:href="${blogLogo}" type="image/x-icon">
+</head>
+<body class="bg-gray-50 dark:bg-gray-900">
+    <div th:replace="~{static/fragments/header :: header}"></div>
+
+    <main class="container max-w-screen-xl mx-auto p-4">
+        <div class="grid grid-cols-4 gap-7">
+            <div class="col-span-4 md:col-span-3">
+                <div class="bg-white border border-gray-200 rounded-lg p-6 dark:bg-gray-800 dark:border-gray-700">
+                    <h1 class="text-2xl font-bold text-gray-900 mb-6 dark:text-white">文章归档</h1>
+
+                    <div th:each="group : ${archiveGroups}" class="mb-6">
+                        <h2 class="text-lg font-bold text-gray-700 mb-3 dark:text-gray-300" th:text="${group.month}">2024年1月</h2>
+                        <div class="border-l-2 border-blue-200 pl-4 space-y-3">
+                            <div th:each="article : ${group.articles}" class="relative">
+                                <div class="absolute -left-[1.35rem] top-2 w-2.5 h-2.5 bg-blue-400 rounded-full"></div>
+                                <a th:href="${baseUrl} + 'article/' + ${article.id} + '/index.html'"
+                                   class="block hover:text-blue-600">
+                                    <span class="text-gray-900 dark:text-white" th:text="${article.title}">标题</span>
+                                    <span class="text-xs text-gray-400 ml-2" th:text="${#temporals.format(article.createTime, 'MM-dd')}">日期</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div th:replace="~{static/fragments/pagination :: pagination}"></div>
+                </div>
+            </div>
+
+            <aside class="hidden md:block md:col-span-1">
+                <div class="sticky top-[5.5rem]">
+                    <div th:replace="~{static/fragments/sidebar :: sidebar}"></div>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <div th:replace="~{static/fragments/footer :: footer}"></div>
+</body>
+</html>

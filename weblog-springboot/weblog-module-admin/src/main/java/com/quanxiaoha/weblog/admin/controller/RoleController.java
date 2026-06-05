@@ -31,7 +31,7 @@ public class RoleController {
     @PostMapping("/role/select/list")
     @ApiOperation(value = "角色 Select 下拉列表数据获取")
     @ApiOperationLog(description = "角色 Select 下拉列表数据获取")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('role:manage')")
     public Response findRoleSelectList() {
         return roleService.findRoleSelectList();
     }
@@ -39,7 +39,7 @@ public class RoleController {
     @GetMapping("/roles")
     @ApiOperation(value = "获取所有角色列表")
     @ApiOperationLog(description = "获取所有角色列表")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('role:manage')")
     public Response findAllRoles() {
         return roleService.findAllRoles();
     }
@@ -47,7 +47,7 @@ public class RoleController {
     @GetMapping("/roles/{id}")
     @ApiOperation(value = "获取角色详情")
     @ApiOperationLog(description = "获取角色详情")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('role:manage')")
     public Response findRoleById(@PathVariable("id") Long id) {
         return roleService.findRoleById(id);
     }
@@ -55,7 +55,7 @@ public class RoleController {
     @PostMapping("/roles")
     @ApiOperation(value = "创建角色")
     @ApiOperationLog(description = "创建角色")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('role:manage')")
     public Response createRole(@RequestBody @Validated CreateRoleReqVO createRoleReqVO) {
         return roleService.createRole(createRoleReqVO);
     }
@@ -63,7 +63,7 @@ public class RoleController {
     @PutMapping("/roles/{id}")
     @ApiOperation(value = "更新角色")
     @ApiOperationLog(description = "更新角色")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('role:manage')")
     public Response updateRole(@PathVariable("id") Long id, @RequestBody @Validated UpdateRoleReqVO updateRoleReqVO) {
         updateRoleReqVO.setId(id);
         return roleService.updateRole(updateRoleReqVO);
@@ -72,7 +72,7 @@ public class RoleController {
     @DeleteMapping("/roles/{id}")
     @ApiOperation(value = "删除角色")
     @ApiOperationLog(description = "删除角色")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('role:manage')")
     public Response deleteRole(@PathVariable("id") Long id) {
         return roleService.deleteRole(id);
     }
@@ -80,7 +80,7 @@ public class RoleController {
     @PostMapping("/roles/assign-permissions")
     @ApiOperation(value = "分配角色权限")
     @ApiOperationLog(description = "分配角色权限")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('role:manage')")
     public Response assignPermissions(@RequestBody @Validated AssignRolePermissionsReqVO assignRolePermissionsReqVO) {
         return roleService.assignPermissions(assignRolePermissionsReqVO);
     }
@@ -88,7 +88,7 @@ public class RoleController {
     @GetMapping("/permissions")
     @ApiOperation(value = "获取所有权限列表")
     @ApiOperationLog(description = "获取所有权限列表")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('role:manage')")
     public Response findAllPermissions() {
         return roleService.findAllPermissions();
     }

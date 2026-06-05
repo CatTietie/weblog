@@ -11,6 +11,12 @@ import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 export default defineConfig({
   server: {
     proxy: {
+      '/api/ws': {
+        target: 'http://localhost:8080',
+        ws: true,
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
       '/api': {
         target: 'http://localhost:8080',
         changeOrigin: true,

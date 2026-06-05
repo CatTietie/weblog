@@ -9,10 +9,13 @@ import com.quanxiaoha.weblog.common.enums.ResponseCodeEnum;
 import com.quanxiaoha.weblog.common.exception.BizException;
 import com.quanxiaoha.weblog.common.utils.PageResponse;
 import com.quanxiaoha.weblog.common.utils.Response;
+import com.quanxiaoha.weblog.common.utils.SensitiveWordHelper;
 import com.quanxiaoha.weblog.web.model.vo.comment.*;
+import com.quanxiaoha.weblog.admin.event.PublishCommentEvent;
 import com.quanxiaoha.weblog.web.service.CommentService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -33,6 +36,12 @@ public class CommentServiceImpl implements CommentService {
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
+    @Autowired
+    private SensitiveWordHelper sensitiveWordHelper;
 
     @Override
     public Response findCommentList(FindCommentListReqVO findCommentListReqVO) {
@@ -102,6 +111,11 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public Response publishComment(PublishCommentReqVO publishCommentReqVO) {
+        // 敏感词检测
+        if (sensitiveWordHelper.contains(publishCommentReqVO.getContent())) {
+            throw new BizException(ResponseCodeEnum.CONTENT_HIT_SENSITIVE_WORD);
+        }
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()
                 || authentication instanceof AnonymousAuthenticationToken) {
@@ -138,6 +152,17 @@ public class CommentServiceImpl implements CommentService {
                 .build();
 
         commentMapper.insert(commentDO);
+
+        eventPublisher.publishEvent(new PublishCommentEvent(
+                this,
+                commentDO.getId(),
+                commentDO.getArticleId(),
+                userDO.getId(),
+                commentDO.getContent(),
+                commentDO.getParentId(),
+                commentDO.getReplyToUserId()
+        ));
+
         return Response.success();
     }
 

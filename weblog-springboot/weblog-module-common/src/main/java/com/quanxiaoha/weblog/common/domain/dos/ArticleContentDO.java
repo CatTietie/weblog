@@ -28,4 +28,5 @@ public class ArticleContentDO {
 
     private String content;
 
+    private Long tenantId;
 }

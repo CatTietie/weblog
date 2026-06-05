@@ -1,0 +1,14 @@
+<div th:fragment="comment-waline" th:if="${commentProvider == 'waline'}">
+    <div class="mt-8 pt-6 border-t border-gray-200">
+        <h3 class="text-lg font-bold text-gray-900 mb-4">评论</h3>
+        <link rel="stylesheet" href="https://unpkg.com/@waline/client@v3/dist/waline.css">
+        <div id="waline"></div>
+        <script type="module">
+            import { init } from 'https://unpkg.com/@waline/client@v3/dist/waline.js';
+            init({
+                el: '#waline',
+                serverURL: /*[[${walineServerUrl}]]*/ ''
+            });
+        </script>
+    </div>
+</div>

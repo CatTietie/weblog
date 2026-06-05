@@ -3,6 +3,7 @@ package com.quanxiaoha.weblog.common.domain.mapper;
 import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -13,6 +14,7 @@ import org.apache.ibatis.annotations.Select;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author: Group 5
@@ -32,6 +34,21 @@ public interface ArticleMapper extends BaseMapper<ArticleDO> {
      * @return
      */
     default Page<ArticleDO> selectPageList(Long current, Long size, String title, LocalDate startDate, LocalDate endDate) {
+        return selectPageList(current, size, title, startDate, endDate, null);
+    }
+
+    /**
+     * 分页查询（含状态过滤）
+     *
+     * @param current
+     * @param size
+     * @param title
+     * @param startDate
+     * @param endDate
+     * @param status
+     * @return
+     */
+    default Page<ArticleDO> selectPageList(Long current, Long size, String title, LocalDate startDate, LocalDate endDate, Integer status) {
         // 分页对象(查询第几页、每页多少数据)
         Page<ArticleDO> page = new Page<>(current, size);
 
@@ -40,6 +57,7 @@ public interface ArticleMapper extends BaseMapper<ArticleDO> {
                 .like(StringUtils.isNotBlank(title), ArticleDO::getTitle, title) // like 模块查询
                 .ge(Objects.nonNull(startDate), ArticleDO::getCreateTime, startDate) // 大于等于 startDate
                 .le(Objects.nonNull(endDate), ArticleDO::getCreateTime, endDate)  // 小于等于 endDate
+                .eq(Objects.nonNull(status), ArticleDO::getStatus, status) // 状态过滤
                 .orderByDesc(ArticleDO::getCreateTime); // 按创建时间倒叙
 
         return selectPage(page, wrapper);
@@ -141,4 +159,46 @@ public interface ArticleMapper extends BaseMapper<ArticleDO> {
      */
     @Select("SELECT title , read_num AS readNum FROM t_article WHERE is_deleted = 0 ORDER BY read_num LIMIT 6")
     List<JSONObject> orderArticle();
+
+    /**
+     * 根据关键词模糊匹配标题或摘要，返回匹配的文章 ID 列表
+     *
+     * @param keyword
+     * @return
+     */
+    default List<Long> selectIdsByTitleOrSummaryLike(String keyword) {
+        return selectList(Wrappers.<ArticleDO>lambdaQuery()
+                .select(ArticleDO::getId)
+                .and(q -> q.like(ArticleDO::getTitle, keyword)
+                           .or()
+                           .like(ArticleDO::getSummary, keyword)))
+                .stream()
+                .map(ArticleDO::getId)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 根据文章 ID 集合分页查询，按创建时间倒序
+     *
+     * @param current
+     * @param size
+     * @param articleIds
+     * @return
+     */
+    default Page<ArticleDO> selectPageByIds(Long current, Long size, List<Long> articleIds) {
+        Page<ArticleDO> page = new Page<>(current, size);
+
+        if (CollectionUtils.isEmpty(articleIds)) {
+            // 无匹配结果时直接返回空页
+            page.setRecords(java.util.Collections.emptyList());
+            page.setTotal(0);
+            return page;
+        }
+
+        LambdaQueryWrapper<ArticleDO> wrapper = Wrappers.<ArticleDO>lambdaQuery()
+                .in(ArticleDO::getId, articleIds)
+                .orderByDesc(ArticleDO::getCreateTime);
+
+        return selectPage(page, wrapper);
+    }
 }

@@ -32,7 +32,13 @@ public class ResumeDO {
 
     private String languages;
 
+    private String shareCode;
+
+    private Integer shareEnabled;
+
     private LocalDateTime createTime;
 
     private LocalDateTime updateTime;
+
+    private Long tenantId;
 }

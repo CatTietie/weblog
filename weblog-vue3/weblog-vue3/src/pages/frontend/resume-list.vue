@@ -7,6 +7,23 @@
             <el-button type="primary" @click="formDialogRef.open()">新建简历</el-button>
         </div>
 
+        <!-- 投递仪表盘 -->
+        <div v-if="statisticsData.totalCount > 0"
+            class="mb-6 bg-white border border-gray-200 rounded-lg p-5 dark:bg-gray-800 dark:border-gray-700">
+            <h2 class="text-lg font-semibold text-gray-800 mb-4 dark:text-white">投递仪表盘</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <h3 class="text-sm text-gray-500 mb-2 dark:text-gray-400">近30日投递趋势</h3>
+                    <ResumeApplicationLineChart :dates="statisticsData.dates"
+                        :counts="statisticsData.dailyCounts" />
+                </div>
+                <div>
+                    <h3 class="text-sm text-gray-500 mb-2 dark:text-gray-400">投递状态分布</h3>
+                    <ResumeApplicationPieChart :data="statisticsData.statusDistribution" />
+                </div>
+            </div>
+        </div>
+
         <!-- 简历卡片列表 -->
         <div v-if="resumeList.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div v-for="item in resumeList" :key="item.id"
@@ -18,6 +35,8 @@
                     </p>
                     <div class="mt-auto flex gap-2">
                         <el-button size="small" type="primary" @click="goEdit(item.id)">编辑</el-button>
+                        <el-button size="small" @click="openApplications(item.id)">投递记录</el-button>
+                        <el-button size="small" @click="handleShare(item)">分享</el-button>
                         <el-button size="small" type="danger" @click="handleDelete(item.id)">删除</el-button>
                     </div>
                 </div>
@@ -44,6 +63,27 @@
         </el-form>
     </FormDialog>
 
+    <!-- 分享设置弹窗 -->
+    <el-dialog v-model="shareDialogVisible" title="分享简历" width="500px" :close-on-click-modal="false">
+        <div class="mb-4 flex items-center">
+            <span class="mr-3 text-gray-700">开启公开分享</span>
+            <el-switch v-model="shareForm.enabled" @change="onShareToggle" :loading="shareLoading" />
+        </div>
+        <div v-if="shareForm.enabled && shareForm.shareUrl">
+            <p class="text-sm text-gray-500 mb-2">任何人都可以通过以下链接查看此简历（无需登录）：</p>
+            <el-input v-model="shareForm.shareUrl" readonly>
+                <template #append>
+                    <el-button @click="copyShareLink">复制链接</el-button>
+                </template>
+            </el-input>
+        </div>
+        <div v-if="!shareForm.enabled" class="text-sm text-gray-400">
+            开启后将生成公开链接，他人可通过链接直接查看简历内容。关闭后链接立即失效。
+        </div>
+    </el-dialog>
+
+    <ApplicationDrawer ref="applicationDrawerRef" @close="fetchStatistics" />
+
     <Footer></Footer>
 </template>
 
@@ -53,7 +93,11 @@ import { useRouter } from 'vue-router'
 import Header from '@/layouts/frontend/components/Header.vue'
 import Footer from '@/layouts/frontend/components/Footer.vue'
 import FormDialog from '@/components/FormDialog.vue'
-import { getResumeList, createResume, deleteResume } from '@/api/admin/resume'
+import ApplicationDrawer from '@/components/resume/ApplicationDrawer.vue'
+import ResumeApplicationLineChart from '@/components/resume/ResumeApplicationLineChart.vue'
+import ResumeApplicationPieChart from '@/components/resume/ResumeApplicationPieChart.vue'
+import { getResumeList, createResume, deleteResume, toggleResumeShare, getResumeShareInfo } from '@/api/admin/resume'
+import { getApplicationStatistics } from '@/api/admin/resumeApplication'
 import { showMessage, showModel } from '@/composables/util'
 
 const router = useRouter()
@@ -61,6 +105,11 @@ const router = useRouter()
 const resumeList = ref([])
 const formDialogRef = ref(null)
 const createFormRef = ref(null)
+const applicationDrawerRef = ref(null)
+
+function openApplications(id) {
+    applicationDrawerRef.value.open(id)
+}
 
 const createForm = reactive({ name: '' })
 const createRules = {
@@ -77,8 +126,19 @@ const fetchList = () => {
     })
 }
 
+const statisticsData = ref({ totalCount: 0, dates: [], dailyCounts: [], statusDistribution: [] })
+
+const fetchStatistics = () => {
+    getApplicationStatistics().then(res => {
+        if (res.success === true) {
+            statisticsData.value = res.data || { totalCount: 0, dates: [], dailyCounts: [], statusDistribution: [] }
+        }
+    })
+}
+
 onMounted(() => {
     fetchList()
+    fetchStatistics()
 })
 
 const goEdit = (resumeId) => {
@@ -117,6 +177,61 @@ const handleCreate = () => {
         }).finally(() => {
             formDialogRef.value.closeBtnLoading()
         })
+    })
+}
+
+// --- 分享功能 ---
+
+const shareDialogVisible = ref(false)
+const shareLoading = ref(false)
+const shareForm = reactive({ resumeId: null, enabled: false, shareCode: '', shareUrl: '' })
+
+function buildShareUrl(code) {
+    return `${window.location.origin}${window.location.pathname}#/resume/s/${code}`
+}
+
+const handleShare = (item) => {
+    shareForm.resumeId = item.id
+    shareForm.enabled = false
+    shareForm.shareCode = ''
+    shareForm.shareUrl = ''
+
+    getResumeShareInfo({ resumeId: item.id }).then(res => {
+        if (res.success) {
+            shareForm.enabled = res.data.shareEnabled
+            shareForm.shareCode = res.data.shareCode || ''
+            shareForm.shareUrl = shareForm.shareCode ? buildShareUrl(shareForm.shareCode) : ''
+            shareDialogVisible.value = true
+        } else {
+            showMessage(res.message || '获取分享信息失败', 'error')
+        }
+    })
+}
+
+const onShareToggle = (val) => {
+    shareLoading.value = true
+    toggleResumeShare({ resumeId: shareForm.resumeId, enabled: val }).then(res => {
+        if (res.success) {
+            shareForm.shareCode = res.data.shareCode || ''
+            shareForm.shareUrl = shareForm.shareCode ? buildShareUrl(shareForm.shareCode) : ''
+            showMessage(val ? '已开启分享' : '已关闭分享')
+        } else {
+            shareForm.enabled = !val
+            showMessage(res.message || '操作失败', 'error')
+        }
+    }).catch(() => {
+        shareForm.enabled = !val
+        showMessage('操作失败', 'error')
+    }).finally(() => {
+        shareLoading.value = false
+    })
+}
+
+const copyShareLink = () => {
+    navigator.clipboard.writeText(shareForm.shareUrl).then(() => {
+        showMessage('链接已复制到剪贴板')
+    }).catch(() => {
+        showMessage('复制失败，请手动复制', 'warning')
     })
 }
 </script>

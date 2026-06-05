@@ -24,4 +24,6 @@ public class ArticleUpdateHistoryDO {
     private Long articleId;
 
     private LocalDateTime updateTime;
+
+    private Long tenantId;
 }

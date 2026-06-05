@@ -10,4 +10,8 @@ export function getArticleDetail(articleId) {
     return axios.post("/article/detail", {articleId})
 }
 
+// 搜索文章
+export function searchArticles(data) {
+    return axios.post("/article/search", data)
+}
 

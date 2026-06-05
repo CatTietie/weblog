@@ -17,37 +17,30 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-/**
- * @author: Group 5
-
- * @date: 2023-08-24 15:19
- * @description: 认证失败处理器
- **/
 @Component
 @Slf4j
 public class RestAuthenticationFailureHandler implements AuthenticationFailureHandler {
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
         log.warn("AuthenticationException: ", exception);
-        
+
         if (exception instanceof UsernameOrPasswordNullException) {
-            // 用户名或密码为空
             ResultUtil.fail(response, Response.fail(exception.getMessage()));
         } else if (exception instanceof BadCredentialsException) {
-            // 用户名或密码错误
             ResultUtil.fail(response, Response.fail(ResponseCodeEnum.USERNAME_OR_PWD_ERROR));
         } else if (exception instanceof UsernameNotFoundException) {
-            // 用户不存在或被禁用
             ResultUtil.fail(response, Response.fail(exception.getMessage()));
         } else if (exception instanceof InternalAuthenticationServiceException) {
-            // 内部认证服务异常（可能是 loadUserByUsername 中抛出的异常）
             Throwable cause = exception.getCause();
-            if (cause != null) {
-                log.error("InternalAuthenticationServiceException cause: ", cause);
+            if (cause instanceof UsernameNotFoundException) {
+                ResultUtil.fail(response, Response.fail(cause.getMessage()));
+            } else {
+                if (cause != null) {
+                    log.error("InternalAuthenticationServiceException cause: ", cause);
+                }
+                ResultUtil.fail(response, Response.fail(ResponseCodeEnum.LOGIN_FAIL));
             }
-            ResultUtil.fail(response, Response.fail("登录失败：" + exception.getMessage()));
         } else {
-            // 其他登录失败
             ResultUtil.fail(response, Response.fail(ResponseCodeEnum.LOGIN_FAIL));
         }
     }

@@ -4,16 +4,16 @@
         <!-- 弹出面板 -->
         <div v-show="showPanel"
             class="absolute bottom-16 right-0 bg-white border border-gray-200 rounded-xl shadow-xl p-4 w-48 dark:bg-gray-800 dark:border-gray-700">
-            <p class="text-xs font-medium text-gray-400 mb-3 uppercase tracking-wide">工具箱</p>
+            <p class="text-xs font-medium text-gray-400 mb-3 uppercase tracking-wide">{{ t('toolbox.title') }}</p>
             <a v-if="isLogined" @click="goResume"
                 class="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition-colors dark:text-gray-300 dark:hover:bg-gray-700">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                我的简历
+                {{ t('toolbox.myResume') }}
             </a>
-            <p v-if="!isLogined" class="text-sm text-gray-400 text-center py-3">请先登录</p>
+            <p v-if="!isLogined" class="text-sm text-gray-400 text-center py-3">{{ t('message.pleaseLogin') }}</p>
         </div>
 
         <!-- 工具箱按钮 -->
@@ -32,6 +32,9 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const router = useRouter()
 const userStore = useUserStore()

@@ -4,6 +4,9 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.quanxiaoha.weblog.common.domain.dos.ArticleContentDO;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * @author: Group 5
 
@@ -40,5 +43,19 @@ public interface ArticleContentMapper extends BaseMapper<ArticleContentDO> {
         return update(articleContentDO,
                 Wrappers.<ArticleContentDO>lambdaQuery()
                         .eq(ArticleContentDO::getArticleId, articleContentDO.getArticleId()));
+    }
+
+    /**
+     * 根据关键词搜索正文内容，返回匹配的文章 ID 列表
+     * @param keyword
+     * @return
+     */
+    default List<Long> selectArticleIdsByKeyword(String keyword) {
+        return selectList(Wrappers.<ArticleContentDO>lambdaQuery()
+                .like(ArticleContentDO::getContent, keyword)
+                .select(ArticleContentDO::getArticleId))
+                .stream()
+                .map(ArticleContentDO::getArticleId)
+                .collect(Collectors.toList());
     }
 }

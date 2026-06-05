@@ -1,5 +1,6 @@
 package com.quanxiaoha.weblog.jwt.filter;
 
+import com.quanxiaoha.weblog.common.context.TenantContext;
 import com.quanxiaoha.weblog.common.domain.dos.UserVisitStatsDO;
 import com.quanxiaoha.weblog.common.domain.mapper.UserVisitStatsMapper;
 import com.quanxiaoha.weblog.jwt.utils.JwtTokenHelper;
@@ -59,6 +60,13 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String requestURI = request.getRequestURI();
+
+        // WebSocket路径直接放行，由JwtHandshakeInterceptor处理认证
+        if (requestURI.startsWith("/ws")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String clientIp = getClientIp(request);
         String deviceType = getDeviceType(request);
         String browserName = getBrowserName(request);
@@ -76,43 +84,51 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
                 .build();
 //        userVisitStatsMapper.insert(userVisitStatsDO);
 
-        if (requestURI.startsWith("/admin") || requestURI.startsWith("/comment")) {
-            // 从请求头中获取 key 为 Authorization 的值
+        boolean isAdminPath = requestURI.startsWith("/admin");
+        boolean isCommentPath = requestURI.startsWith("/comment");
+        boolean isNotificationPath = requestURI.startsWith("/notification");
+        boolean isBehaviorPath = requestURI.startsWith("/behavior");
+        boolean isRecommendationPath = requestURI.startsWith("/recommendation");
+
+        if (isAdminPath || isCommentPath || isNotificationPath || isBehaviorPath || isRecommendationPath) {
             String header = request.getHeader(tokenHeaderKey);
 
-            // 判断 value 值是否以 Bearer 开头
             if (StringUtils.startsWith(header, tokenPrefix)) {
-                // 截取 Token 令牌
                 String token = StringUtils.substring(header, 7);
                 log.info("Token: {}", token);
 
-                // 判空 Token
                 if (StringUtils.isNotBlank(token)) {
                     try {
-                        // 校验 Token 是否可用, 若解析异常，针对不同异常做出不同的响应参数
                         jwtTokenHelper.validateToken(token);
                     } catch (SignatureException | MalformedJwtException | UnsupportedJwtException | IllegalArgumentException e) {
-                        // 抛出异常，统一让 AuthenticationEntryPoint 处理响应参数
-                        authenticationEntryPoint.commence(request, response, new AuthenticationServiceException("Token 不可用"));
+                        if (isAdminPath) {
+                            authenticationEntryPoint.commence(request, response, new AuthenticationServiceException("Token 不可用"));
+                            return;
+                        }
+                        filterChain.doFilter(request, response);
                         return;
                     } catch (ExpiredJwtException e) {
-                        authenticationEntryPoint.commence(request, response, new AuthenticationServiceException("Token 已失效"));
+                        if (isAdminPath) {
+                            authenticationEntryPoint.commence(request, response, new AuthenticationServiceException("Token 已失效"));
+                            return;
+                        }
+                        filterChain.doFilter(request, response);
                         return;
                     }
 
-                    // 从 Token 中解析出用户名
                     String username = jwtTokenHelper.getUsernameByToken(token);
+                    Long tenantId = jwtTokenHelper.getTenantIdByToken(token);
+                    if (tenantId != null) {
+                        TenantContext.setTenantId(tenantId);
+                    }
 
                     if (StringUtils.isNotBlank(username)
                             && Objects.isNull(SecurityContextHolder.getContext().getAuthentication())) {
-                        // 根据用户名获取用户详情信息
                         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                        // 将用户信息存入 authentication，方便后续校验
                         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null,
                                 userDetails.getAuthorities());
                         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                        // 将 authentication 存入 ThreadLocal，方便后续获取用户信息
                         SecurityContextHolder.getContext().setAuthentication(authentication);
                     }
                 }
@@ -120,7 +136,11 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         }
 
         // 继续执行写一个过滤器
-        filterChain.doFilter(request, response);
+        try {
+            filterChain.doFilter(request, response);
+        } finally {
+            TenantContext.clear();
+        }
     }
 
     private String getClientIp(HttpServletRequest request) {

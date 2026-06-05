@@ -40,7 +40,7 @@ public class AdminUserController {
     @PostMapping("/password/update")
     @ApiOperation(value = "修改用户密码")
     @ApiOperationLog(description = "修改用户密码")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('user:password')")
     public Response updatePassword(@RequestBody @Validated UpdateAdminUserPasswordReqVO updateAdminUserPasswordReqVO) {
         return userService.updatePassword(updateAdminUserPasswordReqVO);
     }
@@ -55,7 +55,7 @@ public class AdminUserController {
     @PostMapping("/users")
     @ApiOperation(value = "管理员创建用户")
     @ApiOperationLog(description = "管理员创建用户")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('user:create')")
     public Response createUser(@RequestBody @Validated CreateUserReqVO createUserReqVO) {
         return userService.createUser(createUserReqVO);
     }
@@ -63,7 +63,7 @@ public class AdminUserController {
     @PostMapping("/users/list")
     @ApiOperation(value = "用户分页列表查询")
     @ApiOperationLog(description = "用户分页列表查询")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('user:list')")
     public PageResponse findUserPageList(@RequestBody @Validated UserPageListReqVO userPageListReqVO) {
         return userService.findUserPageList(userPageListReqVO);
     }
@@ -71,7 +71,7 @@ public class AdminUserController {
     @GetMapping("/users/{id}")
     @ApiOperation(value = "获取用户详情")
     @ApiOperationLog(description = "获取用户详情")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('user:view')")
     public Response findUserDetail(@PathVariable("id") Long id) {
         return userService.findUserDetail(id);
     }
@@ -79,7 +79,7 @@ public class AdminUserController {
     @PutMapping("/users/{id}")
     @ApiOperation(value = "编辑用户")
     @ApiOperationLog(description = "编辑用户")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('user:update')")
     public Response updateUser(@PathVariable("id") Long id, @RequestBody @Validated UpdateUserReqVO updateUserReqVO) {
         updateUserReqVO.setId(id);
         return userService.updateUser(updateUserReqVO);
@@ -88,7 +88,7 @@ public class AdminUserController {
     @DeleteMapping("/users/{id}")
     @ApiOperation(value = "删除用户")
     @ApiOperationLog(description = "删除用户")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('user:delete')")
     public Response deleteUser(@PathVariable("id") Long id) {
         return userService.deleteUser(id);
     }
@@ -96,7 +96,7 @@ public class AdminUserController {
     @PostMapping("/users/reset-password")
     @ApiOperation(value = "重置用户密码")
     @ApiOperationLog(description = "重置用户密码")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('user:password')")
     public Response resetPassword(@RequestBody @Validated ResetPasswordReqVO resetPasswordReqVO) {
         return userService.resetPassword(resetPasswordReqVO);
     }

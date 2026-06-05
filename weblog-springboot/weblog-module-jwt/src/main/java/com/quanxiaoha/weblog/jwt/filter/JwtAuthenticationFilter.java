@@ -2,6 +2,7 @@ package com.quanxiaoha.weblog.jwt.filter;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.quanxiaoha.weblog.common.utils.I18nUtil;
 import com.quanxiaoha.weblog.jwt.exception.UsernameOrPasswordNullException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -45,7 +46,7 @@ public class JwtAuthenticationFilter extends AbstractAuthenticationProcessingFil
         // 判断用户名、密码是否为空
         if (Objects.isNull(usernameNode) || Objects.isNull(passwordNode)
             || StringUtils.isBlank(usernameNode.textValue()) || StringUtils.isBlank(passwordNode.textValue())) {
-            throw new UsernameOrPasswordNullException("用户名或密码不能为空");
+            throw new UsernameOrPasswordNullException(I18nUtil.getMessage("error.username.or.password.null"));
         }
 
         String username = usernameNode.textValue();

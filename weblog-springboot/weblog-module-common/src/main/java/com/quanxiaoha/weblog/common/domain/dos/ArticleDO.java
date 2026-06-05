@@ -39,4 +39,8 @@ public class ArticleDO {
     private Boolean isDeleted;
 
     private Long readNum;
+
+    private Integer status;
+
+    private Long tenantId;
 }

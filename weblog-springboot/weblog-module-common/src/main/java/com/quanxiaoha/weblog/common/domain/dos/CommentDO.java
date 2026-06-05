@@ -34,5 +34,9 @@ public class CommentDO {
 
     private Boolean isDeleted;
 
+    private Integer status;
+
     private LocalDateTime createTime;
+
+    private Long tenantId;
 }

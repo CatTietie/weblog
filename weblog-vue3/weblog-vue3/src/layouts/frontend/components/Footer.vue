@@ -2,7 +2,7 @@
     <footer class="bg-white mt-5 dark:bg-gray-800">
         <div class="w-full mx-auto max-w-screen-xl py-6 px-4 md:flex md:items-center md:justify-between">
             <span class="text-sm text-gray-500 sm:text-center dark:text-gray-400">© 2024 <a
-                    class="hover:underline">第5组</a>. All Rights Reserved.
+                    class="hover:underline">{{ t('frontend.footer.team') }}</a>. All Rights Reserved.
             </span>
             <ul class="flex flex-wrap items-center mt-3 text-sm font-medium text-gray-500 dark:text-gray-400 sm:mt-0">
                 <!-- <li>
@@ -12,3 +12,9 @@
         </div>
     </footer>
 </template>
+
+<script setup>
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+</script>

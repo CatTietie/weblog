@@ -2,6 +2,7 @@ package com.quanxiaoha.weblog.admin.utils;
 
 import com.aliyun.oss.OSS;
 import com.quanxiaoha.weblog.admin.config.AliyunOSSProperties;
+import com.quanxiaoha.weblog.common.context.TenantContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,11 +29,13 @@ public class AliyunOSSUtility {
         }
 
         String originalFileName = file.getOriginalFilename();
-        String contentType = file.getContentType();
 
         String key = UUID.randomUUID().toString().replace("-", "");
         String suffix = originalFileName.substring(originalFileName.lastIndexOf("."));
-        String objectName = String.format("%s%s", key, suffix);
+
+        Long tenantId = TenantContext.getTenantId();
+        String tenantPrefix = (tenantId != null && tenantId > 0) ? "tenant_" + tenantId + "/" : "";
+        String objectName = String.format("%s%s%s", tenantPrefix, key, suffix);
 
         log.info("==> 开始上传文件至阿里云 OSS, ObjectName: {}", objectName);
 
@@ -55,12 +58,12 @@ public class AliyunOSSUtility {
         if (domain != null && !domain.isEmpty()) {
             url = String.format("https://%s/%s", domain, objectName);
         } else {
-            url = String.format("https://%s.%s/%s", 
-                aliyunOSSProperties.getBucketName(), 
-                aliyunOSSProperties.getEndpoint(), 
+            url = String.format("https://%s.%s/%s",
+                aliyunOSSProperties.getBucketName(),
+                aliyunOSSProperties.getEndpoint(),
                 objectName);
         }
-        
+
         log.info("==> 上传文件至阿里云 OSS 成功，访问路径: {}", url);
         return url;
     }

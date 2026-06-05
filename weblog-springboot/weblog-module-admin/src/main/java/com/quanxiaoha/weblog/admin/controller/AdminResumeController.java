@@ -62,4 +62,18 @@ public class AdminResumeController {
                                  @RequestParam(value = "name", required = false) String name) {
         return adminResumeService.uploadResume(file, resumeId, name);
     }
+
+    @PostMapping("/share/toggle")
+    @ApiOperation(value = "切换简历分享状态")
+    @ApiOperationLog(description = "切换简历分享状态")
+    public Response toggleShare(@RequestBody @Validated ToggleShareReqVO toggleShareReqVO) {
+        return adminResumeService.toggleShare(toggleShareReqVO);
+    }
+
+    @PostMapping("/share/info")
+    @ApiOperation(value = "获取简历分享信息")
+    @ApiOperationLog(description = "获取简历分享信息")
+    public Response getShareInfo(@RequestBody @Validated FindResumeDetailReqVO findResumeDetailReqVO) {
+        return adminResumeService.getShareInfo(findResumeDetailReqVO);
+    }
 }

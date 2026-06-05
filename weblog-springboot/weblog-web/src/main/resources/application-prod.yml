@@ -35,3 +35,9 @@ aliyun:
     accessKeySecret: ${OSS_ACCESS_KEY_SECRET:}
     bucketName: weblog-dev
     domain: weblog-dev.oss-cn-beijing.aliyuncs.com
+
+#=================================================================
+# 工作流引擎
+#=================================================================
+weblog:
+  site-url: ${SITE_URL:http://localhost:8080}

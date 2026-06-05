@@ -34,4 +34,6 @@ public class StatisticsArticlePVDO {
     private LocalDateTime createTime;
 
     private LocalDateTime updateTime;
+
+    private Long tenantId;
 }

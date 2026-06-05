@@ -227,7 +227,7 @@
                                 fill="#c0c7d2" fill-rule="evenodd" group-id="4" id="矩形" node-id="56" stroke="none"
                                 target-height="46" target-width="33.334473" target-x="380.8566" target-y="423" />
                         </svg>
-                        <p class="mt-2 mb-16 text-gray-400">此分类下还未发布文章哟~</p>
+                        <p class="mt-2 mb-16 text-gray-400">{{ t('frontend.noCategoryArticles') }}</p>
                     </div>
                 </div>
 
@@ -240,7 +240,7 @@
                                 class="flex items-center justify-center px-4 h-10 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
                                 :class="[current > 1 ? '' : 'cursor-not-allowed']">
 
-                                <span class="sr-only">上一页</span>
+                                <span class="sr-only">{{ t('common.prevPage') }}</span>
                                 <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
                                     viewBox="0 0 6 10">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
@@ -261,7 +261,7 @@
                             <a @click="getCategoryArticles(current + 1)"
                                 class="flex items-center justify-center px-4 h-10 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
                                 :class="[current < pages ? '' : 'cursor-not-allowed']">
-                                <span class="sr-only">下一页</span>
+                                <span class="sr-only">{{ t('common.nextPage') }}</span>
                                 <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
                                     viewBox="0 0 6 10">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
@@ -307,6 +307,9 @@ import ScrollToTopButton from '@/layouts/frontend/components/ScrollToTopButton.v
 import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getCategoryArticlePageList } from '@/api/frontend/category'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const route = useRoute()
 const router = useRouter()

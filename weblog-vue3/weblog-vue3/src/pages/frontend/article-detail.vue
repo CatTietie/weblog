@@ -28,14 +28,14 @@
                                         <path
                                             d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z" />
                                     </svg>
-                                    首页
+                                    {{ t('frontend.home') }}
                                 </a>
                             </li>
                             <li>
                                 <div class="flex items-center">
                                     /
                                     <a href="#"
-                                        class="ml-1 text-sm font-medium md:ml-3 dark:text-gray-400 dark:hover:text-white">正文</a>
+                                        class="ml-1 text-sm font-medium md:ml-3 dark:text-gray-400 dark:hover:text-white">{{ t('frontend.content') }}</a>
                                 </div>
                             </li>
                         </ol>
@@ -53,7 +53,7 @@
                                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M5 1v3m5-3v3m5-3v3M1 7h18M5 11h10M2 3h16a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" />
                             </svg>
-                            <span class="mr-1 hidden md:inline">发表于</span> {{ article.createTime }}
+                            <span class="mr-1 hidden md:inline">{{ t('frontend.publishedAt') }}</span> {{ article.createTime }}
 
                             <!-- 分类 -->
                             <svg class="inline w-3 h-3 ml-5 mr-2 dark:text-white" aria-hidden="true"
@@ -61,7 +61,7 @@
                                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M1 5v11a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H1Zm0 0V2a1 1 0 0 1 1-1h5.443a1 1 0 0 1 .8.4l2.7 3.6H1Z" />
                             </svg>
-                            <span class="hidden md:inline">分类于</span>
+                            <span class="hidden md:inline">{{ t('frontend.categoryOf') }}</span>
                             <a @click="goCategoryArticleListPage(article.categoryId, article.categoryName)"
                                 class="cursor-pointer mr-1 hover:underline">{{ article.categoryName }}</a>
 
@@ -73,7 +73,7 @@
                                     <path d="M10 13c4.97 0 9-2.686 9-6s-4.03-6-9-6-9 2.686-9 6 4.03 6 9 6Z" />
                                 </g>
                             </svg>
-                            <span class="mr-1 hidden md:inline">阅读量</span> {{ article.readNum }}
+                            <span class="mr-1 hidden md:inline">{{ t('frontend.readCount') }}</span> {{ article.readNum }}
                         </div>
 
                         <!-- 正文 -->
@@ -102,7 +102,7 @@
                                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
                                                 stroke-width="2" d="M13 5H1m0 0 4 4M1 5l4-4"></path>
                                         </svg>
-                                        上一篇
+                                        {{ t('frontend.prevArticle') }}
                                     </div>
                                     <div>{{ article.preArticle.articleTitle }}</div>
                                 </a>
@@ -114,7 +114,7 @@
                                     @click="router.push('/article/' + article.nextArticle.articleId)"
                                     class="cursor-pointer flex flex-col h-full text-right p-4 text-base font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:border-blue-500 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
                                     <div>
-                                        下一篇
+                                        {{ t('frontend.nextArticle') }}
                                         <svg class="inline w-3.5 h-3.5 ml-2 mb-1" aria-hidden="true"
                                             xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
                                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
@@ -140,17 +140,14 @@
                 </div>
             </div>
 
-            <!-- 右边侧边栏 - 博主信息、分类、标签 -->
+            <!-- 右边侧边栏 - 相关推荐 -->
             <aside class="col-span-4 md:col-span-1">
-                <div>
+                <div class="sticky top-[5.5rem]">
+                    <!-- 相关推荐 -->
+                    <RelatedArticles :articleId="route.params.articleId" />
+
                     <!-- 博主信息 -->
-                    <UserInfoCard></UserInfoCard>
-
-                    <!-- 分类 -->
-                    <CategoryListCard></CategoryListCard>
-
-                    <!-- 标签 -->
-                    <TagListCard></TagListCard>
+                    <UserInfoCard class="mt-4"></UserInfoCard>
                 </div>
             </aside>
         </div>
@@ -171,14 +168,20 @@ import CategoryListCard from '@/layouts/frontend/components/CategoryListCard.vue
 import ScrollToTopButton from '@/layouts/frontend/components/ScrollToTopButton.vue'
 import Toc from '@/layouts/frontend/components/Toc.vue'
 import CommentSection from '@/pages/frontend/components/CommentSection.vue'
+import RelatedArticles from '@/pages/frontend/components/RelatedArticles.vue'
 import { getArticleDetail } from '@/api/frontend/article'
+import { useBehaviorTracker } from '@/composables/useBehaviorTracker'
 import { useRoute, useRouter } from 'vue-router'
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
+import { useI18n } from 'vue-i18n'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/tokyo-night-dark.css'
 
+const { t } = useI18n()
+
 const route = useRoute()
 const router = useRouter()
+const { startReadTimer, stopReadTimer, trackTagClick } = useBehaviorTracker()
 // 路由传递过来的文章 ID
 console.log(route.params.articleId)
 
@@ -187,15 +190,15 @@ const article = ref({})
 
 // 获取文章详情
 function refreshArticleDetail(articleId) {
-    getArticleDetail(route.params.articleId).then((res) => {
-        // 该文章不存在(错误码为 20010)
+    stopReadTimer(article.value.id)
+    getArticleDetail(articleId).then((res) => {
         if (!res.success && res.errorCode == '20010') {
-            // 手动跳转 404 页面
             router.push({ name: 'NotFound' })
             return
         }
 
         article.value = res.data
+        startReadTimer()
     })
 }
 refreshArticleDetail(route.params.articleId)
@@ -208,13 +211,13 @@ const goCategoryArticleListPage = (id, name) => {
 
 // 跳转标签文章列表页
 const goTagArticleListPage = (id, name) => {
-    // 跳转时通过 query 携带参数（标签 ID、标签名称）
+    trackTagClick(id)
     router.push({ path: '/tag/article/list', query: { id, name } })
 }
 
 // 监听路由
 watch(route, (newRoute, oldRoute) => {
-    // 重新渲染文章详情
+    stopReadTimer(article.value.id)
     refreshArticleDetail(newRoute.params.articleId)
 })
 

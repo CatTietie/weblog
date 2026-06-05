@@ -17,4 +17,8 @@ public interface AdminResumeService {
     Response deleteResume(DeleteResumeReqVO deleteResumeReqVO);
 
     Response uploadResume(MultipartFile file, Long resumeId, String name);
+
+    Response toggleShare(ToggleShareReqVO toggleShareReqVO);
+
+    Response getShareInfo(FindResumeDetailReqVO findResumeDetailReqVO);
 }

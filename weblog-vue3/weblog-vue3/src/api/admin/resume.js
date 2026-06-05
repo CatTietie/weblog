@@ -19,3 +19,11 @@ export function updateResume(data) {
 export function deleteResume(data) {
     return axios.post("/admin/resume/delete", data)
 }
+
+export function toggleResumeShare(data) {
+    return axios.post("/admin/resume/share/toggle", data)
+}
+
+export function getResumeShareInfo(data) {
+    return axios.post("/admin/resume/share/info", data)
+}

@@ -17,6 +17,7 @@ import com.quanxiaoha.weblog.common.domain.mapper.RolePermissionMapper;
 import com.quanxiaoha.weblog.common.domain.mapper.UserMapper;
 import com.quanxiaoha.weblog.common.enums.ResponseCodeEnum;
 import com.quanxiaoha.weblog.common.utils.Response;
+import com.quanxiaoha.weblog.jwt.service.PermissionCacheService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,6 +43,8 @@ public class RoleServiceImpl implements RoleService {
     private RolePermissionMapper rolePermissionMapper;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private PermissionCacheService permissionCacheService;
 
     private static final Long ADMIN_ROLE_ID = 1L;
 
@@ -272,6 +275,9 @@ public class RoleServiceImpl implements RoleService {
                 rolePermissionMapper.insert(rolePermissionDO);
             }
         }
+
+        // 清除该角色的权限缓存，使变更立即生效
+        permissionCacheService.evictByRoleId(roleId);
 
         return Response.success();
     }

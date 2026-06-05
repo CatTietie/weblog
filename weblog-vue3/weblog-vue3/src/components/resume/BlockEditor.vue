@@ -8,7 +8,7 @@
         </div>
 
         <!-- 可拖拽模块列表 -->
-        <draggable v-model="localModules" item-key="id" handle=".drag-handle" @end="emitModules"
+        <draggable v-model="localModules" item-key="id" handle=".drag-handle" @end="emitModulesImmediate"
             :animation="200">
             <template #item="{ element, index }">
                 <div class="bg-white border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700 mb-3">
@@ -53,7 +53,28 @@
                             :toolbars="toolbars"
                             :footers="[]"
                             style="height: 200px;"
-                            @onChange="emitModules" />
+                            @onChange="onEditorChange(element)">
+                            <template #defToolbars>
+                                <MarkdownSnippets :type="element.type" />
+                            </template>
+                        </MdEditor>
+
+                        <!-- 格式校验 + 渲染预览 -->
+                        <div class="flex items-center justify-between px-1 pt-2">
+                            <FormatWarning :warnings="validationResults[element.id] || []" />
+                            <button
+                                @click="togglePreview(element.id)"
+                                class="text-xs text-gray-400 hover:text-blue-500 transition-colors whitespace-nowrap ml-2"
+                            >
+                                {{ previewVisible.has(element.id) ? '隐藏预览' : '渲染预览' }}
+                            </button>
+                        </div>
+                        <ModuleRenderPreview
+                            :content="element.content"
+                            :type="element.type"
+                            :module-id="element.id"
+                            :visible="previewVisible.has(element.id)"
+                        />
                     </div>
                 </div>
             </template>
@@ -82,11 +103,16 @@
 
 <script setup>
 import { ref, reactive, watch, nextTick } from 'vue'
+import { useDebounceFn } from '@vueuse/core'
 import draggable from 'vuedraggable'
 import { MdEditor } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
 import { ArrowUp, ArrowDown, Delete, Plus } from '@element-plus/icons-vue'
+import MarkdownSnippets from '@/components/resume/MarkdownSnippets.vue'
+import FormatWarning from '@/components/resume/FormatWarning.vue'
+import ModuleRenderPreview from '@/components/resume/ModuleRenderPreview.vue'
 import { getTypeLabel, getDefaultContent, detectType, generateId } from '@/utils/resume-parser'
+import { validateModuleContent } from '@/utils/resume-validation'
 
 const props = defineProps({
     modelValue: { type: Array, required: true },
@@ -98,9 +124,12 @@ const emit = defineEmits(['update:modelValue', 'update:resumeName'])
 const localModules = ref([...props.modelValue])
 const localName = ref(props.resumeName)
 const collapsed = reactive(new Set())
+const validationResults = reactive({})
+const previewVisible = reactive(new Set())
 let internalUpdate = false
+let pendingValidationIds = new Set()
 
-const toolbars = ['bold', 'italic', 'strikeThrough', '-', 'title', 'unorderedList', 'orderedList', '-', 'link', 'code', 'codeRow']
+const toolbars = [0, '-', 'bold', 'italic', 'strikeThrough', '-', 'title', 'unorderedList', 'orderedList', '-', 'link', 'code', 'codeRow']
 
 watch(() => props.modelValue, (val) => {
     if (internalUpdate) return
@@ -111,7 +140,17 @@ watch(() => props.resumeName, (val) => {
     localName.value = val
 })
 
+const debouncedEmit = useDebounceFn(() => {
+    internalUpdate = true
+    emit('update:modelValue', localModules.value)
+    nextTick(() => { internalUpdate = false })
+}, 150)
+
 function emitModules() {
+    debouncedEmit()
+}
+
+function emitModulesImmediate() {
     internalUpdate = true
     emit('update:modelValue', localModules.value)
     nextTick(() => { internalUpdate = false })
@@ -123,7 +162,7 @@ function emitName() {
 
 function handleTitleChange(element) {
     element.type = detectType(element.title)
-    emitModules()
+    emitModulesImmediate()
 }
 
 function toggleCollapse(id) {
@@ -136,7 +175,7 @@ function toggleCollapse(id) {
 
 function handleDelete(index) {
     localModules.value.splice(index, 1)
-    emitModules()
+    emitModulesImmediate()
 }
 
 function handleAdd(type) {
@@ -146,6 +185,45 @@ function handleAdd(type) {
         type,
         content: getDefaultContent(type),
     })
-    emitModules()
+    emitModulesImmediate()
+}
+
+function togglePreview(id) {
+    if (previewVisible.has(id)) {
+        previewVisible.delete(id)
+    } else {
+        previewVisible.add(id)
+        scheduleValidation(id)
+    }
+}
+
+function scheduleValidation(moduleId) {
+    pendingValidationIds.add(moduleId)
+    runValidation()
+}
+
+const runValidation = useDebounceFn(() => {
+    const idsToValidate = pendingValidationIds.size > 0
+        ? pendingValidationIds
+        : new Set(localModules.value.map(m => m.id))
+
+    for (const mod of localModules.value) {
+        if (idsToValidate.has(mod.id)) {
+            validationResults[mod.id] = validateModuleContent(mod.content, mod.type)
+        }
+    }
+    pendingValidationIds = new Set()
+}, 800)
+
+function onEditorChange(element) {
+    pendingValidationIds.add(element.id)
+    runValidation()
+    debouncedEmit()
 }
 </script>
+
+<style>
+.md-editor-toolbar-wrapper {
+    overflow: visible !important;
+}
+</style>

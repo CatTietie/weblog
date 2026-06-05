@@ -15,7 +15,7 @@
             <!-- 右边容器 -->
             <div class="ml-auto flex">
                 <!-- 点击刷新页面 -->
-                <el-tooltip class="box-item" effect="dark" content="刷新" placement="bottom">
+                <el-tooltip class="box-item" effect="dark" :content="t('admin.header.refresh')" placement="bottom">
                     <div class="w-[42px] h-[64px] cursor-pointer flex items-center justify-center text-gray-700 hover:bg-gray-200"
                         @click="handleRefresh">
                         <el-icon>
@@ -25,7 +25,7 @@
                 </el-tooltip>
 
                 <!-- 点击跳转前台首页 -->
-                <el-tooltip class="box-item" effect="dark" content="跳转前台" placement="bottom">
+                <el-tooltip class="box-item" effect="dark" :content="t('admin.header.goFrontend')" placement="bottom">
                     <div class="w-[42px] h-[64px] cursor-pointer flex items-center justify-center text-gray-700 hover:bg-gray-200"
                         @click="router.push('/')">
                         <el-icon>
@@ -35,7 +35,7 @@
                 </el-tooltip>
 
                 <!-- 点击全屏展示 -->
-                <el-tooltip class="box-item" effect="dark" content="全屏" placement="bottom">
+                <el-tooltip class="box-item" effect="dark" :content="t('admin.header.fullscreen')" placement="bottom">
                     <div class="w-[42px] h-[64px] cursor-pointer flex items-center justify-center text-gray-700 mr-2 hover:bg-gray-200"
                         @click="toggle">
                         <el-icon>
@@ -45,10 +45,12 @@
                     </div>
                 </el-tooltip>
 
+                <!-- 语言切换 -->
+                <LanguageSwitcher class="h-[64px] flex items-center text-gray-700 hover:bg-gray-200 px-2" />
+
                 <!-- 登录用户头像 -->
                 <el-dropdown class="flex items-center justify-center" @command="handleCommand">
                     <span class="el-dropdown-link flex items-center justify-center text-gray-700 text-xs">
-                        <!-- 头像 Avatar -->
                         <el-avatar class="mr-2" :size="25" :src="avatarUrl" />
                         {{ userStore.userInfo.username }}
                         <el-icon class="el-icon--right">
@@ -57,8 +59,8 @@
                     </span>
                     <template #dropdown>
                         <el-dropdown-menu>
-                            <el-dropdown-item command="updatePassword">修改密码</el-dropdown-item>
-                            <el-dropdown-item command="logout">退出登录</el-dropdown-item>
+                            <el-dropdown-item command="updatePassword">{{ t('admin.header.changePassword') }}</el-dropdown-item>
+                            <el-dropdown-item command="logout">{{ t('admin.header.logout') }}</el-dropdown-item>
                         </el-dropdown-menu>
                     </template>
                 </el-dropdown>
@@ -66,17 +68,16 @@
         </div>
 
         <!-- 修改密码 -->
-        <FormDialog ref="formDialogRef" title="修改密码" destroyOnClose @submit="onSubmit">
+        <FormDialog ref="formDialogRef" :title="t('admin.header.changePassword')" destroyOnClose @submit="onSubmit">
             <el-form ref="formRef" :rules="rules" :model="form">
-                <el-form-item label="用户名" prop="username" label-width="120px" size="large">
-                    <!-- 输入框组件 -->
-                    <el-input v-model="form.username" placeholder="请输入用户名" clearable disabled />
+                <el-form-item :label="t('user.username')" prop="username" label-width="120px" size="large">
+                    <el-input v-model="form.username" :placeholder="t('user.usernamePlaceholder')" clearable disabled />
                 </el-form-item>
-                <el-form-item label="新密码" prop="password" label-width="120px" size="large">
-                    <el-input type="password" v-model="form.password" placeholder="请输入新密码" clearable show-password />
+                <el-form-item :label="t('user.newPassword')" prop="password" label-width="120px" size="large">
+                    <el-input type="password" v-model="form.password" :placeholder="t('user.newPasswordPlaceholder')" clearable show-password />
                 </el-form-item>
-                <el-form-item label="确认新密码" prop="rePassword" label-width="120px" size="large">
-                    <el-input type="password" v-model="form.rePassword" placeholder="请确认新密码" clearable show-password />
+                <el-form-item :label="t('user.confirmPassword')" prop="rePassword" label-width="120px" size="large">
+                    <el-input type="password" v-model="form.rePassword" :placeholder="t('user.confirmPasswordPlaceholder')" clearable show-password />
                 </el-form-item>
             </el-form>
         </FormDialog>
@@ -91,9 +92,12 @@ import { useFullscreen } from '@vueuse/core'
 import { updateAdminPassword } from '@/api/admin/user'
 import { showMessage, showModel } from '@/composables/util'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import FormDialog from '@/components/FormDialog.vue'
+import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 import { getBlogSettingsDetail } from '@/api/frontend/blogsettings';
 
+const { t } = useI18n()
 const router = useRouter()
 
 // isFullscreen 表示当前是否处于全屏；toggle 用于动态切换全屏、非全屏
@@ -128,10 +132,9 @@ const handleCommand = (command) => {
 
 // 退出登录
 function logout() {
-    showModel('是否确认要退出登录？').then(() => {
+    showModel(t('login.confirmLogoutAdmin')).then(() => {
         userStore.logout()
-        showMessage('退出登录成功！')
-        // 跳转登录页
+        showMessage(t('login.logoutSuccessAdmin'))
         router.push('/login')
     })
 }
@@ -158,29 +161,29 @@ watch(() => userStore.userInfo.username, (newValue, oldValue) => {
 });
 
 // 规则校验
-const rules = {
+const rules = reactive({
     username: [
         {
             required: true,
-            message: '用户名不能为空',
+            message: () => t('validation.usernameRequired'),
             trigger: 'blur'
         }
     ],
     password: [
         {
             required: true,
-            message: '密码不能为空',
+            message: () => t('validation.passwordRequired'),
             trigger: 'blur',
         },
     ],
     rePassword: [
         {
             required: true,
-            message: '确认密码不能为空',
+            message: () => t('validation.confirmPasswordRequired'),
             trigger: 'blur',
         },
     ]
-}
+})
 
 
 
@@ -204,7 +207,7 @@ const onSubmit = () => {
         }
 
         if (form.password != form.rePassword) {
-            showMessage('两次密码输入不一致，请检查！', 'warning')
+            showMessage(t('validation.passwordMismatch'), 'warning')
             return
         }
 
@@ -214,7 +217,7 @@ const onSubmit = () => {
             console.log(res)
             // 判断是否成功
             if (res.success == true) {
-                showMessage('密码重置成功，请重新登录！')
+                showMessage(t('message.passwordResetSuccess'))
                 // 退出登录
                 userStore.logout()
 

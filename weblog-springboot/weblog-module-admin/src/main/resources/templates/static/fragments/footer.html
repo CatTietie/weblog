@@ -1,0 +1,8 @@
+<footer th:fragment="footer" class="bg-white border-t border-gray-200 mt-8 dark:bg-gray-800 dark:border-gray-700">
+    <div class="container max-w-screen-xl mx-auto px-4 py-6 text-center text-gray-500 text-sm">
+        <p>
+            Powered by <span th:text="${blogName}">博客</span>
+            &copy; <span th:text="${#dates.format(#dates.createNow(), 'yyyy')}">2024</span>
+        </p>
+    </div>
+</footer>
