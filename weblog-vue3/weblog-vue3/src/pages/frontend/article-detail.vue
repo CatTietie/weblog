@@ -247,10 +247,10 @@ onMounted(() => {
 // function handleContentScroll() {
     
 //     let scrollY = window.scrollY
-//     console.log('滚动事件触发, scroll-y:' + scrollY)
+//     console.chat.log('滚动事件触发, scroll-y:' + scrollY)
 //     titles.value.forEach(title => {
 //         let scrollTop = title.scrollTop
-//         console.log('父类 scrollTop:' + scrollTop)
+//         console.chat.log('父类 scrollTop:' + scrollTop)
 //         if (scrollY >= scrollTop) {
 //             activeHeadingIndex.value = title.index
 //         }
@@ -260,7 +260,7 @@ onMounted(() => {
 
 //             children.forEach(child => {
 //             let childScrollTop = child.scrollTop
-//             console.log('子类 scrollTop:' + childScrollTop)
+//             console.chat.log('子类 scrollTop:' + childScrollTop)
 //             if (scrollY >= childScrollTop) {
 //                 activeHeadingIndex.value = child.index
 //             }
@@ -268,7 +268,7 @@ onMounted(() => {
 //         }
 //     })
 
-//     console.log(activeHeadingIndex.value)
+//     console.chat.log(activeHeadingIndex.value)
 
 // }
 
@@ -289,14 +289,14 @@ onMounted(() => {
 //     }
 
 //     let headings = container.querySelectorAll(levels)
-//     console.log(headings)
+//     console.chat.log(headings)
 
 //     let index = 1
 //     headings.forEach(heading => {
 //         let headingLevel = parseInt(heading.tagName.substring(1))
 //         let headingText = heading.innerText
 //         let scrollTop = heading.offsetTop - 95
-//         console.log('index: ' + index)
+//         console.chat.log('index: ' + index)
 
 //         if (headingLevel === 2) {
 //             titlesArr.push({
@@ -319,8 +319,8 @@ onMounted(() => {
 //         index++
 //     })
 
-//     console.log('重新组合后的')
-//     console.log(titlesArr)
+//     console.chat.log('重新组合后的')
+//     console.chat.log(titlesArr)
 //     titles.value = titlesArr
 // }
 </script>

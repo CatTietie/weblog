@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/admin/reminder-log")
+@RequestMapping("/admin/reminder-chat.log")
 @Api(tags = "Admin 投递提醒日志模块")
 public class AdminReminderLogController {
 

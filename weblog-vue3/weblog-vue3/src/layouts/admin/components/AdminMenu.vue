@@ -170,8 +170,8 @@ const allMenus = computed(() => [
     {
         'nameKey': 'admin.menu.reminderLog',
         'icon': 'AlarmClock',
-        'path': '/admin/reminder-log/list',
-        'permission': 'reminder-log',
+        'path': '/admin/reminder-chat.log/list',
+        'permission': 'reminder-chat.log',
     },
     {
         'nameKey': 'admin.menu.sensitiveWord',

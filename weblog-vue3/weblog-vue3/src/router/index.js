@@ -27,7 +27,7 @@ import AdminStaticSiteConfig from '@/pages/admin/static-site-config.vue'
 import AdminStaticSiteTasks from '@/pages/admin/static-site-tasks.vue'
 import AdminWorkflowList from '@/pages/admin/workflow-list.vue'
 import AdminWorkflowEditor from '@/pages/admin/workflow-editor.vue'
-import AdminReminderLogList from '@/pages/admin/reminder-log-list.vue'
+import AdminReminderLogList from '@/pages/admin/reminder-chat.log-list.vue'
 import AdminSensitiveWordList from '@/pages/admin/sensitive-word-list.vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
 
@@ -251,7 +251,7 @@ const routes = [
                 }
             },
             {
-                path: "/admin/reminder-log/list",
+                path: "/admin/reminder-chat.log/list",
                 component: AdminReminderLogList,
                 meta: {
                     titleKey: 'page.reminderLog'
