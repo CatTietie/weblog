@@ -1,55 +1,81 @@
 package com.quanxiaoha.weblog.admin.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.quanxiaoha.weblog.admin.model.vo.file.UploadFileRspVO;
-import com.quanxiaoha.weblog.admin.model.vo.user.FindUserInfoRspVO;
-import com.quanxiaoha.weblog.admin.model.vo.user.UpdateAdminUserPasswordReqVO;
 import com.quanxiaoha.weblog.admin.service.AdminFileService;
-import com.quanxiaoha.weblog.admin.service.AdminUserService;
-import com.quanxiaoha.weblog.admin.utils.MinioUtil;
-import com.quanxiaoha.weblog.common.domain.mapper.UserMapper;
+import com.quanxiaoha.weblog.admin.utils.AliyunOSSUtility;
+import com.quanxiaoha.weblog.common.context.TenantContext;
+import com.quanxiaoha.weblog.common.domain.dos.FileDO;
+import com.quanxiaoha.weblog.common.domain.mapper.FileMapper;
 import com.quanxiaoha.weblog.common.enums.ResponseCodeEnum;
 import com.quanxiaoha.weblog.common.exception.BizException;
+import com.quanxiaoha.weblog.common.utils.PageResponse;
 import com.quanxiaoha.weblog.common.utils.Response;
-import io.minio.MinioClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-/**
- * @author: Group 5
+import java.time.LocalDateTime;
+import java.util.Objects;
 
- * @date: 2023-09-15 14:03
- * @description: 文件上传
- **/
 @Service
 @Slf4j
 public class AdminFileServiceImpl implements AdminFileService {
 
     @Autowired
-    private MinioUtil minioUtil;
+    private AliyunOSSUtility aliyunOSSUtility;
 
-    /**
-     * 上传文件
-     *
-     * @param file
-     * @return
-     */
+    @Autowired
+    private FileMapper fileMapper;
+
     @Override
     public Response uploadFile(MultipartFile file) {
         try {
-            // 上传文件
-            String url = minioUtil.uploadFile(file);
+            String url = aliyunOSSUtility.uploadFile(file);
 
-            // 构建成功返参，将图片的访问链接返回
+            FileDO fileDO = FileDO.builder()
+                    .originalName(file.getOriginalFilename())
+                    .url(url)
+                    .fileSize(file.getSize())
+                    .contentType(file.getContentType())
+                    .tenantId(TenantContext.getTenantId())
+                    .createTime(LocalDateTime.now())
+                    .build();
+            fileMapper.insert(fileDO);
+
             return Response.success(UploadFileRspVO.builder().url(url).build());
         } catch (Exception e) {
-            log.error("==> 上传文件至 Minio 错误: ", e);
-            // 手动抛出业务异常，提示 “文件上传失败”
+            log.error("==> 上传文件至阿里云 OSS 错误: ", e);
             throw new BizException(ResponseCodeEnum.FILE_UPLOAD_FAILED);
         }
+    }
+
+    @Override
+    public PageResponse findFilePageList(Long current, Long size) {
+        Page<FileDO> page = new Page<>(current, size);
+        LambdaQueryWrapper<FileDO> wrapper = new LambdaQueryWrapper<>();
+        Long tenantId = TenantContext.getTenantId();
+        if (tenantId != null && tenantId > 0) {
+            wrapper.eq(FileDO::getTenantId, tenantId);
+        }
+        wrapper.orderByDesc(FileDO::getCreateTime);
+        Page<FileDO> resultPage = fileMapper.selectPage(page, wrapper);
+        return PageResponse.success(resultPage, resultPage.getRecords());
+    }
+
+    @Override
+    public Response deleteFile(Long id) {
+        FileDO fileDO = fileMapper.selectById(id);
+        if (Objects.isNull(fileDO)) {
+            throw new BizException(ResponseCodeEnum.PARAM_NOT_VALID);
+        }
+        Long tenantId = TenantContext.getTenantId();
+        if (tenantId != null && tenantId > 0 && !Objects.equals(tenantId, fileDO.getTenantId())) {
+            throw new BizException(ResponseCodeEnum.TENANT_ACCESS_DENIED);
+        }
+        fileMapper.deleteById(id);
+        return Response.success();
     }
 }

@@ -27,4 +27,6 @@ public class ArticleCategoryRelDO {
     private Long articleId;
 
     private Long categoryId;
+
+    private Long tenantId;
 }

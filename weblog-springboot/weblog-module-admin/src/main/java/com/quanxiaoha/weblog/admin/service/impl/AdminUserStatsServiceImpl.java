@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -90,10 +91,10 @@ public class AdminUserStatsServiceImpl implements AdminUserStatsService {
         );
 
         // 初始化结果结构
-        List<Long> deskData = new ArrayList<>(List.of(0L, 0L, 0L, 0L, 0L));
-        List<Long> mobileData = new ArrayList<>(List.of(0L, 0L, 0L, 0L, 0L));
-        List<Long> backData = new ArrayList<>(List.of(0L, 0L, 0L, 0L, 0L));
-        List<Long> frontData = new ArrayList<>(List.of(0L, 0L, 0L, 0L, 0L));
+        List<Long> deskData = new ArrayList<>(Arrays.asList(0L, 0L, 0L, 0L, 0L));
+        List<Long> mobileData = new ArrayList<>(Arrays.asList(0L, 0L, 0L, 0L, 0L));
+        List<Long> backData = new ArrayList<>(Arrays.asList(0L, 0L, 0L, 0L, 0L));
+        List<Long> frontData = new ArrayList<>(Arrays.asList(0L, 0L, 0L, 0L, 0L));
 
         for (JSONObject item : result) {
             Integer periodIndex = item.getInteger("period_index");

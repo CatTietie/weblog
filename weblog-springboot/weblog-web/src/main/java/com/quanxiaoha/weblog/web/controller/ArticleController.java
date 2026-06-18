@@ -3,6 +3,7 @@ package com.quanxiaoha.weblog.web.controller;
 import com.quanxiaoha.weblog.common.aspect.ApiOperationLog;
 import com.quanxiaoha.weblog.common.utils.Response;
 import com.quanxiaoha.weblog.web.model.vo.article.FindArticleDetailReqVO;
+import com.quanxiaoha.weblog.web.model.vo.article.FindArticlesBySearchReqVO;
 import com.quanxiaoha.weblog.web.model.vo.article.FindIndexArticlePageListReqVO;
 import com.quanxiaoha.weblog.web.service.ArticleService;
 import io.swagger.annotations.Api;
@@ -40,6 +41,13 @@ public class ArticleController {
     @ApiOperationLog(description = "获取文章详情")
     public Response findArticleDetail(@RequestBody FindArticleDetailReqVO findArticleDetailReqVO) {
         return articleService.findArticleDetail(findArticleDetailReqVO);
+    }
+
+    @PostMapping("/search")
+    @ApiOperation(value = "关键词搜索文章")
+    @ApiOperationLog(description = "关键词搜索文章")
+    public Response searchArticles(@RequestBody FindArticlesBySearchReqVO findArticlesBySearchReqVO) {
+        return articleService.searchArticles(findArticlesBySearchReqVO);
     }
 
 }

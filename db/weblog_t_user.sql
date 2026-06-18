@@ -3,6 +3,7 @@ create table t_user
     is_deleted  tinyint(2) default 0                 not null comment '删除标志位：0：未删除 1：已删除',
     update_time datetime   default CURRENT_TIMESTAMP not null comment '最后一次更新时间',
     create_time datetime   default CURRENT_TIMESTAMP not null comment '创建时间',
+    status      tinyint(2) default 0                 not null comment '状态：0-启用，1-禁用',
     password    varchar(60)                          not null comment '密码',
     username    varchar(60)                          not null comment '用户名',
     id          bigint unsigned auto_increment comment 'id'

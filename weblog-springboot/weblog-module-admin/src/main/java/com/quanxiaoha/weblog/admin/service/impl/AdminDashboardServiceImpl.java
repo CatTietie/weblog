@@ -16,10 +16,15 @@ import com.quanxiaoha.weblog.common.model.vo.LineDataVO;
 import com.quanxiaoha.weblog.common.model.vo.PieDataVO;
 import com.quanxiaoha.weblog.common.utils.Response;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -280,5 +285,118 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
 
         return res;
 
+    }
+
+    @Override
+    public void exportDashboardExcel(LocalDate startDate, LocalDate endDate, HttpServletResponse response) {
+        try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+            CellStyle headerStyle = workbook.createCellStyle();
+            Font headerFont = workbook.createFont();
+            headerFont.setBold(true);
+            headerStyle.setFont(headerFont);
+
+            // Sheet 1: PV趋势数据（按日期范围过滤）
+            Sheet pvSheet = workbook.createSheet("PV趋势数据");
+            Row pvHeader = pvSheet.createRow(0);
+            createCell(pvHeader, 0, "日期", headerStyle);
+            createCell(pvHeader, 1, "PV访问量", headerStyle);
+
+            List<StatisticsArticlePVDO> pvRecords = articlePVMapper.selectList(
+                    Wrappers.<StatisticsArticlePVDO>lambdaQuery()
+                            .ge(StatisticsArticlePVDO::getPvDate, startDate)
+                            .le(StatisticsArticlePVDO::getPvDate, endDate)
+                            .orderByAsc(StatisticsArticlePVDO::getPvDate));
+            if (!CollectionUtils.isEmpty(pvRecords)) {
+                int rowIdx = 1;
+                for (StatisticsArticlePVDO pv : pvRecords) {
+                    Row row = pvSheet.createRow(rowIdx++);
+                    row.createCell(0).setCellValue(pv.getPvDate().toString());
+                    row.createCell(1).setCellValue(pv.getPvCount());
+                }
+            }
+
+            // Sheet 2: 文章阅读量Top6
+            Sheet readSheet = workbook.createSheet("文章阅读量Top6");
+            Row readHeader = readSheet.createRow(0);
+            createCell(readHeader, 0, "文章标题", headerStyle);
+            createCell(readHeader, 1, "阅读量", headerStyle);
+
+            List<JSONObject> topArticles = articleMapper.orderArticle();
+            if (!CollectionUtils.isEmpty(topArticles)) {
+                int rowIdx = 1;
+                for (JSONObject item : topArticles) {
+                    Row row = readSheet.createRow(rowIdx++);
+                    row.createCell(0).setCellValue(item.getString("title"));
+                    row.createCell(1).setCellValue(item.getIntValue("readNum"));
+                }
+            }
+
+            // Sheet 3: 分类分布
+            Sheet categorySheet = workbook.createSheet("分类分布");
+            Row categoryHeader = categorySheet.createRow(0);
+            createCell(categoryHeader, 0, "分类名称", headerStyle);
+            createCell(categoryHeader, 1, "文章数", headerStyle);
+
+            List<PieDataVO> categories = statisticsMapper.categoryAndArticleCount();
+            if (!CollectionUtils.isEmpty(categories)) {
+                int rowIdx = 1;
+                for (PieDataVO item : categories) {
+                    Row row = categorySheet.createRow(rowIdx++);
+                    row.createCell(0).setCellValue(item.getName());
+                    row.createCell(1).setCellValue(item.getValue());
+                }
+            }
+
+            // Sheet 4: 标签分布
+            Sheet tagSheet = workbook.createSheet("标签分布");
+            Row tagHeader = tagSheet.createRow(0);
+            createCell(tagHeader, 0, "标签名称", headerStyle);
+            createCell(tagHeader, 1, "文章数", headerStyle);
+
+            List<PieDataVO> tags = statisticsMapper.tagsAndArticleCount();
+            if (!CollectionUtils.isEmpty(tags)) {
+                int rowIdx = 1;
+                for (PieDataVO item : tags) {
+                    if (item.getValue() == 0L) continue;
+                    Row row = tagSheet.createRow(rowIdx++);
+                    row.createCell(0).setCellValue(item.getName());
+                    row.createCell(1).setCellValue(item.getValue());
+                }
+            }
+
+            // Sheet 5: 发布热力图（按日期范围过滤）
+            Sheet publishSheet = workbook.createSheet("发布热力图");
+            Row publishHeader = publishSheet.createRow(0);
+            createCell(publishHeader, 0, "日期", headerStyle);
+            createCell(publishHeader, 1, "发布数", headerStyle);
+
+            List<ArticlePublishCountDO> publishCounts = articleMapper.selectDateArticlePublishCount(startDate, endDate);
+            if (!CollectionUtils.isEmpty(publishCounts)) {
+                int rowIdx = 1;
+                for (ArticlePublishCountDO item : publishCounts) {
+                    Row row = publishSheet.createRow(rowIdx++);
+                    row.createCell(0).setCellValue(item.getDate().toString());
+                    row.createCell(1).setCellValue(item.getCount());
+                }
+            }
+
+            // 设置响应头
+            String fileName = "dashboard_report_" + startDate + "_" + endDate + ".xlsx";
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(fileName, "UTF-8"));
+            response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+
+            workbook.write(response.getOutputStream());
+            response.getOutputStream().flush();
+        } catch (IOException e) {
+            log.error("导出仪表盘Excel失败", e);
+            throw new RuntimeException("导出Excel失败");
+        }
+    }
+
+    private void createCell(Row row, int col, String value, CellStyle style) {
+        Cell cell = row.createCell(col);
+        cell.setCellValue(value);
+        cell.setCellStyle(style);
     }
 }

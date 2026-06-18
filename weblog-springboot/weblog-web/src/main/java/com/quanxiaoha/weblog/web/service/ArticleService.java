@@ -2,6 +2,7 @@ package com.quanxiaoha.weblog.web.service;
 
 import com.quanxiaoha.weblog.common.utils.Response;
 import com.quanxiaoha.weblog.web.model.vo.article.FindArticleDetailReqVO;
+import com.quanxiaoha.weblog.web.model.vo.article.FindArticlesBySearchReqVO;
 import com.quanxiaoha.weblog.web.model.vo.article.FindIndexArticlePageListReqVO;
 
 /**
@@ -24,5 +25,12 @@ public interface ArticleService {
      * @return
      */
     Response findArticleDetail(FindArticleDetailReqVO findArticleDetailReqVO);
+
+    /**
+     * 关键词搜索文章
+     * @param findArticlesBySearchReqVO
+     * @return
+     */
+    Response searchArticles(FindArticlesBySearchReqVO findArticlesBySearchReqVO);
 
 }

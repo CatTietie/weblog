@@ -2,7 +2,7 @@
     <!-- 左边：标签导航栏 -->
     <div class="fixed top-[64px] h-[44px] px-2 right-0 z-50 flex items-center bg-white transition-all duration-300 shadow" :style="{left: menuStore.menuWidth}">
         <el-tabs v-model="activeTab" type="card" class="demo-tabs" @tab-remove="removeTab" @tab-change="tabChange" style="min-width: 10px;">
-            <el-tab-pane v-for="item in tabList" :key="item.path" :label="item.title" :name="item.path" :closable="item.path != '/admin/index'">
+            <el-tab-pane v-for="item in tabList" :key="item.path" :label="item.titleKey ? t(item.titleKey) : item.title" :name="item.path" :closable="item.path != '/admin/index'">
             </el-tab-pane>
         </el-tabs>
 
@@ -16,8 +16,8 @@
                 </span>
                 <template #dropdown>
                     <el-dropdown-menu>
-                        <el-dropdown-item command="closeOthers">关闭其他</el-dropdown-item>
-                        <el-dropdown-item command="closeAll">关闭全部</el-dropdown-item>
+                        <el-dropdown-item command="closeOthers">{{ t('admin.tagList.closeOthers') }}</el-dropdown-item>
+                        <el-dropdown-item command="closeAll">{{ t('admin.tagList.closeAll') }}</el-dropdown-item>
                     </el-dropdown-menu>
                 </template>
             </el-dropdown>
@@ -28,7 +28,9 @@
 
 <script setup>
 import { useTabList } from '@/composables/useTagList.js'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const { menuStore, activeTab, tabList, tabChange, removeTab, handleCloseTab } = useTabList()
 </script>
 

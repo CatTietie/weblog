@@ -6,14 +6,19 @@ import com.google.common.collect.Lists;
 import com.quanxiaoha.weblog.admin.convert.ArticleDetailConvert;
 import com.quanxiaoha.weblog.admin.model.vo.article.*;
 import com.quanxiaoha.weblog.admin.service.AdminArticleService;
+import com.quanxiaoha.weblog.admin.workflow.engine.ArticlePublishedEvent;
+import com.quanxiaoha.weblog.common.context.TenantContext;
 import com.quanxiaoha.weblog.common.domain.dos.*;
 import com.quanxiaoha.weblog.common.domain.mapper.*;
+import com.quanxiaoha.weblog.common.enums.ArticleStatusEnum;
 import com.quanxiaoha.weblog.common.enums.ResponseCodeEnum;
 import com.quanxiaoha.weblog.common.exception.BizException;
+import com.quanxiaoha.weblog.common.utils.SensitiveWordHelper;
 import com.quanxiaoha.weblog.common.utils.PageResponse;
 import com.quanxiaoha.weblog.common.utils.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -49,6 +54,12 @@ public class AdminArticleServiceImpl implements AdminArticleService {
     private ArticleTagRelMapper articleTagRelMapper;
     @Autowired
     private ArticleUpdateHistoryMapper articleUpdateHistoryMapper;
+    @Autowired
+    private ArticleVersionMapper articleVersionMapper;
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+    @Autowired
+    private SensitiveWordHelper sensitiveWordHelper;
 
     /**
      * 发布文章
@@ -59,6 +70,12 @@ public class AdminArticleServiceImpl implements AdminArticleService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Response publishArticle(PublishArticleReqVO publishArticleReqVO) {
+        // 敏感词检测
+        if (sensitiveWordHelper.contains(publishArticleReqVO.getTitle())
+                || sensitiveWordHelper.contains(publishArticleReqVO.getContent())) {
+            throw new BizException(ResponseCodeEnum.CONTENT_HIT_SENSITIVE_WORD);
+        }
+
         // 1. VO 转 ArticleDO, 并保存
         ArticleDO articleDO = ArticleDO.builder()
                 .title(publishArticleReqVO.getTitle())
@@ -66,6 +83,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
                 .summary(publishArticleReqVO.getSummary())
                 .createTime(LocalDateTime.now())
                 .updateTime(LocalDateTime.now())
+                .status(ArticleStatusEnum.DRAFT.getCode())
                 .build();
         articleMapper.insert(articleDO);
 
@@ -102,7 +120,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
         List<String> publishTags = publishArticleReqVO.getTags();
         insertTags(articleId, publishTags);
 
-        return Response.success();
+        return Response.success(articleId);
     }
 
     /**
@@ -115,6 +133,14 @@ public class AdminArticleServiceImpl implements AdminArticleService {
     @Transactional(rollbackFor = Exception.class)
     public Response deleteArticle(DeleteArticleReqVO deleteArticleReqVO) {
         Long articleId = deleteArticleReqVO.getId();
+
+        // 校验文章是否属于当前租户
+        ArticleDO articleDO = articleMapper.selectById(articleId);
+        if (Objects.isNull(articleDO)) {
+            log.warn("==> 该文章不存在, articleId: {}", articleId);
+            throw new BizException(ResponseCodeEnum.ARTICLE_NOT_FOUND);
+        }
+        checkTenantPermission(articleDO.getTenantId());
 
         // 1. 删除文章
         articleMapper.deleteById(articleId);
@@ -160,6 +186,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
                             .title(articleDO.getTitle())
                             .cover(articleDO.getCover())
                             .createTime(articleDO.getCreateTime())
+                            .status(articleDO.getStatus())
                             .build())
                     .collect(Collectors.toList());
         }
@@ -183,6 +210,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
             log.warn("==> 查询的文章不存在，articleId: {}", articleId);
             throw new BizException(ResponseCodeEnum.ARTICLE_NOT_FOUND);
         }
+        checkTenantPermission(articleDO.getTenantId());
 
         ArticleContentDO articleContentDO = articleContentMapper.selectByArticleId(articleId);
 
@@ -212,7 +240,33 @@ public class AdminArticleServiceImpl implements AdminArticleService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Response updateArticle(UpdateArticleReqVO updateArticleReqVO) {
+        // 敏感词检测
+        if (sensitiveWordHelper.contains(updateArticleReqVO.getTitle())
+                || sensitiveWordHelper.contains(updateArticleReqVO.getContent())) {
+            throw new BizException(ResponseCodeEnum.CONTENT_HIT_SENSITIVE_WORD);
+        }
+
         Long articleId = updateArticleReqVO.getId();
+
+        // 校验文章是否属于当前租户
+        ArticleDO existingArticle = articleMapper.selectById(articleId);
+        if (Objects.isNull(existingArticle)) {
+            log.warn("==> 该文章不存在, articleId: {}", articleId);
+            throw new BizException(ResponseCodeEnum.ARTICLE_NOT_FOUND);
+        }
+        checkTenantPermission(existingArticle.getTenantId());
+
+        // 若文章已发布，保存版本快照（记录更新前的标题和内容）
+        if (Objects.equals(existingArticle.getStatus(), ArticleStatusEnum.PUBLISHED.getCode())) {
+            ArticleContentDO existingContent = articleContentMapper.selectByArticleId(articleId);
+            ArticleVersionDO versionDO = ArticleVersionDO.builder()
+                    .articleId(articleId)
+                    .title(existingArticle.getTitle())
+                    .content(existingContent.getContent())
+                    .createTime(LocalDateTime.now())
+                    .build();
+            articleVersionMapper.insert(versionDO);
+        }
 
         //插入更新数据
         ArticleUpdateHistoryDO articleUpdateHistoryDO = ArticleUpdateHistoryDO.builder()
@@ -354,6 +408,79 @@ public class AdminArticleServiceImpl implements AdminArticleService {
             });
             // 批量插入
             articleTagRelMapper.insertBatchSomeColumn(articleTagRelDOS);
+        }
+    }
+
+    @Override
+    public Response changeArticleStatus(ChangeArticleStatusReqVO changeArticleStatusReqVO) {
+        Long articleId = changeArticleStatusReqVO.getId();
+        ArticleDO articleDO = articleMapper.selectById(articleId);
+        if (Objects.isNull(articleDO)) {
+            log.warn("==> 该文章不存在, articleId: {}", articleId);
+            throw new BizException(ResponseCodeEnum.ARTICLE_NOT_FOUND);
+        }
+        checkTenantPermission(articleDO.getTenantId());
+        ArticleDO update = ArticleDO.builder()
+                .id(articleId)
+                .status(changeArticleStatusReqVO.getStatus())
+                .updateTime(LocalDateTime.now())
+                .build();
+        articleMapper.updateById(update);
+
+        if (Objects.equals(changeArticleStatusReqVO.getStatus(), ArticleStatusEnum.PUBLISHED.getCode())) {
+            ArticleCategoryRelDO catRel = articleCategoryRelMapper.selectByArticleId(articleId);
+            String categoryName = "";
+            Long categoryId = null;
+            if (catRel != null) {
+                categoryId = catRel.getCategoryId();
+                CategoryDO cat = categoryMapper.selectById(categoryId);
+                if (cat != null) {
+                    categoryName = cat.getName();
+                }
+            }
+            eventPublisher.publishEvent(new ArticlePublishedEvent(
+                    this, articleId, articleDO.getTitle(), categoryId, categoryName, null));
+        }
+
+        return Response.success();
+    }
+
+    @Override
+    public Response findArticleVersionList(FindArticleVersionListReqVO findArticleVersionListReqVO) {
+        Long articleId = findArticleVersionListReqVO.getId();
+        List<ArticleVersionDO> versions = articleVersionMapper.selectByArticleId(articleId);
+        List<FindArticleVersionListRspVO> rspVOS = versions.stream()
+                .map(v -> FindArticleVersionListRspVO.builder()
+                        .id(v.getId())
+                        .title(v.getTitle())
+                        .createTime(v.getCreateTime())
+                        .build())
+                .collect(Collectors.toList());
+        return Response.success(rspVOS);
+    }
+
+    @Override
+    public Response findArticleVersionDetail(FindArticleVersionDetailReqVO findArticleVersionDetailReqVO) {
+        Long versionId = findArticleVersionDetailReqVO.getId();
+        ArticleVersionDO versionDO = articleVersionMapper.selectById(versionId);
+        if (Objects.isNull(versionDO)) {
+            throw new BizException(ResponseCodeEnum.ARTICLE_VERSION_NOT_FOUND);
+        }
+        FindArticleVersionDetailRspVO rspVO = FindArticleVersionDetailRspVO.builder()
+                .id(versionDO.getId())
+                .articleId(versionDO.getArticleId())
+                .title(versionDO.getTitle())
+                .content(versionDO.getContent())
+                .createTime(versionDO.getCreateTime())
+                .build();
+        return Response.success(rspVO);
+    }
+
+    private void checkTenantPermission(Long articleTenantId) {
+        Long currentTenantId = TenantContext.getTenantId();
+        if (currentTenantId != null && currentTenantId > 0
+                && !Objects.equals(currentTenantId, articleTenantId)) {
+            throw new BizException(ResponseCodeEnum.TENANT_ACCESS_DENIED);
         }
     }
 }

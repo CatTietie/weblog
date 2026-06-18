@@ -36,7 +36,7 @@ public class AdminCategoryController {
     @PostMapping("/add")
     @ApiOperation(value = "添加分类")
     @ApiOperationLog(description = "添加分类")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('category:create')")
     public Response addCategory(@RequestBody @Validated AddCategoryReqVO addCategoryReqVO) {
         return categoryService.addCategory(addCategoryReqVO);
     }
@@ -51,7 +51,7 @@ public class AdminCategoryController {
     @PostMapping("/delete")
     @ApiOperation(value = "删除分类")
     @ApiOperationLog(description = "删除分类")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('category:delete')")
     public Response deleteCategory(@RequestBody @Validated DeleteCategoryReqVO deleteCategoryReqVO) {
         return categoryService.deleteCategory(deleteCategoryReqVO);
     }

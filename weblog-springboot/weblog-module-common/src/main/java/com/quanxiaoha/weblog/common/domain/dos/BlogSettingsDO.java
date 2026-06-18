@@ -43,4 +43,6 @@ public class BlogSettingsDO {
     private String giteeHomepage;
 
     private String zhihuHomepage;
+
+    private Long tenantId;
 }

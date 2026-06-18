@@ -6,9 +6,15 @@ import com.quanxiaoha.weblog.common.utils.Response;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletResponse;
+import java.time.LocalDate;
 
 /**
  * @author: Group 5
@@ -86,5 +92,15 @@ public class AdminDashboardController {
     @ApiOperationLog(description = "统计标签下的文章数量")
     public Response countTags() {
         return dashboardService.countTags();
+    }
+
+    @GetMapping("/export")
+    @ApiOperation(value = "导出仪表盘数据为Excel")
+    @ApiOperationLog(description = "导出仪表盘数据为Excel")
+    public void exportDashboardExcel(
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate,
+            HttpServletResponse response) {
+        dashboardService.exportDashboardExcel(startDate, endDate, response);
     }
 }

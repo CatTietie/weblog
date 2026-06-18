@@ -85,6 +85,19 @@ public class JwtTokenHelper implements InitializingBean {
                 .compact();
     }
 
+    public String generateToken(String username, Long tenantId) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime expireTime = now.plusMinutes(tokenExpireTime);
+
+        return Jwts.builder().setSubject(username)
+                .setIssuer(issuer)
+                .claim("tenantId", tenantId)
+                .setIssuedAt(Date.from(now.atZone(ZoneId.systemDefault()).toInstant()))
+                .setExpiration(Date.from(expireTime.atZone(ZoneId.systemDefault()).toInstant()))
+                .signWith(key)
+                .compact();
+    }
+
     /**
      * 解析 Token
      * @param token
@@ -119,6 +132,19 @@ public class JwtTokenHelper implements InitializingBean {
             Claims claims = jwtParser.parseClaimsJws(token).getBody();
             String username = claims.getSubject();
             return username;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public Long getTenantIdByToken(String token) {
+        try {
+            Claims claims = jwtParser.parseClaimsJws(token).getBody();
+            Object tenantId = claims.get("tenantId");
+            if (tenantId instanceof Number) {
+                return ((Number) tenantId).longValue();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

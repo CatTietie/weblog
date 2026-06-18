@@ -70,6 +70,12 @@
             <artifactId>jackson-core</artifactId>
         </dependency>
 
+        <!-- Caffeine 本地缓存 -->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
+
 
         <dependency>
             <groupId>net.sf.uadetector</groupId>

@@ -4,42 +4,42 @@
         <el-card shadow="never" class="mb-5">
             <!-- flex 布局，内容垂直居中 -->
             <div class="flex items-center">
-                <el-text>分类名称</el-text>
-                <div class="ml-3 w-52 mr-5"><el-input v-model="searchCategoryName" placeholder="请输入（模糊查询）" /></div>
+                <el-text>{{ t('category.name') }}</el-text>
+                <div class="ml-3 w-52 mr-5"><el-input v-model="searchCategoryName" :placeholder="t('search.placeholder')" /></div>
 
-                <el-text>创建日期</el-text>
+                <el-text>{{ t('common.createDate') }}</el-text>
                 <div class="ml-3 w-30 mr-5">
                     <!-- 日期选择组件（区间选择） -->
-                    <el-date-picker v-model="pickDate" type="daterange" range-separator="至" start-placeholder="开始时间"
-                        end-placeholder="结束时间" size="default" :shortcuts="shortcuts" @change="datepickerChange"/>
+                    <el-date-picker v-model="pickDate" type="daterange" :range-separator="t('datepicker.rangeSeparator')" :start-placeholder="t('datepicker.startPlaceholder')"
+                        :end-placeholder="t('datepicker.endPlaceholder')" size="default" :shortcuts="shortcuts" @change="datepickerChange"/>
                 </div>
 
-                <el-button type="primary" class="ml-3" :icon="Search" @click="getTableData">查询</el-button>
-                <el-button class="ml-3" :icon="RefreshRight" @click="reset">重置</el-button>
+                <el-button type="primary" class="ml-3" :icon="Search" @click="getTableData">{{ t('common.query') }}</el-button>
+                <el-button class="ml-3" :icon="RefreshRight" @click="reset">{{ t('common.reset') }}</el-button>
             </div>
         </el-card>
 
         <el-card shadow="never">
             <!-- 新增按钮 -->
             <div class="mb-5">
-                <el-button type="primary" @click="addCategoryBtnClick">
+                <el-button v-if="userStore.hasPermission('category:create')" type="primary" @click="addCategoryBtnClick">
                     <el-icon class="mr-1">
                         <Plus />
                     </el-icon>
-                    新增</el-button>
+                    {{ t('common.add') }}</el-button>
             </div>
 
             <!-- 分页列表 -->
             <el-table :data="tableData" border stripe style="width: 100%" v-loading="tableLoading">
-                <el-table-column prop="name" label="分类名称" width="180" />
-                <el-table-column prop="createTime" label="创建时间" width="180" />
-                <el-table-column label="操作" >
+                <el-table-column prop="name" :label="t('category.name')" width="180" />
+                <el-table-column prop="createTime" :label="t('common.createTime')" width="180" />
+                <el-table-column :label="t('common.actions')" >
                     <template #default="scope">
-                    <el-button type="danger" size="small" @click="deleteCategorySubmit(scope.row)">
+                    <el-button v-if="userStore.hasPermission('category:delete')" type="danger" size="small" @click="deleteCategorySubmit(scope.row)">
                         <el-icon class="mr-1">
                             <Delete />
                         </el-icon>
-                        删除
+                        {{ t('common.delete') }}
                     </el-button>
                 </template>
                 </el-table-column>
@@ -55,10 +55,10 @@
         </el-card>
 
     <!-- 添加分类 -->
-    <FormDialog ref="formDialogRef" title="添加文章分类" destroyOnClose @submit="onSubmit">
+    <FormDialog ref="formDialogRef" :title="t('category.addCategory')" destroyOnClose @submit="onSubmit">
         <el-form ref="formRef" :rules="rules" :model="form">
-                    <el-form-item label="分类名称" prop="name" label-width="80px" size="large">
-                        <el-input v-model="form.name" placeholder="请输入分类名称" maxlength="20" show-word-limit clearable/>
+                    <el-form-item :label="t('category.name')" prop="name" label-width="80px" size="large">
+                        <el-input v-model="form.name" :placeholder="t('category.namePlaceholder')" maxlength="20" show-word-limit clearable/>
                     </el-form-item>
                 </el-form>
     </FormDialog>
@@ -68,11 +68,16 @@
 
 <script setup>
 import { Search, RefreshRight } from '@element-plus/icons-vue'
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { getCategoryPageList, addCategory, deleteCategory } from '@/api/admin/category'
 import moment from 'moment'
 import { showMessage, showModel } from '@/composables/util'
 import FormDialog from '@/components/FormDialog.vue'
+import { useUserStore } from '@/stores/user'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+const userStore = useUserStore()
 
 // 分页查询的分类名称
 const searchCategoryName = ref('')
@@ -91,9 +96,9 @@ const datepickerChange = (e) => {
     console.log('开始时间：' + startDate.value + ', 结束时间：' + endDate.value)
 }
 
-const shortcuts = [
+const shortcuts = computed(() => [
     {
-        text: '最近一周',
+        text: t('datepicker.lastWeek'),
         value: () => {
             const end = new Date()
             const start = new Date()
@@ -102,7 +107,7 @@ const shortcuts = [
         },
     },
     {
-        text: '最近一个月',
+        text: t('datepicker.lastMonth'),
         value: () => {
             const end = new Date()
             const start = new Date()
@@ -111,7 +116,7 @@ const shortcuts = [
         },
     },
     {
-        text: '最近三个月',
+        text: t('datepicker.lastThreeMonths'),
         value: () => {
             const end = new Date()
             const start = new Date()
@@ -119,7 +124,7 @@ const shortcuts = [
             return [start, end]
         },
     },
-]
+])
 
 // 表格加载 Loading
 const tableLoading = ref(false)
@@ -138,11 +143,11 @@ function getTableData() {
     // 显示表格 loading
     tableLoading.value = true
     // 调用后台分页接口，并传入所需参数
-    
+
     getCategoryPageList({current: current.value, size: size.value, startDate: startDate.value, endDate: endDate.value, name: searchCategoryName.value})
     .then((res) => {
         if (res.success == true) {
-        
+
             tableData.value = res.data
             current.value = res.current
             size.value = res.size
@@ -190,10 +195,10 @@ const rules = {
     name: [
         {
             required: true,
-            message: '分类名称不能为空',
+            message: t('validation.categoryNameRequired'),
             trigger: 'blur',
         },
-        { min: 1, max: 20, message: '分类名称字数要求大于 1 个字符，小于 20 个字符', trigger: 'blur' },
+        { min: 1, max: 20, message: t('validation.categoryNameLength'), trigger: 'blur' },
     ]
 }
 
@@ -204,12 +209,12 @@ const onSubmit = () => {
             console.log('表单验证不通过')
             return false
         }
-        
+
         // 显示提交按钮 loading
         formDialogRef.value.showBtnLoading()
         addCategory(form).then((res) => {
             if (res.success == true) {
-                showMessage('添加成功')
+                showMessage(t('common.addSuccess'))
                 // 将表单中分类名称置空
                 form.name = ''
                 // 隐藏对话框
@@ -230,10 +235,10 @@ const onSubmit = () => {
 // 删除分类
 const deleteCategorySubmit = (row) => {
     console.log(row)
-    showModel('是否确定要删除该分类？').then(() => {
+    showModel(t('confirm.deleteCategory')).then(() => {
         deleteCategory(row.id).then((res) => {
             if (res.success == true) {
-                showMessage('删除成功')
+                showMessage(t('common.deleteSuccess'))
                 // 重新请求分页接口，渲染数据
                 getTableData()
             } else {

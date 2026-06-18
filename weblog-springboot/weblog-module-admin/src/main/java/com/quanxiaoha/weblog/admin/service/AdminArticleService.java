@@ -44,4 +44,25 @@ public interface AdminArticleService {
      * @return
      */
     Response updateArticle(UpdateArticleReqVO updateArticleReqVO);
+
+    /**
+     * 修改文章状态
+     * @param changeArticleStatusReqVO
+     * @return
+     */
+    Response changeArticleStatus(ChangeArticleStatusReqVO changeArticleStatusReqVO);
+
+    /**
+     * 查询文章版本列表
+     * @param findArticleVersionListReqVO
+     * @return
+     */
+    Response findArticleVersionList(FindArticleVersionListReqVO findArticleVersionListReqVO);
+
+    /**
+     * 查询文章版本详情
+     * @param findArticleVersionDetailReqVO
+     * @return
+     */
+    Response findArticleVersionDetail(FindArticleVersionDetailReqVO findArticleVersionDetailReqVO);
 }

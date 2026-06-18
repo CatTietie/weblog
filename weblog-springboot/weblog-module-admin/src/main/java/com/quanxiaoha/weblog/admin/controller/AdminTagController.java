@@ -35,7 +35,7 @@ public class AdminTagController {
     @PostMapping("/add")
     @ApiOperation(value = "添加标签")
     @ApiOperationLog(description = "添加标签")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('tag:create')")
     public Response addTags(@RequestBody @Validated AddTagReqVO addTagReqVO) {
         return tagService.addTags(addTagReqVO);
     }
@@ -50,7 +50,7 @@ public class AdminTagController {
     @PostMapping("/delete")
     @ApiOperation(value = "删除标签")
     @ApiOperationLog(description = "删除标签")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('tag:delete')")
     public Response deleteTag(@RequestBody @Validated DeleteTagReqVO deleteTagReqVO) {
         return tagService.deleteTag(deleteTagReqVO);
     }

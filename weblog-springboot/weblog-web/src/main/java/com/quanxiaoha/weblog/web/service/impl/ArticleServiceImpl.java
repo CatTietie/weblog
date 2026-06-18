@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import com.quanxiaoha.weblog.admin.event.ReadArticleEvent;
 import com.quanxiaoha.weblog.common.domain.dos.*;
 import com.quanxiaoha.weblog.common.domain.mapper.*;
+import com.quanxiaoha.weblog.common.enums.ArticleStatusEnum;
 import com.quanxiaoha.weblog.common.enums.ResponseCodeEnum;
 import com.quanxiaoha.weblog.common.exception.BizException;
 import com.quanxiaoha.weblog.common.utils.PageResponse;
@@ -17,6 +18,7 @@ import com.quanxiaoha.weblog.web.model.vo.category.FindCategoryListRspVO;
 import com.quanxiaoha.weblog.web.model.vo.tag.FindTagListRspVO;
 import com.quanxiaoha.weblog.web.service.ArticleService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -64,8 +66,8 @@ public class ArticleServiceImpl implements ArticleService {
         Long current = findIndexArticlePageListReqVO.getCurrent();
         Long size = findIndexArticlePageListReqVO.getSize();
 
-        // 第一步：分页查询文章主体记录
-        Page<ArticleDO> articleDOPage = articleMapper.selectPageList(current, size, null, null, null);
+        // 第一步：分页查询文章主体记录（仅已发布）
+        Page<ArticleDO> articleDOPage = articleMapper.selectPageList(current, size, null, null, null, ArticleStatusEnum.PUBLISHED.getCode());
 
         // 返回的分页数据
         List<ArticleDO> articleDOS = articleDOPage.getRecords();
@@ -161,6 +163,12 @@ public class ArticleServiceImpl implements ArticleService {
             throw new BizException(ResponseCodeEnum.ARTICLE_NOT_FOUND);
         }
 
+        // 判断文章是否已发布
+        if (!Objects.equals(articleDO.getStatus(), ArticleStatusEnum.PUBLISHED.getCode())) {
+            log.warn("==> 该文章未发布, articleId: {}", articleId);
+            throw new BizException(ResponseCodeEnum.ARTICLE_NOT_FOUND);
+        }
+
         // 查询正文
         ArticleContentDO articleContentDO = articleContentMapper.selectByArticleId(articleId);
 
@@ -213,5 +221,54 @@ public class ArticleServiceImpl implements ArticleService {
         eventPublisher.publishEvent(new ReadArticleEvent(this, articleId));
 
         return Response.success(vo);
+    }
+
+    @Override
+    public Response searchArticles(FindArticlesBySearchReqVO findArticlesBySearchReqVO) {
+        Long current = findArticlesBySearchReqVO.getCurrent();
+        Long size = findArticlesBySearchReqVO.getSize();
+        String keyword = findArticlesBySearchReqVO.getKeyword();
+
+        // 第一步：从正文表（t_article_content）查找匹配关键词的文章 ID
+        List<Long> contentMatchIds = articleContentMapper.selectArticleIdsByKeyword(keyword);
+
+        // 第二步：从文章表（t_article）查找标题或摘要匹配关键词的文章 ID
+        List<Long> titleSummaryMatchIds = articleMapper.selectIdsByTitleOrSummaryLike(keyword);
+
+        // 第三步：合并两个来源的文章 ID，去重
+        java.util.Set<Long> allMatchIds = new java.util.LinkedHashSet<>();
+        allMatchIds.addAll(titleSummaryMatchIds);
+        allMatchIds.addAll(contentMatchIds);
+
+        // 第四步：根据合并后的 ID 集合分页查询文章详情，按时间倒序
+        List<Long> mergedIds = new java.util.ArrayList<>(allMatchIds);
+        Page<ArticleDO> articleDOPage = articleMapper.selectPageByIds(current, size, mergedIds);
+
+        List<ArticleDO> articleDOS = articleDOPage.getRecords();
+
+        List<FindArticlesBySearchRspVO> vos = null;
+        if (!CollectionUtils.isEmpty(articleDOS)) {
+            vos = articleDOS.stream().map(articleDO -> {
+                String highlightedTitle = highlightKeyword(articleDO.getTitle(), keyword);
+                String highlightedSummary = highlightKeyword(articleDO.getSummary(), keyword);
+                return FindArticlesBySearchRspVO.builder()
+                        .id(articleDO.getId())
+                        .cover(articleDO.getCover())
+                        .title(highlightedTitle)
+                        .summary(highlightedSummary)
+                        .createDate(articleDO.getCreateTime().toLocalDate())
+                        .build();
+            }).collect(Collectors.toList());
+        }
+
+        return PageResponse.success(articleDOPage, vos);
+    }
+
+    private String highlightKeyword(String text, String keyword) {
+        if (StringUtils.isBlank(text) || StringUtils.isBlank(keyword)) {
+            return text;
+        }
+        return text.replaceAll("(?i)" + java.util.regex.Pattern.quote(keyword),
+                "<span class=\"text-red-500 font-bold\">" + keyword + "</span>");
     }
 }

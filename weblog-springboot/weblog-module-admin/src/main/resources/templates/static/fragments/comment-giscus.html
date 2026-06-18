@@ -1,0 +1,50 @@
+<div th:fragment="comment-giscus" th:if="${commentProvider == 'giscus'}">
+    <div class="mt-8 pt-6 border-t border-gray-200">
+        <h3 class="text-lg font-bold text-gray-900 mb-4 dark:text-white">评论</h3>
+        <script src="https://giscus.app/client.js"
+                th:attr="data-repo=${giscusRepo},
+                         data-repo-id=${giscusRepoId},
+                         data-category=${giscusCategory},
+                         data-category-id=${giscusCategoryId},
+                         data-theme=${giscusTheme}"
+                data-mapping="pathname"
+                data-strict="0"
+                data-reactions-enabled="1"
+                data-emit-metadata="0"
+                data-input-position="bottom"
+                data-lang="zh-CN"
+                crossorigin="anonymous"
+                async>
+        </script>
+        <!-- 主题自动跟随脚本（仅当 giscusThemeMode 为 auto 时生效） -->
+        <script th:if="${giscusThemeMode == 'auto'}">
+            (function() {
+                function getPreferredTheme() {
+                    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                }
+                function setGiscusTheme(theme) {
+                    var iframe = document.querySelector('iframe.giscus-frame');
+                    if (iframe) {
+                        iframe.contentWindow.postMessage(
+                            { giscus: { setConfig: { theme: theme } } },
+                            'https://giscus.app'
+                        );
+                    }
+                }
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+                    setGiscusTheme(e.matches ? 'dark' : 'light');
+                });
+                // 监听博客自身的主题切换（通过 document.documentElement 的 class 变化）
+                var observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(m) {
+                        if (m.attributeName === 'class') {
+                            var isDark = document.documentElement.classList.contains('dark');
+                            setGiscusTheme(isDark ? 'dark' : 'light');
+                        }
+                    });
+                });
+                observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+            })();
+        </script>
+    </div>
+</div>

@@ -1,5 +1,21 @@
 <template>
     <main class="container p-4">
+        <!-- 导出工具栏 -->
+        <div class="flex items-center justify-end mb-4 gap-3">
+            <el-date-picker
+                v-model="exportDateRange"
+                type="monthrange"
+                range-separator="至"
+                start-placeholder="开始月份"
+                end-placeholder="结束月份"
+                value-format="YYYY-MM-DD"
+                size="default"
+            />
+            <el-button type="primary" :loading="exporting" :disabled="exporting" @click="handleExport">
+                <el-icon class="mr-1"><Download /></el-icon>
+                {{ exporting ? '导出中...' : '导出报表' }}
+            </el-button>
+        </div>
         <!-- grid 表格布局，分为 4 列 -->
         <div class="grid grid-cols-4 gap-7">
             <!-- 文章数 -->
@@ -279,7 +295,10 @@
 
 <script setup>
 import { ref } from 'vue'
-import { getBaseStatisticsInfo, getCategoryCount, getArticleReadNumInfo, getArticleReadNumTop, getArticleUpdateTop, getTagCount } from '@/api/admin/dashboard'
+import { getBaseStatisticsInfo, getCategoryCount, getArticleReadNumInfo, getArticleReadNumTop, getArticleUpdateTop, getTagCount, exportDashboardExcel } from '@/api/admin/dashboard'
+import { showMessage } from '@/composables/util'
+import { Download } from '@element-plus/icons-vue'
+import moment from 'moment'
 import CountTo from '@/components/CountTo.vue'
 import ArticleReadNumChat from '@/components/ArticleReadNumChat.vue'
 import CategoryCountPieChat from '@/components/CategoryCountPieChat.vue'
@@ -337,6 +356,38 @@ getTagCount().then((res) => {
         tagCountInfo.value = res.data
     }
 })
+
+const exporting = ref(false)
+const exportDateRange = ref([
+    moment().subtract(1, 'months').startOf('month').format('YYYY-MM-DD'),
+    moment().endOf('month').format('YYYY-MM-DD')
+])
+
+const handleExport = () => {
+    if (exporting.value) return
+    if (!exportDateRange.value || exportDateRange.value.length !== 2) {
+        showMessage('请先选择导出的日期范围', 'warning')
+        return
+    }
+    exporting.value = true
+    const [startDate, endDate] = exportDateRange.value
+    exportDashboardExcel(startDate, endDate).then((res) => {
+        const blob = new Blob([res], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `仪表盘报表_${startDate}_${endDate}.xlsx`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        URL.revokeObjectURL(url)
+        showMessage('导出成功')
+    }).catch(() => {
+        showMessage('导出失败', 'error')
+    }).finally(() => {
+        exporting.value = false
+    })
+}
 
 </script>
 

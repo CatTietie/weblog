@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'分类 - ' + ${blogName}">分类</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" th:href="${blogLogo}" type="image/x-icon">
+</head>
+<body class="bg-gray-50 dark:bg-gray-900">
+    <div th:replace="~{static/fragments/header :: header}"></div>
+
+    <main class="container max-w-screen-xl mx-auto p-4">
+        <div class="grid grid-cols-4 gap-7">
+            <div class="col-span-4 md:col-span-3">
+                <div class="bg-white border border-gray-200 rounded-lg p-6 dark:bg-gray-800 dark:border-gray-700">
+                    <h1 class="text-2xl font-bold text-gray-900 mb-6 dark:text-white">全部分类</h1>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <a th:each="cat : ${categories}"
+                           th:href="${baseUrl} + 'category/' + ${cat.id} + '/index.html'"
+                           class="block p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-sm transition">
+                            <h3 class="font-medium text-gray-900 dark:text-white" th:text="${cat.name}">分类名</h3>
+                            <span class="text-sm text-gray-500" th:text="${cat.articleCount} + ' 篇文章'">0 篇文章</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <aside class="hidden md:block md:col-span-1">
+                <div class="sticky top-[5.5rem]">
+                    <div th:replace="~{static/fragments/sidebar :: sidebar}"></div>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <div th:replace="~{static/fragments/footer :: footer}"></div>
+</body>
+</html>

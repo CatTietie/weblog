@@ -1,0 +1,30 @@
+package com.quanxiaoha.weblog.admin.model.vo.resume;
+
+import io.swagger.annotations.ApiModel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import javax.validation.constraints.NotNull;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@ApiModel(value = "更新简历入参 VO")
+public class UpdateResumeReqVO {
+
+    @NotNull(message = "简历 ID 不能为空")
+    private Long id;
+
+    private String name;
+
+    private String content;
+
+    private String templateId;
+
+    private String coverData;
+
+    private String languages;
+}

@@ -4,46 +4,46 @@
         <el-card shadow="never" class="mb-5">
             <!-- flex 布局，内容垂直居中 -->
             <div class="flex items-center">
-                <el-text>标签名称</el-text>
-                <div class="ml-3 w-52 mr-5"><el-input v-model="searchTagName" placeholder="请输入（模糊查询）" /></div>
+                <el-text>{{ t('tag.name') }}</el-text>
+                <div class="ml-3 w-52 mr-5"><el-input v-model="searchTagName" :placeholder="t('search.placeholder')" /></div>
 
-                <el-text>创建日期</el-text>
+                <el-text>{{ t('common.createDate') }}</el-text>
                 <div class="ml-3 w-30 mr-5">
                     <!-- 日期选择组件（区间选择） -->
-                    <el-date-picker v-model="pickDate" type="daterange" range-separator="至" start-placeholder="开始时间"
-                        end-placeholder="结束时间" size="default" :shortcuts="shortcuts" @change="datepickerChange" />
+                    <el-date-picker v-model="pickDate" type="daterange" :range-separator="t('datepicker.rangeSeparator')" :start-placeholder="t('datepicker.startPlaceholder')"
+                        :end-placeholder="t('datepicker.endPlaceholder')" size="default" :shortcuts="shortcuts" @change="datepickerChange" />
                 </div>
 
-                <el-button type="primary" class="ml-3" :icon="Search" @click="getTableData">查询</el-button>
-                <el-button class="ml-3" :icon="RefreshRight" @click="reset">重置</el-button>
+                <el-button type="primary" class="ml-3" :icon="Search" @click="getTableData">{{ t('common.query') }}</el-button>
+                <el-button class="ml-3" :icon="RefreshRight" @click="reset">{{ t('common.reset') }}</el-button>
             </div>
         </el-card>
 
         <el-card shadow="never">
             <!-- 新增按钮 -->
             <div class="mb-5">
-                <el-button type="primary" @click="addCategoryBtnClick">
+                <el-button v-if="userStore.hasPermission('tag:create')" type="primary" @click="addCategoryBtnClick">
                     <el-icon class="mr-1">
                         <Plus />
                     </el-icon>
-                    新增</el-button>
+                    {{ t('common.add') }}</el-button>
             </div>
 
             <!-- 分页列表 -->
             <el-table :data="tableData" border stripe style="width: 100%" v-loading="tableLoading">
-                <el-table-column prop="name" label="标签名称" width="180">
+                <el-table-column prop="name" :label="t('tag.name')" width="180">
                     <template #default="scope">
                         <el-tag class="ml-2" type="success">{{ scope.row.name }}</el-tag>
                     </template>
                 </el-table-column>
-                <el-table-column prop="createTime" label="创建时间" width="180" />
-                <el-table-column label="操作">
+                <el-table-column prop="createTime" :label="t('common.createTime')" width="180" />
+                <el-table-column :label="t('common.actions')">
                     <template #default="scope">
-                        <el-button type="danger" size="small" @click="deleteTagSubmit(scope.row)">
+                        <el-button v-if="userStore.hasPermission('tag:delete')" type="danger" size="small" @click="deleteTagSubmit(scope.row)">
                             <el-icon class="mr-1">
                                 <Delete />
                             </el-icon>
-                            删除
+                            {{ t('common.delete') }}
                         </el-button>
                     </template>
                 </el-table-column>
@@ -59,7 +59,7 @@
         </el-card>
 
         <!-- 添加标签 -->
-        <FormDialog ref="formDialogRef" title="添加文章标签" destroyOnClose @submit="onSubmit">
+        <FormDialog ref="formDialogRef" :title="t('tag.addTag')" destroyOnClose @submit="onSubmit">
             <el-form ref="formRef" :model="form">
                 <el-form-item prop="name">
                     <el-tag v-for="tag in dynamicTags" :key="tag" class="mx-1" closable :disable-transitions="false"
@@ -70,7 +70,7 @@
                         <el-input v-if="inputVisible" ref="InputRef" v-model="inputValue" class="ml-1 w-20" size="small"
                         @keyup.enter="handleInputConfirm" @blur="handleInputConfirm" />
                     <el-button v-else class="button-new-tag ml-1" size="small" @click="showInput">
-                        + 新增标签
+                        {{ t('tag.addNewTag') }}
                     </el-button>
                     </span>
                 </el-form-item>
@@ -82,11 +82,16 @@
 
 <script setup>
 import { Search, RefreshRight } from '@element-plus/icons-vue'
-import { ref, reactive, nextTick } from 'vue'
+import { ref, reactive, nextTick, computed } from 'vue'
 import { getTagPageList, addTag, deleteTag } from '@/api/admin/tag'
 import moment from 'moment'
 import { showMessage, showModel } from '@/composables/util'
 import FormDialog from '@/components/FormDialog.vue'
+import { useUserStore } from '@/stores/user'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+const userStore = useUserStore()
 
 // 分页查询的标签名称
 const searchTagName = ref('')
@@ -105,9 +110,9 @@ const datepickerChange = (e) => {
     console.log('开始时间：' + startDate.value + ', 结束时间：' + endDate.value)
 }
 
-const shortcuts = [
+const shortcuts = computed(() => [
     {
-        text: '最近一周',
+        text: t('datepicker.lastWeek'),
         value: () => {
             const end = new Date()
             const start = new Date()
@@ -116,7 +121,7 @@ const shortcuts = [
         },
     },
     {
-        text: '最近一个月',
+        text: t('datepicker.lastMonth'),
         value: () => {
             const end = new Date()
             const start = new Date()
@@ -125,7 +130,7 @@ const shortcuts = [
         },
     },
     {
-        text: '最近三个月',
+        text: t('datepicker.lastThreeMonths'),
         value: () => {
             const end = new Date()
             const start = new Date()
@@ -133,7 +138,7 @@ const shortcuts = [
             return [start, end]
         },
     },
-]
+])
 
 // 表格加载 Loading
 const tableLoading = ref(false)
@@ -208,7 +213,7 @@ const onSubmit = () => {
         form.tags = dynamicTags.value
         addTag(form).then((res) => {
             if (res.success == true) {
-                showMessage('添加成功')
+                showMessage(t('common.addSuccess'))
                 // 将表单中标签数组置空
                 form.tags = []
                 dynamicTags.value = []
@@ -229,10 +234,10 @@ const onSubmit = () => {
 // 删除标签
 const deleteTagSubmit = (row) => {
     console.log(row)
-    showModel('是否确定要删除该标签？').then(() => {
+    showModel(t('confirm.deleteTag')).then(() => {
         deleteTag(row.id).then((res) => {
             if (res.success == true) {
-                showMessage('删除成功')
+                showMessage(t('common.deleteSuccess'))
                 // 重新请求分页接口，渲染数据
                 getTableData()
             } else {

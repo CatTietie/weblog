@@ -7,6 +7,8 @@
         <div class="grid grid-cols-4 gap-7">
             <!-- 左边栏，占用 3 列 -->
             <div class="col-span-4 md:col-span-3 mb-3">
+                <!-- 为你推荐 -->
+                <RecommendedSection />
                 <!-- 文章列表，grid 表格布局，分为 2 列 -->
                 <div class="grid grid-cols-2 gap-4">
                     <div v-for="(article, index) in articles" :key="index" class="col-span-2 md:col-span-1">
@@ -65,7 +67,7 @@
                                 :class="[current > 1 ? '' : 'cursor-not-allowed']"
                                 >
 
-                                <span class="sr-only">上一页</span>
+                                <span class="sr-only">{{ t('common.prevPage') }}</span>
                                 <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
                                     viewBox="0 0 6 10">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
@@ -88,7 +90,7 @@
                                 class="flex items-center justify-center px-4 h-10 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
                                 :class="[current < pages ? '' : 'cursor-not-allowed']"
                                 >
-                                <span class="sr-only">下一页</span>
+                                <span class="sr-only">{{ t('common.nextPage') }}</span>
                                 <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
                                     viewBox="0 0 6 10">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
@@ -118,6 +120,9 @@
 
     </main>
 
+    <!-- 工具箱 -->
+    <ToolboxButton></ToolboxButton>
+
     <!-- 返回顶部 -->
     <ScrollToTopButton></ScrollToTopButton>
 
@@ -131,12 +136,19 @@ import UserInfoCard from '@/layouts/frontend/components/UserInfoCard.vue'
 import CategoryListCard from '@/layouts/frontend/components/CategoryListCard.vue'
 import TagListCard from '@/layouts/frontend/components/TagListCard.vue'
 import ScrollToTopButton from '@/layouts/frontend/components/ScrollToTopButton.vue'
+import ToolboxButton from '@/layouts/frontend/components/ToolboxButton.vue'
+import RecommendedSection from '@/pages/frontend/components/RecommendedSection.vue'
 import { initTooltips } from 'flowbite'
 import { onMounted, ref } from 'vue'
 import { getArticlePageList } from '@/api/frontend/article'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import { useBehaviorTracker } from '@/composables/useBehaviorTracker'
+
+const { t } = useI18n()
 
 const router = useRouter()
+const { trackTagClick } = useBehaviorTracker()
 
 // 跳转分类文章列表页
 const goCategoryArticleListPage = (id, name) => {
@@ -185,7 +197,7 @@ const goArticleDetailPage = (articleId) => {
 
 // 跳转标签文章列表页
 const goTagArticleListPage = (id, name) => {
-    // 跳转时通过 query 携带参数（标签 ID、标签名称）
+    trackTagClick(id)
     router.push({path: '/tag/article/list', query: {id, name}})
 }
 </script>

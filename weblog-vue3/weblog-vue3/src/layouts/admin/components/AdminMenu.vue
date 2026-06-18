@@ -12,21 +12,19 @@
                 <el-sub-menu v-if="item.children" :index="item.path">
                     <template #title>
                         <el-icon>
-                            <!-- 动态图标 -->
                             <component :is="item.icon"></component>
                         </el-icon>
-                        <span>{{ item.name }}</span>
+                        <span>{{ t(item.nameKey) }}</span>
                     </template>
                     <el-menu-item v-for="(child, childIndex) in item.children" :key="childIndex" :index="child.path">
-                        <span>{{ child.name }}</span>
+                        <span>{{ t(child.nameKey) }}</span>
                     </el-menu-item>
                 </el-sub-menu>
                 <el-menu-item v-else :index="item.path">
                     <el-icon>
-                        <!-- 动态图标 -->
                         <component :is="item.icon"></component>
                     </el-icon>
-                    <span>{{ item.name }}</span>
+                    <span>{{ t(item.nameKey) }}</span>
                 </el-menu-item>
             </template>
         </el-menu>
@@ -34,63 +32,159 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useMenuStore } from '@/stores/menu'
+import { useUserStore } from '@/stores/user'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const menuStore = useMenuStore()
+const userStore = useUserStore()
 
 const route = useRoute()
 const router = useRouter()
 
-// 是否折叠
 const isCollapse = computed(() => !(menuStore.menuWidth == '250px'))
 
-// 根据路由地址判断哪个菜单被选中
 const defaultActive = ref('/admin/index/article-stats')
 
-// 菜单选择事件
 const handleSelect = (path) => {
     router.push(path)
 }
 
-const menus = [
+const isAdmin = computed(() => {
+    const roles = userStore.userInfo?.roles
+    return roles && roles.includes('ROLE_ADMIN')
+})
+
+const allMenus = computed(() => [
     {
-        'name': '仪表盘',
+        'nameKey': 'admin.menu.dashboard',
         'icon': 'Monitor',
         'path': '/admin/index/article-stats',
+        'permission': 'dashboard',
         'children': [
             {
-                'name': '文章统计',
+                'nameKey': 'admin.menu.articleStats',
                 'path': '/admin/index/article-stats'
             },
             {
-                'name': '用户统计',
+                'nameKey': 'admin.menu.userStats',
                 'path': '/admin/index/user-stats'
             }
         ]
     },
     {
-        'name': '文章管理',
+        'nameKey': 'admin.menu.articleManage',
         'icon': 'Document',
         'path': '/admin/article/list',
+        'permission': 'article',
     },
     {
-        'name': '分类管理',
+        'nameKey': 'admin.menu.categoryManage',
         'icon': 'FolderOpened',
         'path': '/admin/category/list',
+        'permission': 'category',
     },
     {
-        'name': '标签管理',
+        'nameKey': 'admin.menu.tagManage',
         'icon': 'PriceTag',
         'path': '/admin/tag/list',
+        'permission': 'tag',
     },
     {
-        'name': '博客设置',
+        'nameKey': 'admin.menu.blogSettings',
         'icon': 'Setting',
         'path': '/admin/blog/settings',
+        'permission': 'blogsettings',
     },
-]
+    {
+        'nameKey': 'admin.menu.commentManage',
+        'icon': 'ChatDotRound',
+        'path': '/admin/comment/list',
+        'permission': 'comment',
+    },
+    {
+        'nameKey': 'admin.menu.notificationManage',
+        'icon': 'Bell',
+        'path': '/admin/notification/send',
+        'permission': 'notification',
+    },
+    {
+        'nameKey': 'admin.menu.userManage',
+        'icon': 'User',
+        'path': '/admin/user/list',
+        'permission': 'user',
+    },
+    {
+        'nameKey': 'admin.menu.roleManage',
+        'icon': 'Avatar',
+        'path': '/admin/role/list',
+        'permission': 'role',
+    },
+    {
+        'nameKey': 'admin.menu.templateManage',
+        'icon': 'Files',
+        'path': '/admin/resume-template/list',
+        'permission': 'template',
+    },
+    {
+        'nameKey': 'admin.menu.recommendManage',
+        'icon': 'TrendCharts',
+        'path': '/admin/recommendation/dashboard',
+        'permission': 'recommendation',
+        'children': [
+            {
+                'nameKey': 'admin.menu.recommendDashboard',
+                'path': '/admin/recommendation/dashboard'
+            },
+            {
+                'nameKey': 'admin.menu.recommendConfig',
+                'path': '/admin/recommendation/config'
+            }
+        ]
+    },
+    {
+        'nameKey': 'admin.menu.staticSite',
+        'icon': 'Upload',
+        'path': '/admin/static-site/config',
+        'permission': 'static-site',
+        'children': [
+            {
+                'nameKey': 'admin.menu.staticSiteConfig',
+                'path': '/admin/static-site/config'
+            },
+            {
+                'nameKey': 'admin.menu.staticSiteTasks',
+                'path': '/admin/static-site/tasks'
+            }
+        ]
+    },
+    {
+        'nameKey': 'admin.menu.workflowManage',
+        'icon': 'Connection',
+        'path': '/admin/workflow/list',
+        'permission': 'workflow',
+    },
+    {
+        'nameKey': 'admin.menu.reminderLog',
+        'icon': 'AlarmClock',
+        'path': '/admin/reminder-chat.log/list',
+        'permission': 'reminder-chat.log',
+    },
+    {
+        'nameKey': 'admin.menu.sensitiveWord',
+        'icon': 'Warning',
+        'path': '/admin/sensitive-word/list',
+        'permission': 'sensitive_word',
+    },
+])
+
+const menus = computed(() => {
+    const permissions = userStore.userInfo?.permissions || []
+    return allMenus.value.filter(item => permissions.includes(item.permission))
+})
 </script>
 
 <style>

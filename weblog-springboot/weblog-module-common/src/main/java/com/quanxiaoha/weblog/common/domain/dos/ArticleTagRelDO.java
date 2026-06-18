@@ -27,4 +27,6 @@ public class ArticleTagRelDO {
     private Long articleId;
 
     private Long tagId;
+
+    private Long tenantId;
 }

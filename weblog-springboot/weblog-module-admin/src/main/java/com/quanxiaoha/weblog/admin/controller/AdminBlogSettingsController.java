@@ -33,7 +33,7 @@ public class AdminBlogSettingsController {
     @PostMapping("/update")
     @ApiOperation(value = "博客基础信息修改")
     @ApiOperationLog(description = "博客基础信息修改")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('settings:update')")
     public Response updateBlogSettings(@RequestBody @Validated UpdateBlogSettingsReqVO updateBlogSettingsReqVO) {
         return blogSettingsService.updateBlogSettings(updateBlogSettingsReqVO);
     }

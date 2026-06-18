@@ -1,0 +1,19 @@
+<header th:fragment="header" class="sticky top-0 z-50 bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+    <nav class="container max-w-screen-xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center space-x-8">
+            <a th:href="${baseUrl}" class="flex items-center">
+                <img th:src="${blogLogo}" class="h-8 mr-2" alt="Logo" th:if="${blogLogo}">
+                <span class="text-xl font-bold text-gray-900 dark:text-white" th:text="${blogName}">博客</span>
+            </a>
+            <div class="hidden md:flex space-x-6">
+                <a th:href="${baseUrl}" class="text-gray-600 hover:text-blue-600 dark:text-gray-300">首页</a>
+                <a th:href="${baseUrl} + 'category/index.html'" class="text-gray-600 hover:text-blue-600 dark:text-gray-300">分类</a>
+                <a th:href="${baseUrl} + 'tag/index.html'" class="text-gray-600 hover:text-blue-600 dark:text-gray-300">标签</a>
+                <a th:href="${baseUrl} + 'archive/index.html'" class="text-gray-600 hover:text-blue-600 dark:text-gray-300">归档</a>
+            </div>
+        </div>
+        <div class="flex items-center space-x-4">
+            <span class="text-sm text-gray-500" th:text="${blogAuthor}"></span>
+        </div>
+    </nav>
+</header>

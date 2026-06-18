@@ -24,7 +24,7 @@
                 </svg>
                 <div id="github-tooltip-bottom" role="tooltip"
                     class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
-                    我的 GitHub
+                    {{ t('social.github') }}
                     <div class="tooltip-arrow" data-popper-arrow></div>
                 </div>
                 <!-- Gitee -->
@@ -37,7 +37,7 @@
                 </svg>
                 <div id="gitee-tooltip-bottom" role="tooltip"
                     class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
-                    我的 Gitee
+                    {{ t('social.gitee') }}
                     <div class="tooltip-arrow" data-popper-arrow></div>
                 </div>
                 <!-- 知乎 -->
@@ -53,7 +53,7 @@
                 </svg>
                 <div id="zhihu-tooltip-bottom" role="tooltip"
                     class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
-                    我的知乎
+                    {{ t('social.zhihu') }}
                     <div class="tooltip-arrow" data-popper-arrow></div>
                 </div>
                 <!-- CSDN -->
@@ -66,7 +66,7 @@
                 </svg>
                 <div id="csdn-tooltip-bottom" role="tooltip"
                     class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
-                    我的 CSDN
+                    {{ t('social.csdn') }}
                     <div class="tooltip-arrow" data-popper-arrow></div>
                 </div>
             </div>
@@ -78,6 +78,9 @@
 import { useBlogSettingsStore } from '@/stores/blogsettings'
 import { initTooltips } from 'flowbite'
 import { onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 // 初始化 Flowbit 组件
 onMounted(() => {

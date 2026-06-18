@@ -30,9 +30,17 @@ public class UserDO {
 
     private String password;
 
+    private Integer status;
+
+    private Long roleId;
+
+    private String email;
+
     private LocalDateTime createTime;
 
     private LocalDateTime updateTime;
 
     private Boolean isDeleted;
+
+    private Long tenantId;
 }

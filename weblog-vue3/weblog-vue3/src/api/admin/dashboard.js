@@ -39,3 +39,11 @@ export function getUpdateCount(data) {
     return axios.post("/admin/dashboard/updateTimes/statistics", data)
 }
 
+export function exportDashboardExcel(startDate, endDate) {
+    return axios.get("/admin/dashboard/export", {
+        params: { startDate, endDate },
+        responseType: 'blob',
+        timeout: 60000
+    })
+}
+

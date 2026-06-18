@@ -24,3 +24,18 @@ export function getArticleDetail(id) {
 export function updateArticle(data) {
     return axios.post("/admin/article/update", data)
 }
+
+// 修改文章状态
+export function changeArticleStatus(data) {
+    return axios.post("/admin/article/status", data)
+}
+
+// 获取文章版本列表
+export function getArticleVersionList(id) {
+    return axios.post("/admin/article/version/list", {id})
+}
+
+// 获取文章版本详情
+export function getArticleVersionDetail(id) {
+    return axios.post("/admin/article/version/detail", {id})
+}
